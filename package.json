@@ -1,0 +1,15 @@
+{
+  "name": "mlb-intelligence",
+  "version": "8.0.0",
+  "description": "MLB Betting Intelligence with real-time data",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "dependencies": {
+    "cheerio": "^1.2.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

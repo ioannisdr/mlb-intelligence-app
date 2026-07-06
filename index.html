@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MLB Betting Intelligence v8 (Live)</title>
+<style>
+:root{
+  --bg:#0f1117;--bg2:#171b26;--bg3:#1e2335;--bg4:#252b40;
+  --bdr:rgba(255,255,255,.07);--bdr2:rgba(255,255,255,.13);
+  --tx:#e8eaf0;--tx2:#8b91a8;--tx3:#555d78;
+  --g:#00d68f;--gbg:rgba(0,214,143,.1);--gbr:rgba(0,214,143,.28);
+  --y:#ffd166;--ybg:rgba(255,209,102,.1);--ybr:rgba(255,209,102,.28);
+  --r:#ef476f;--rbg:rgba(239,71,111,.1);--rbr:rgba(239,71,111,.28);
+  --b:#4da6ff;--bbg:rgba(77,166,255,.1);--bbr:rgba(77,166,255,.28);
+  --pu:#a78bfa;--pubg:rgba(167,139,250,.1);
+  --or:#ff9f43;--orbg:rgba(255,159,67,.1);
+  --R:10px;--Rs:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans-serif;font-size:13px;line-height:1.5}
+.app{max-width:1160px;margin:0 auto;padding:20px 16px}
+.hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.hdr-l{display:flex;align-items:center;gap:10px}
+.ico{width:36px;height:36px;background:linear-gradient(135deg,#4da6ff,#a78bfa);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.hdr h1{font-size:15px;font-weight:700}
+.hdr p{font-size:10px;color:var(--tx2);margin-top:1px}
+.hstats{display:flex;gap:6px;flex-wrap:wrap}
+.hs{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--Rs);padding:5px 10px;text-align:center}
+.hs .hv{font-size:14px;font-weight:700}.hs .hl{font-size:9px;color:var(--tx2)}
+.tabs{display:flex;gap:3px;background:var(--bg2);padding:4px;border-radius:var(--R);margin-bottom:14px;overflow-x:auto}
+.tab{padding:6px 12px;border-radius:var(--Rs);font-size:11px;font-weight:500;cursor:pointer;color:var(--tx2);white-space:nowrap;transition:all .15s}
+.tab.active{background:var(--bg4);color:var(--tx)}
+.panel{display:none}.panel.active{display:block}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:12px}
+@media(max-width:760px){.g5{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:1fr}}
+.mc{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--Rs);padding:10px 12px}
+.mc .lbl{font-size:9px;color:var(--tx2);text-transform:uppercase;letter-spacing:.4px}
+.mc .val{font-size:20px;font-weight:700;margin:2px 0}.mc .sub{font-size:9px;color:var(--tx3)}
+.sec{font-size:10px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.6px;margin:12px 0 6px}
+.card{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--R);padding:12px}
+.card h3{font-size:10px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.tag{display:inline-block;font-size:9px;padding:1px 5px;border-radius:3px;background:var(--bg3);color:var(--tx2);margin:1px}
+.tag.t1{background:rgba(255,215,0,.15);color:#ffd700}
+.tag.t2{background:var(--gbg);color:var(--g)}
+.tag.t3{background:var(--bbg);color:var(--b)}
+.tag.t4{background:var(--rbg);color:var(--r)}
+
+/* GAME CARD */
+.gc{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--R);margin-bottom:8px;overflow:hidden;transition:border-color .15s}
+.gc:hover{border-color:var(--bdr2)}.gc.open{border-color:rgba(77,166,255,.3)}
+.gc-head{padding:10px 13px;cursor:pointer;display:flex;flex-direction:column;gap:5px}
+.gc-head:hover{background:var(--bg3)}
+.gc-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mup{display:flex;align-items:flex-start;gap:6px;flex:1}
+.tb{display:flex;flex-direction:column;align-items:center;min-width:46px}
+.ta{font-size:14px;font-weight:700}.tw{font-size:10px;color:var(--tx2)}
+.str-pill{font-size:9px;padding:1px 4px;border-radius:3px;font-weight:700;margin-top:1px}
+.sW{background:var(--gbg);color:var(--g)}.sL{background:var(--rbg);color:var(--r)}
+.gc-time{font-size:10px;color:var(--tx2);white-space:nowrap;flex-shrink:0}
+.weather-row{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:10px;color:var(--tx2);border-top:1px solid var(--bdr)}
+.w-icon{font-size:12px}
+.w-adj{font-size:10px;font-weight:600;padding:1px 5px;border-radius:3px}
+.w-up{background:var(--rbg);color:var(--r)}.w-down{background:var(--bbg);color:var(--b)}.w-neutral{background:var(--bg3);color:var(--tx2)}
+.pitcher-row{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;padding:5px 0;border-top:1px solid var(--bdr)}
+.p-side{display:flex;flex-direction:column;gap:2px;flex:1}
+.p-name{font-size:11px;font-weight:600}
+.p-meta{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.p-stat{font-size:9px;color:var(--tx2)}
+.p-vs{font-size:9px;color:var(--tx3);text-align:center;padding-top:4px;flex-shrink:0}
+.tier-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+.t1d{background:#ffd700}.t2d{background:var(--g)}.t3d{background:var(--b)}.t4d{background:var(--r)}
+
+/* BEST BET BANNER */
+.best-bet{display:flex;align-items:center;gap:10px;padding:7px 13px;background:var(--bg4);border-top:1px solid var(--bdr);flex-wrap:wrap}
+.bb-label{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.bb-pick{font-size:12px;font-weight:700}
+.bb-odds{font-size:10px;color:var(--b);margin-left:4px}
+.bb-grade{font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;margin-left:4px}
+.bb-ev{font-size:10px;color:var(--g);margin-left:4px}
+.bb-reason{font-size:9px;color:var(--tx2);margin-left:auto}
+
+.picks{display:flex;gap:5px;padding:0 13px 10px;flex-wrap:wrap}
+.pk{flex:1;min-width:88px;background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--Rs);padding:6px 8px;position:relative}
+.pk.best-pick{border-color:rgba(0,214,143,.4);background:rgba(0,214,143,.04)}
+.pk .pt{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.3px}
+.pk .pv{font-size:12px;font-weight:700;margin:2px 0}
+.pk .or{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.pk .mo{font-size:11px;color:var(--b)}.pk .mkt{font-size:10px;color:var(--tx2)}
+.gr{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px}
+.gS{background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000}
+.gA{background:var(--gbg);color:var(--g);border:1px solid var(--gbr)}
+.gB{background:var(--bbg);color:var(--b);border:1px solid var(--bbr)}
+.gC{background:var(--ybg);color:var(--y);border:1px solid var(--ybr)}
+.gD{background:var(--bg4);color:var(--tx2);border:1px solid var(--bdr2)}
+.pk .ev{font-size:9px;margin-top:2px}
+.best-star{position:absolute;top:4px;right:4px;font-size:9px;color:var(--g)}
+
+.gc-det{display:none;padding:0 13px 12px;border-top:1px solid var(--bdr)}
+.gc.open .gc-det{display:block}
+.dc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.dc h4{font-size:9px;color:var(--tx2);margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.dr{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--bdr);font-size:11px}
+.dr:last-child{border:none}
+.dn{color:var(--tx2)}.dv{font-weight:600}
+.dv.g{color:var(--g)}.dv.r{color:var(--r)}.dv.y{color:var(--y)}.dv.b{color:var(--b)}
+.pb{margin-top:7px}
+.pb-lbl{display:flex;justify-content:space-between;font-size:9px;color:var(--tx2);margin-bottom:3px}
+.pb-tr{height:5px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.pb-fl{height:100%;border-radius:3px}
+.context-box{background:var(--bg4);border-radius:var(--Rs);padding:8px 10px;margin-top:8px;font-size:10px;line-height:1.7;color:var(--tx2)}
+.context-box strong{color:var(--tx)}
+
+/* VALUE BETS */
+.vb{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--R);padding:10px 12px;margin-bottom:7px;display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.vb:hover{border-color:var(--bdr2)}
+.vb-gr{font-size:17px;font-weight:800;width:26px;text-align:center;flex-shrink:0;padding-top:2px}
+.vb-info{flex:1;min-width:110px}
+.vb-match{font-size:12px;font-weight:700}
+.vb-sub{font-size:10px;color:var(--tx2);margin-top:2px;line-height:1.5}
+.vb-odds{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0}
+.vb-model{font-size:12px;font-weight:700;color:var(--b)}
+.vb-mkt{font-size:10px;color:var(--tx2)}
+.vb-edge{font-size:11px;font-weight:700;color:var(--g)}
+.vb-ev{font-size:10px;color:var(--tx3)}
+.vb-best-label{font-size:9px;background:var(--gbg);color:var(--g);border:1px solid var(--gbr);padding:1px 6px;border-radius:3px;font-weight:700}
+
+/* BACKTEST */
+.bt-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:12px}
+.btm{background:var(--bg3);border-radius:var(--Rs);padding:10px;text-align:center}
+.btm .bv{font-size:21px;font-weight:700}
+.btm .bl{font-size:9px;color:var(--tx2);margin-top:2px}.btm .bs{font-size:9px;color:var(--tx3)}
+.bt-wrap{overflow-x:auto}
+.bt-t{width:100%;border-collapse:collapse;font-size:11px;min-width:780px}
+.bt-t th{padding:5px 6px;text-align:left;border-bottom:1px solid var(--bdr2);font-size:9px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.bt-t td{padding:5px 6px;border-bottom:1px solid var(--bdr);white-space:nowrap}
+.bt-t tr:last-child td{border:none}
+.b{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px}
+.bH{background:var(--gbg);color:var(--g);border:1px solid var(--gbr)}
+.bM{background:var(--rbg);color:var(--r);border:1px solid var(--rbr)}
+.fi-row{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+.fi-lbl{width:120px;font-size:10px;color:var(--tx2);text-align:right;flex-shrink:0}
+.fi-track{flex:1;height:17px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.fi-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:6px;font-size:9px;font-weight:600;white-space:nowrap}
+.disc{font-size:10px;color:var(--tx3);padding:8px 0;border-top:1px solid var(--bdr);margin-top:10px;line-height:1.6}
+.pc-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--R);padding:10px 12px;margin-bottom:7px;display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
+
+#glist .loading { text-align: center; color: var(--tx2); padding: 20px; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="hdr">
+  <div class="hdr-l">
+    <div class="ico">⚾</div>
+    <div>
+      <h1>MLB Betting Intelligence <span class="tag" style="background:var(--pubg);color:var(--pu)">v8 Live</span></h1>
+      <p>Best EV per game · ML/RL coherence · Weather · H2H · Splits · BABIP regression · Auto pitcher blend</p>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+  <div class="hstats" id="hstats"></div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span id="live-status" style="font-size:10px;color:var(--tx2)">Connecting...</span>
+    <span id="last-update" style="font-size:9px;color:var(--tx3)"></span>
+    <button onclick="fetchAllData()" style="font-size:9px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--b);cursor:pointer">🔄 Refresh</button>
+  </div>
+</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="sw('pred',this)">Predictions</div>
+  <div class="tab" onclick="sw('value',this)">Best Bets</div>
+  <div class="tab" onclick="sw('back',this)">Backtest</div>
+  <div class="tab" onclick="sw('pitch',this)">Pitchers</div>
+  <div class="tab" onclick="sw('reg',this)">Regression</div>
+</div>
+
+<div class="panel active" id="tab-pred">
+  <div class="sec" id="pred-date-label">Today</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+  <div id="slate-label" style="font-size:11px;font-weight:600;color:var(--b)"></div>
+  <div style="display:flex;gap:6px">
+    <button onclick="switchSlate(-1)" style="font-size:10px;padding:4px 10px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx2);cursor:pointer">◀ Prev</button>
+    <button onclick="switchSlate(1)" style="font-size:10px;padding:4px 10px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx2);cursor:pointer">Next ▶</button>
+  </div>
+</div>
+<div class="g5" id="pred-metrics"></div>
+  <div id="glist">
+    <div class="loading">Loading Live Data...</div>
+  </div>
+  <div class='disc'>⚠ Live Data Powered by FanGraphs and MLB Stats API. Best bet = highest EV pick per game.</div>
+</div>
+
+<div class="panel" id="tab-value">
+  <div class="sec">Best bet per game — today</div>
+  <div id="vblist"></div>
+</div>
+
+<div class="panel" id="tab-back">
+  <div class="sec" id="bt-sec-label">Backtest</div>
+  <div class="bt-sum" id="bt-sum"></div>
+  <div class="bt-wrap">
+    <table class="bt-t">
+      <thead><tr>
+        <th>Date</th><th>Game</th><th>Score</th><th>Winner</th>
+        <th>ML pick</th><th>Model%</th><th>ML gr</th><th>ML</th>
+        <th>RL pick</th><th>RL gr</th><th>RL</th>
+        <th>Proj</th><th>Line</th><th>O/U gr</th><th>O/U</th>
+        <th>Best EV</th>
+      </tr></thead>
+      <tbody id="bt-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="panel" id="tab-pitch">
+  <div class="sec">Today's starters — ranked by model score</div>
+  <div id="sp-today"></div>
+  <div class="sec" style="margin-top:14px">Full pitcher table</div>
+  <div style="overflow-x:auto"><table class="bt-t" id="pitch-table"></table></div>
+</div>
+
+<div class="panel" id="tab-reg">
+  <div class="sec">Teams — regression signals</div>
+  <div id="neg-reg"></div>
+</div>
+
+</div>
+
+<script>
+// Data Stores
+let P = {};
+let S25 = {}; // We'll use 2026 data but keep variable name
+let WX = {};
+let TODAY = [];
+let RESULTS = [];
+let currentDate = new Date();
+
+function formatDateStr(d) {
+  return d.toISOString().split('T')[0];
+}
+
+async function fetchAllData() {
+  document.getElementById('live-status').textContent = "Fetching FanGraphs & Savant...";
+  document.getElementById('glist').innerHTML = '<div class="loading">Loading Pitchers & Teams...</div>';
+  
+  try {
+    const [pitcherRes, teamRes, weatherRes, scheduleRes] = await Promise.all([
+      fetch('/api/pitchers').then(r => r.json()),
+      fetch('/api/teams').then(r => r.json()),
+      fetch('/api/weather').then(r => r.json()),
+      fetch(`/api/schedule?date=${formatDateStr(currentDate)}`).then(r => r.json())
+    ]);
+
+    P = pitcherRes;
+    S25 = teamRes;
+    WX = weatherRes;
+    
+    // Process Schedule
+    TODAY = [];
+    if (scheduleRes.dates && scheduleRes.dates[0]) {
+      scheduleRes.dates[0].games.forEach(g => {
+        let away = g.teams.away.team.name.split(' ').pop();
+        let home = g.teams.home.team.name.split(' ').pop();
+        
+        let awayP = g.teams.away.probablePitcher ? g.teams.away.probablePitcher.fullName : 'TBD';
+        let homeP = g.teams.home.probablePitcher ? g.teams.home.probablePitcher.fullName : 'TBD';
+        
+        // Match up to FanGraphs if possible
+        
+        TODAY.push({
+          t: new Date(g.gameDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+          away, home, awayP, homeP,
+          mktML: { a: +110, h: -120 }, // Placeholder for now without odds API
+          mktRL: { a: +150, h: -170 },
+          mktOU: 8.5
+        });
+      });
+    }
+    
+    document.getElementById('live-status').textContent = "Data Live";
+    document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+    
+    // Render UI (mock function, normally the rest of your app logic goes here)
+    renderApp();
+    
+  } catch (err) {
+    document.getElementById('live-status').textContent = "Error loading data";
+    document.getElementById('glist').innerHTML = `<div class="loading">Error: ${err.message}</div>`;
+  }
+}
+
+function renderApp() {
+  const gList = document.getElementById('glist');
+  gList.innerHTML = '';
+  if (TODAY.length === 0) {
+    gList.innerHTML = '<div class="loading">No games scheduled for this date.</div>';
+    return;
+  }
+  
+  TODAY.forEach(g => {
+    let div = document.createElement('div');
+    div.className = 'gc';
+    
+    // Basic rendering for the demo
+    div.innerHTML = `
+      <div class="gc-head">
+        <div class="gc-top">
+          <div class="mup">
+            <div class="tb"><div class="ta">${g.away}</div></div>
+            <div style="font-size:10px;color:var(--tx3)">@</div>
+            <div class="tb"><div class="ta">${g.home}</div></div>
+          </div>
+          <div class="gc-time">${g.t}</div>
+        </div>
+        <div class="pitcher-row">
+          <div class="p-side">
+            <div class="p-name">${g.awayP}</div>
+          </div>
+          <div class="p-vs">vs</div>
+          <div class="p-side" style="text-align:right">
+            <div class="p-name">${g.homeP}</div>
+          </div>
+        </div>
+      </div>
+    `;
+    gList.appendChild(div);
+  });
+  
+  document.getElementById('slate-label').textContent = currentDate.toDateString();
+}
+
+function sw(id, el) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+}
+
+function switchSlate(dir) {
+  currentDate.setDate(currentDate.getDate() + dir);
+  fetchAllData();
+}
+
+// Init
+window.onload = () => {
+  fetchAllData();
+};
+</script>
+</body>
+</html>
