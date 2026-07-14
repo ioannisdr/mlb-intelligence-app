@@ -229,7 +229,25 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
       </div>
     </div>
     <div class="chart-card">
-      <h3>Monthly Profit/Loss (Units)</h3>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
+        <h3 style="margin-bottom:0;">Monthly Profit/Loss (Units)</h3>
+        <div style="display:flex; gap:5px;">
+          <select id="mo-grade" onchange="updateMonthlyFilter()" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bdr2);border-radius:4px;padding:3px 5px;font-size:10px;outline:none;cursor:pointer;">
+            <option value="ALL">All Grades</option>
+            <option value="A+">A+</option>
+            <option value="A">A</option>
+            <option value="B">B</option>
+            <option value="C">C</option>
+            <option value="D">D</option>
+          </select>
+          <select id="mo-mkt" onchange="updateMonthlyFilter()" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bdr2);border-radius:4px;padding:3px 5px;font-size:10px;outline:none;cursor:pointer;">
+            <option value="ALL">All Markets</option>
+            <option value="ML">Moneyline</option>
+            <option value="RL">Run Line</option>
+            <option value="OU">Over/Under</option>
+          </select>
+        </div>
+      </div>
       <div class="chart-container-wrapper">
         <canvas id="monthly-chart"></canvas>
       </div>
@@ -435,7 +453,7 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   } else {
     // Simulate realistic market: market is usually within ±5% of true prob
     // but adds bookmaker vig (~4.5% juice split across both sides)
-    let noiseSeed = seedRand(g.away + g.home + "mktNoise");
+    let noiseSeed = seedRand(g.away + g.home + (g.dateKey || '') + "mktNoise");
     let noise = (noiseSeed * 0.10) - 0.05; // market noise ±5%
     let mktHomeRaw = Math.max(0.28, Math.min(0.76, homeProb + noise));
     // Apply vig: inflate both implied probs by ~2.25% each
@@ -548,8 +566,12 @@ function renderApp() {
     else if(mod.evA > mod.evH && mod.evA > 0) { bestPick = `${g.away} ML`; bestEV = mod.evA; isDog = mod.awayDog; mlPickLine = mkt.ml.a; }
 
     let ouPick = mod.projOU > mkt.ou ? 'OVER' : 'UNDER';
-    // O/U EV approximated as 4% gain per 1 run of differential
-    let ouEV = Math.abs(mod.projOU - mkt.ou) * 0.04; 
+    // OU EV: treat as a -110 bet. If we pick correctly, win 0.909u; otherwise lose 1u.
+    // The "edge" in EV terms = model_prob_correct * 0.909 - (1-model_prob_correct)
+    // Approximate model prob of OU correct from run differential as a logistic proxy
+    let ouDiff = Math.abs(mod.projOU - mkt.ou);
+    let ouModelProb = 1 / (1 + Math.exp(-ouDiff * 0.8)); // sigmoid: wider diff = more confident
+    let ouEV = (ouModelProb * 0.909) - (1 - ouModelProb); // standard -110 EV
     let bestIsOU = false;
     if(ouEV > bestEV) { bestPick = `${ouPick} ${mkt.ou}`; bestEV = ouEV; bestIsOU = true; }
 
@@ -675,9 +697,24 @@ async function runBacktest() {
   const pastRes = await fetch('https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=2026-03-20&endDate=' + formatDateStr(new Date())).then(r=>r.json()).catch(()=>null);
   
   let html = '';
-  
   let pl = { ALL: {}, ML: {}, RL: {}, OU: {} };
+
+  // monthlyPL[grade][market][monthName] = profit
+  // 'ALL' is a catch-all for each dimension
+  const GRADES = ['ALL', 'A+', 'A', 'B', 'C', 'D'];
+  const MARKETS = ['ALL', 'ML', 'RL', 'OU'];
   let monthlyPL = {};
+  GRADES.forEach(gr => { monthlyPL[gr] = {}; MARKETS.forEach(mk => { monthlyPL[gr][mk] = {}; }); });
+
+  // Helper: add profit to all relevant grade+market buckets
+  function addMonthly(grade, market, month, profit) {
+    [grade, 'ALL'].forEach(gr => {
+      [market, 'ALL'].forEach(mk => {
+        if (!monthlyPL[gr][mk][month]) monthlyPL[gr][mk][month] = 0;
+        monthlyPL[gr][mk][month] += profit;
+      });
+    });
+  }
   
   let grHits = {
      ALL: { 'A+':{w:0,t:0}, 'A':{w:0,t:0}, 'B':{w:0,t:0}, 'C':{w:0,t:0}, 'D':{w:0,t:0} },
@@ -690,7 +727,7 @@ async function runBacktest() {
     pastRes.dates.reverse().forEach(d => {
       let dStr = new Date(d.date).toLocaleString('en-US', {month:'short', day:'numeric'});
       let mStr = new Date(d.date).toLocaleString('en-US', {month:'long'});
-      if(!monthlyPL[mStr]) monthlyPL[mStr] = 0;
+      if(!monthlyPL['ALL']['ALL'][mStr]) { /* already initialised by GRADES loop */ }
       
       d.games.filter(g => g.gameType === 'R').forEach(g => {
         if(g.status.abstractGameState === "Final" || g.status.statusCode === "F") {
@@ -707,18 +744,13 @@ async function runBacktest() {
            let totalScore = awayScore + homeScore;
            let winner = homeScore > awayScore ? home : away;
            
-           // Vary market odds realistically per game using seeded randomness
-           let mktSeed = seedRand(away + home + d.date);
-           let hLine = Math.round((-105 - mktSeed * 60) / 5) * 5;  // h between -105 and -165
-           let aLine = Math.round((100 + mktSeed * 60) / 5) * 5;   // a between +100 and +160
-           let baselineMkt = { ml: { a: aLine, h: hLine }, rl: { a: '+1.5', h: '-1.5' }, ou: 8.5 };
-
-           let mockG = { away, home, awayP:'TBD', homeP:'TBD' };
-           let mod = calculateModel(mockG, baselineMkt, winner, totalScore);
+           // Backtest: use model-derived market for consistency with live predictions
+           // dateKey causes per-game variation in market noise
+           let mockG = { away, home, awayP:'TBD', homeP:'TBD', dateKey: d.date };
+           let mod = calculateModel(mockG, null, winner, totalScore);
 
            // ML: model picks whichever side has higher EV
            let mlPick = mod.evH >= mod.evA ? home : away;
-           // DOG: market prices the pick at positive (+) American odds
            let isDog = mlPick === home ? mod.homeDog : mod.awayDog;
            let mlEV = Math.max(mod.evH, mod.evA);
            let mlGr = getGrade(mlEV);
@@ -729,32 +761,34 @@ async function runBacktest() {
            let mlProfit = mlHit ? (decOdds - 1) : -1;
            pl.ALL[mlPick] += mlProfit;
            pl.ML[mlPick] += mlProfit;
-           monthlyPL[mStr] += mlProfit;
+           addMonthly(mlGr.l, 'ML', mStr, mlProfit);
 
            grHits.ALL[mlGr.l].t++; grHits.ML[mlGr.l].t++;
            if(mlHit) { grHits.ALL[mlGr.l].w++; grHits.ML[mlGr.l].w++; }
 
            // RL: same direction as ML pick, payout ~+115
            let rlPick = mlPick;
-           let rlGr = getGrade(Math.max(0, mlEV - 0.03));
+           let rlGr = getGrade(Math.max(0, mlEV - 0.02));
            let rlHit = mlPick === home ? (homeScore - awayScore > 1) : (awayScore - homeScore > 1);
            let rlProfit = rlHit ? 1.15 : -1;
            pl.ALL[rlPick] += rlProfit;
            pl.RL[rlPick] += rlProfit;
-           monthlyPL[mStr] += rlProfit;
+           addMonthly(rlGr.l, 'RL', mStr, rlProfit);
 
            grHits.ALL[rlGr.l].t++; grHits.RL[rlGr.l].t++;
            if(rlHit) { grHits.ALL[rlGr.l].w++; grHits.RL[rlGr.l].w++; }
 
-           // OU: ONE bet per game — credit the home team's P/L bucket (representative)
+           // OU: ONE bet per game using proper sigmoid EV
            let ouPick = mod.projOU > mod.mkt.ou ? 'OVER' : 'UNDER';
-           let ouEV = Math.abs(mod.projOU - mod.mkt.ou) * 0.04;
-           let ouGr = getGrade(ouEV);
+           let ouDiff = Math.abs(mod.projOU - mod.mkt.ou);
+           let ouModelProb = 1 / (1 + Math.exp(-ouDiff * 0.8));
+           let ouEV = (ouModelProb * 0.909) - (1 - ouModelProb);
+           let ouGr = getGrade(Math.max(0, ouEV));
            let ouHit = (ouPick === 'OVER' && totalScore > mod.mkt.ou) || (ouPick === 'UNDER' && totalScore < mod.mkt.ou);
-           let ouProfit = ouHit ? 0.909 : -1;  // -110 standard vig: win 100/110 = 0.909u per unit risked
-           pl.ALL[home] += ouProfit;  // attribute to home team bucket
+           let ouProfit = ouHit ? 0.909 : -1;
+           pl.ALL[home] += ouProfit;
            pl.OU[home] += ouProfit;
-           monthlyPL[mStr] += ouProfit;
+           addMonthly(ouGr.l, 'OU', mStr, ouProfit);
 
            grHits.ALL[ouGr.l].t++; grHits.OU[ouGr.l].t++;
            if(ouHit) { grHits.ALL[ouGr.l].w++; grHits.OU[ouGr.l].w++; }
@@ -798,9 +832,11 @@ async function runBacktest() {
 }
 
 let currentPlData = {};
+let currentMonthlyPL = {};
 function renderCharts(pl, grHits, monthlyPL) {
   currentGrHits = grHits;
   currentPlData = pl;
+  currentMonthlyPL = monthlyPL;
   if (chartsObj.plChart) chartsObj.plChart.destroy();
   if (chartsObj.grChart) chartsObj.grChart.destroy();
   if (chartsObj.monthlyChart) chartsObj.monthlyChart.destroy();
@@ -865,8 +901,10 @@ function renderCharts(pl, grHits, monthlyPL) {
     }
   });
 
-  let months = Object.keys(monthlyPL);
-  let mVals = months.map(m => monthlyPL[m]);
+  // Monthly P/L chart — use ALL grades / ALL markets for initial render
+  let mthData = monthlyPL['ALL']['ALL'];
+  let months = Object.keys(mthData);
+  let mVals = months.map(m => mthData[m]);
   let mColors = mVals.map(v => v >= 0 ? '#00d68f' : '#ef476f');
 
   const ctxMo = document.getElementById('monthly-chart').getContext('2d');
@@ -938,6 +976,19 @@ function updateGrFilter(val) {
    let hitRates = grades.map(g => currentGrHits[val][g].t > 0 ? (currentGrHits[val][g].w / currentGrHits[val][g].t * 100).toFixed(1) : 0);
    chartsObj.grChart.data.datasets[0].data = hitRates;
    chartsObj.grChart.update();
+}
+
+function updateMonthlyFilter() {
+  let grade = document.getElementById('mo-grade').value;
+  let mkt   = document.getElementById('mo-mkt').value;
+  let data  = (currentMonthlyPL[grade] && currentMonthlyPL[grade][mkt]) ? currentMonthlyPL[grade][mkt] : {};
+  let months = Object.keys(data);
+  let vals  = months.map(m => data[m]);
+  let colors = vals.map(v => v >= 0 ? '#00d68f' : '#ef476f');
+  chartsObj.monthlyChart.data.labels = months.length ? months : ['No data'];
+  chartsObj.monthlyChart.data.datasets[0].data = vals.length ? vals : [0];
+  chartsObj.monthlyChart.data.datasets[0].backgroundColor = colors.length ? colors : ['#555d78'];
+  chartsObj.monthlyChart.update();
 }
 
 function renderPitchers() {
