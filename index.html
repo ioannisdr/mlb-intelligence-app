@@ -100,7 +100,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 
 /* BACKTEST */
 .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-.chart-card { background: var(--bg2); border: 1px solid var(--bdr); border-radius: var(--R); padding: 15px; }
+.chart-card { background: var(--bg2); border: 1px solid var(--bdr); border-radius: var(--R); padding: 15px; min-width: 0; }
 .chart-card h3 { font-size: 11px; color: var(--tx2); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 0.5px; }
 .chart-container-wrapper { position: relative; height: 220px; width: 100%; }
 @media(max-width:760px){.charts-grid{grid-template-columns:1fr}}
@@ -450,12 +450,12 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
 }
 
 function getGrade(ev) {
-  // Precise EV Thresholds mapping A+ down to D
-  if(ev >= 0.065) return { l: 'A+', c: 'grade-s' };
-  if(ev >= 0.035) return { l: 'A', c: 'grade-a' };
-  if(ev >= 0.015) return { l: 'B', c: 'grade-b' };
-  if(ev >= 0.001) return { l: 'C', c: 'grade-c' };
-  return { l: 'D', c: 'grade-d' };
+  // Stricter EV Thresholds to ensure realistic distribution
+  if(ev >= 0.12) return { l: 'A+', c: 'grade-s', v: 5 };
+  if(ev >= 0.08) return { l: 'A', c: 'grade-a', v: 4 };
+  if(ev >= 0.04) return { l: 'B', c: 'grade-b', v: 3 };
+  if(ev >= 0.01) return { l: 'C', c: 'grade-c', v: 2 };
+  return { l: 'D', c: 'grade-d', v: 1 };
 }
 
 function generateForm(seed) {
@@ -495,6 +495,8 @@ function renderApp() {
   let dogCount = 0;
   let underCount = 0;
   let totalProj = 0;
+
+  let bestBetsArr = [];
 
   TODAY.forEach(g => {
     let mod = calculateModel(g);
@@ -607,7 +609,16 @@ function renderApp() {
         </div>
       </div>
     `;
-    vList.innerHTML += bCardHtml;
+    bestBetsArr.push({ html: bCardHtml, v: bestGrade.v, ev: bestEV });
+  });
+
+  bestBetsArr.sort((a,b) => {
+    if(b.v !== a.v) return b.v - a.v;
+    return b.ev - a.ev;
+  });
+
+  bestBetsArr.forEach(b => {
+    vList.innerHTML += b.html;
   });
 
   if(vList.innerHTML === '') vList.innerHTML = '<div class="loading">No A/B/C value bets found for this slate on '+currentBook+'.</div>';
