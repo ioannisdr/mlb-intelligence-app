@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>MLB Betting Intelligence v8</title>
+<style>
+:root{
+  --bg:#0f1117;--bg2:#171b26;--bg3:#1e2335;--bg4:#252b40;
+  --bdr:rgba(255,255,255,.07);--bdr2:rgba(255,255,255,.13);
+  --tx:#e8eaf0;--tx2:#8b91a8;--tx3:#555d78;
+  --g:#00d68f;--gbg:rgba(0,214,143,.1);--gbr:rgba(0,214,143,.28);
+  --y:#ffd166;--ybg:rgba(255,209,102,.1);--ybr:rgba(255,209,102,.28);
+  --r:#ef476f;--rbg:rgba(239,71,111,.1);--rbr:rgba(239,71,111,.28);
+  --b:#4da6ff;--bbg:rgba(77,166,255,.1);--bbr:rgba(77,166,255,.28);
+  --pu:#a78bfa;--pubg:rgba(167,139,250,.1);
+  --or:#ff9f43;--orbg:rgba(255,159,67,.1);
+  --R:10px;--Rs:6px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans-serif;font-size:13px;line-height:1.5}
+.app{max-width:1160px;margin:0 auto;padding:20px 16px}
+.hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px}
+.hdr-l{display:flex;align-items:center;gap:10px}
+.ico{width:36px;height:36px;background:linear-gradient(135deg,#4da6ff,#a78bfa);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.hdr h1{font-size:15px;font-weight:700}
+.hdr p{font-size:10px;color:var(--tx2);margin-top:1px}
+.hstats{display:flex;gap:6px;flex-wrap:wrap}
+.hs{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--Rs);padding:5px 10px;text-align:center}
+.hs .hv{font-size:14px;font-weight:700}.hs .hl{font-size:9px;color:var(--tx2)}
+.tabs{display:flex;gap:3px;background:var(--bg2);padding:4px;border-radius:var(--R);margin-bottom:14px;overflow-x:auto}
+.tab{padding:6px 12px;border-radius:var(--Rs);font-size:11px;font-weight:500;cursor:pointer;color:var(--tx2);white-space:nowrap;transition:all .15s}
+.tab.active{background:var(--bg4);color:var(--tx)}
+.panel{display:none}.panel.active{display:block}
+.g5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:12px}
+@media(max-width:760px){.g5{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:1fr}}
+.mc{background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--Rs);padding:10px 12px}
+.mc .lbl{font-size:9px;color:var(--tx2);text-transform:uppercase;letter-spacing:.4px}
+.mc .val{font-size:20px;font-weight:700;margin:2px 0}.mc .sub{font-size:9px;color:var(--tx3)}
+.sec{font-size:10px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.6px;margin:12px 0 6px}
+.card{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--R);padding:12px}
+.card h3{font-size:10px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.tag{display:inline-block;font-size:9px;padding:1px 5px;border-radius:3px;background:var(--bg3);color:var(--tx2);margin:1px}
+.tag.t1{background:rgba(255,215,0,.15);color:#ffd700}
+.tag.t2{background:var(--gbg);color:var(--g)}
+.tag.t3{background:var(--bbg);color:var(--b)}
+.tag.t4{background:var(--rbg);color:var(--r)}
+
+/* GAME CARD */
+.gc{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--R);margin-bottom:8px;overflow:hidden;transition:border-color .15s}
+.gc:hover{border-color:var(--bdr2)}.gc.open{border-color:rgba(77,166,255,.3)}
+.gc-head{padding:10px 13px;cursor:pointer;display:flex;flex-direction:column;gap:5px}
+.gc-head:hover{background:var(--bg3)}
+.gc-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mup{display:flex;align-items:flex-start;gap:6px;flex:1}
+.tb{display:flex;flex-direction:column;align-items:center;min-width:46px}
+.ta{font-size:14px;font-weight:700}.tw{font-size:10px;color:var(--tx2)}
+.str-pill{font-size:9px;padding:1px 4px;border-radius:3px;font-weight:700;margin-top:1px}
+.sW{background:var(--gbg);color:var(--g)}.sL{background:var(--rbg);color:var(--r)}
+.gc-time{font-size:10px;color:var(--tx2);white-space:nowrap;flex-shrink:0}
+.weather-row{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:10px;color:var(--tx2);border-top:1px solid var(--bdr)}
+.w-icon{font-size:12px}
+.w-adj{font-size:10px;font-weight:600;padding:1px 5px;border-radius:3px}
+.w-up{background:var(--rbg);color:var(--r)}.w-down{background:var(--bbg);color:var(--b)}.w-neutral{background:var(--bg3);color:var(--tx2)}
+.pitcher-row{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;padding:5px 0;border-top:1px solid var(--bdr)}
+.p-side{display:flex;flex-direction:column;gap:2px;flex:1}
+.p-name{font-size:11px;font-weight:600}
+.p-meta{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.p-stat{font-size:9px;color:var(--tx2)}
+.p-vs{font-size:9px;color:var(--tx3);text-align:center;padding-top:4px;flex-shrink:0}
+.tier-dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+.t1d{background:#ffd700}.t2d{background:var(--g)}.t3d{background:var(--b)}.t4d{background:var(--r)}
+
+/* BEST BET BANNER */
+.best-bet{display:flex;align-items:center;gap:10px;padding:7px 13px;background:var(--bg4);border-top:1px solid var(--bdr);flex-wrap:wrap}
+.bb-label{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.bb-pick{font-size:12px;font-weight:700}
+.bb-odds{font-size:10px;color:var(--b);margin-left:4px}
+.bb-grade{font-size:10px;font-weight:700;padding:2px 7px;border-radius:3px;margin-left:4px}
+.bb-ev{font-size:10px;color:var(--g);margin-left:4px}
+.bb-reason{font-size:9px;color:var(--tx2);margin-left:auto}
+
+.picks{display:flex;gap:5px;padding:0 13px 10px;flex-wrap:wrap}
+.pk{flex:1;min-width:88px;background:var(--bg3);border:1px solid var(--bdr);border-radius:var(--Rs);padding:6px 8px;position:relative}
+.pk.best-pick{border-color:rgba(0,214,143,.4);background:rgba(0,214,143,.04)}
+.pk .pt{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.3px}
+.pk .pv{font-size:12px;font-weight:700;margin:2px 0}
+.pk .or{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.pk .mo{font-size:11px;color:var(--b)}.pk .mkt{font-size:10px;color:var(--tx2)}
+.gr{font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px}
+.gS{background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000}
+.gA{background:var(--gbg);color:var(--g);border:1px solid var(--gbr)}
+.gB{background:var(--bbg);color:var(--b);border:1px solid var(--bbr)}
+.gC{background:var(--ybg);color:var(--y);border:1px solid var(--ybr)}
+.gD{background:var(--bg4);color:var(--tx2);border:1px solid var(--bdr2)}
+.pk .ev{font-size:9px;margin-top:2px}
+.best-star{position:absolute;top:4px;right:4px;font-size:9px;color:var(--g)}
+
+.gc-det{display:none;padding:0 13px 12px;border-top:1px solid var(--bdr)}
+.gc.open .gc-det{display:block}
+.dc-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.dc h4{font-size:9px;color:var(--tx2);margin-bottom:5px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.dr{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--bdr);font-size:11px}
+.dr:last-child{border:none}
+.dn{color:var(--tx2)}.dv{font-weight:600}
+.dv.g{color:var(--g)}.dv.r{color:var(--r)}.dv.y{color:var(--y)}.dv.b{color:var(--b)}
+.pb{margin-top:7px}
+.pb-lbl{display:flex;justify-content:space-between;font-size:9px;color:var(--tx2);margin-bottom:3px}
+.pb-tr{height:5px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.pb-fl{height:100%;border-radius:3px}
+.context-box{background:var(--bg4);border-radius:var(--Rs);padding:8px 10px;margin-top:8px;font-size:10px;line-height:1.7;color:var(--tx2)}
+.context-box strong{color:var(--tx)}
+
+/* VALUE BETS */
+.vb{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--R);padding:10px 12px;margin-bottom:7px;display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.vb:hover{border-color:var(--bdr2)}
+.vb-gr{font-size:17px;font-weight:800;width:26px;text-align:center;flex-shrink:0;padding-top:2px}
+.vb-info{flex:1;min-width:110px}
+.vb-match{font-size:12px;font-weight:700}
+.vb-sub{font-size:10px;color:var(--tx2);margin-top:2px;line-height:1.5}
+.vb-odds{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0}
+.vb-model{font-size:12px;font-weight:700;color:var(--b)}
+.vb-mkt{font-size:10px;color:var(--tx2)}
+.vb-edge{font-size:11px;font-weight:700;color:var(--g)}
+.vb-ev{font-size:10px;color:var(--tx3)}
+.vb-best-label{font-size:9px;background:var(--gbg);color:var(--g);border:1px solid var(--gbr);padding:1px 6px;border-radius:3px;font-weight:700}
+
+/* BACKTEST */
+.bt-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:12px}
+.btm{background:var(--bg3);border-radius:var(--Rs);padding:10px;text-align:center}
+.btm .bv{font-size:21px;font-weight:700}
+.btm .bl{font-size:9px;color:var(--tx2);margin-top:2px}.btm .bs{font-size:9px;color:var(--tx3)}
+.bt-wrap{overflow-x:auto}
+.bt-t{width:100%;border-collapse:collapse;font-size:11px;min-width:780px}
+.bt-t th{padding:5px 6px;text-align:left;border-bottom:1px solid var(--bdr2);font-size:9px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.bt-t td{padding:5px 6px;border-bottom:1px solid var(--bdr);white-space:nowrap}
+.bt-t tr:last-child td{border:none}
+.b{display:inline-block;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px}
+.bH{background:var(--gbg);color:var(--g);border:1px solid var(--gbr)}
+.bM{background:var(--rbg);color:var(--r);border:1px solid var(--rbr)}
+.fi-row{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+.fi-lbl{width:120px;font-size:10px;color:var(--tx2);text-align:right;flex-shrink:0}
+.fi-track{flex:1;height:17px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.fi-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding-left:6px;font-size:9px;font-weight:600;white-space:nowrap}
+.disc{font-size:10px;color:var(--tx3);padding:8px 0;border-top:1px solid var(--bdr);margin-top:10px;line-height:1.6}
+.pc-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--R);padding:10px 12px;margin-bottom:7px;display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="app">
+
+<div class="hdr">
+  <div class="hdr-l">
+    <div class="ico">⚾</div>
+    <div>
+      <h1>MLB Betting Intelligence <span class="tag" style="background:var(--pubg);color:var(--pu)">v8</span></h1>
+      <p>Best EV per game · ML/RL coherence · Weather · H2H · Splits · BABIP regression · Auto pitcher blend · <strong style='color:var(--g)'>Apr 8, 2026</strong></p>
+    </div>
+  </div>
+  <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+  <div class="hstats" id="hstats"></div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <span id="live-status" style="font-size:10px;color:var(--tx2)">Connecting...</span>
+    <span id="last-update" style="font-size:9px;color:var(--tx3)"></span>
+    <button onclick="fetchTodaySchedule()" style="font-size:9px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--b);cursor:pointer">🔄 Refresh</button>
+  </div>
+</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="sw('pred',this)">Predictions</div>
+  <div class="tab" onclick="sw('value',this)">Best Bets</div>
+  <div class="tab" onclick="sw('back',this)">Backtest</div>
+  <div class="tab" onclick="sw('pitch',this)">Pitchers</div>
+  <div class="tab" onclick="sw('reg',this)">Regression</div>
+</div>
+
+<div class="panel active" id="tab-pred">
+  <div class="sec" id="pred-date-label">Sun Apr 5, 2026</div>
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">
+  <div id="slate-label" style="font-size:11px;font-weight:600;color:var(--b)">Wed Apr 8, 2026</div>
+  <div style="display:flex;gap:6px">
+    <button onclick="switchSlate(-1)" style="font-size:10px;padding:4px 10px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx2);cursor:pointer">◀ Prev</button>
+    <button onclick="switchSlate(1)" style="font-size:10px;padding:4px 10px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx2);cursor:pointer">Next ▶</button>
+  </div>
+</div>
+<div class="g5" id="pred-metrics"></div>
+  <div id="glist"></div>
+  <div class='disc'>⚠ v8: Best bet = highest EV pick per game. ML/RL coherence: if RL value → model checks ML is also +EV on same side. Weather: outdoor parks have O/U adjusted for wind/temp. BABIP regression incorporated per pitcher. H2H 2025 and LHP/RHP splits included. For analysis only.</div>
+</div>
+
+<div class="panel" id="tab-value">
+  <div class="sec">Best bet per game — today</div>
+  <div id="vblist"></div>
+  <div class="disc">One pick per game — highest EV. UNDER picks appear when model projected total is below market line after O/U calibration. Early 2026: pitching-heavy environment means more UNDERs expected. Weather/SP adjustments affect each total.</div>
+</div>
+
+<div class="panel" id="tab-back">
+  <div class="sec" id="bt-sec-label">Backtest — loading...</div>
+  <div class="bt-sum" id="bt-sum"></div>
+  <div class="sec">Accuracy by grade — all markets</div>
+  <div id="grade-chart" style="margin-bottom:12px"></div>
+  <div class="sec">O/U split</div>
+  <div id="ou-split" style="margin-bottom:12px"></div>
+  <div style="font-size:10px;background:var(--bg3);border-radius:var(--Rs);padding:8px 10px;margin-bottom:10px;color:var(--tx2)">
+    <strong style="color:var(--tx)">Note on backtest grades (v9):</strong> Backtest now uses <strong>real historical market odds</strong> for all 60 games. ML grades: mostly C/D because model and market agree on strong teams. RL grades include many A/S because dog +1.5 at +130–+160 is mathematically underpriced in MLB (~55% cover rate). OU grades: A/B when model total diverges from market line by &gt;1.5 runs. Grade S in predictions = model sees genuine edge vs live market. This is the same system as Best Bets.
+  </div>
+  <div class="bt-wrap">
+    <table class="bt-t">
+      <thead><tr>
+        <th>Date</th><th>Game</th><th>Score</th><th>Winner</th>
+        <th>ML pick</th><th>Model%</th><th>ML gr</th><th>ML</th>
+        <th>RL pick</th><th>RL gr</th><th>RL</th>
+        <th>Proj</th><th>Line</th><th>O/U gr</th><th>O/U</th>
+        <th>Best EV</th>
+      </tr></thead>
+      <tbody id="bt-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="panel" id="tab-pitch">
+  <div class="sec">Today's starters — ranked by model score</div>
+  <div id="sp-today"></div>
+  <div class="sec" style="margin-top:14px">Full pitcher table</div>
+  <div style="overflow-x:auto"><table class="bt-t" id="pitch-table"></table></div>
+</div>
+
+<div class="panel" id="tab-reg">
+  <div class="sec">Teams — negative regression due (ERA much better than xFIP)</div>
+  <div id="neg-reg"></div>
+  <div class="sec" style="margin-top:14px">Teams — positive regression due (ERA much worse than xFIP)</div>
+  <div id="pos-reg"></div>
+  <div class="sec" style="margin-top:14px">Pitchers — regression signals (BABIP + ERA vs xERA)</div>
+  <div id="pitch-reg"></div>
+</div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+// TRAINED WEIGHTS
+// ══════════════════════════════════════════════
+const MW = {
+  w:{xfip_diff:-.0200,xera_diff:-.0218,era_diff:-.0291,babip_diff:-.0290,kpct_diff:.0288,bbpct_diff:-.0311,swstr_diff:.0261,ops_diff:-.0179,woba_diff:-.0168,wpct_diff:.0322},
+  b:.00765,
+  means:{xfip_diff:.0170,xera_diff:.0163,era_diff:.0182,babip_diff:.00058,kpct_diff:-.0435,bbpct_diff:.0383,swstr_diff:-.0370,ops_diff:.000316,woba_diff:.000203,wpct_diff:-.00150},
+  stds:{xfip_diff:.6217,xera_diff:.6513,era_diff:.6988,babip_diff:.02009,kpct_diff:2.6165,bbpct_diff:1.4105,swstr_diff:1.6539,ops_diff:.03415,woba_diff:.01360,wpct_diff:.07757},
+  ou_w:{total_rpg:.0623,total_rapg:.1275,avg_xfip:.1277,avg_xera:.1270,ops_home:.0450,ops_away:.0634},
+  ou_b:9.389,
+  ou_means:{total_rpg:8.966,total_rapg:9.918,avg_xfip:3.985,avg_xera:3.887,ops_home:.7300,ops_away:.7303},
+  ou_stds:{total_rpg:.5058,total_rapg:.8365,avg_xfip:.2966,avg_xera:.3107,ops_home:.02403,ops_away:.02383}
+};
+const LG_XERA=4.05, LG_BABIP=.300;
+
+// ══════════════════════════════════════════════
+// PITCHER DATA
+// ══════════════════════════════════════════════
+const P={
+  "Yoshinobu Yamamoto":{team:"LAD",hand:"R",era:2.92,xera:2.65,fip:2.82,xfip:2.70,babip:.272,kpct:27.8,bbpct:5.2,swstr:14.2,ip:172,tier:1},
+  "Tarik Skubal":{team:"DET",hand:"L",era:2.21,xera:2.48,fip:2.30,xfip:2.55,babip:.265,kpct:28.4,bbpct:5.8,swstr:15.1,ip:191,tier:1},
+  "Paul Skenes":{team:"PIT",hand:"R",era:1.97,xera:2.20,fip:2.10,xfip:2.28,babip:.258,kpct:31.2,bbpct:4.9,swstr:16.8,ip:168,tier:1},
+  "Garrett Crochet":{team:"BOS",hand:"L",era:3.12,xera:2.85,fip:2.95,xfip:2.90,babip:.275,kpct:32.1,bbpct:6.8,swstr:16.2,ip:198,tier:1},
+  "Chris Sale":{team:"ATL",hand:"L",era:2.88,xera:2.72,fip:2.80,xfip:2.78,babip:.271,kpct:29.5,bbpct:6.1,swstr:14.8,ip:182,tier:1},
+  "Freddy Peralta":{team:"MIL",hand:"R",era:2.70,xera:3.05,fip:2.95,xfip:3.10,babip:.278,kpct:28.8,bbpct:7.2,swstr:13.9,ip:195,tier:2},
+  "Cristopher Sanchez":{team:"PHI",hand:"L",era:3.22,xera:3.18,fip:3.28,xfip:3.22,babip:.280,kpct:24.1,bbpct:6.4,swstr:12.8,ip:185,tier:2},
+  "George Kirby":{team:"SEA",hand:"R",era:3.38,xera:3.12,fip:3.20,xfip:3.18,babip:.282,kpct:23.4,bbpct:4.8,swstr:12.2,ip:177,tier:2},
+  "Kevin Gausman":{team:"TOR",hand:"R",era:3.45,xera:3.28,fip:3.35,xfip:3.30,babip:.288,kpct:26.2,bbpct:6.5,swstr:13.1,ip:188,tier:2},
+  "Cam Schlittler":{team:"NYY",hand:"R",era:2.76,xera:3.35,fip:3.22,xfip:3.40,babip:.282,kpct:25.1,bbpct:5.9,swstr:13.5,ip:158,tier:2},
+  "Andrew Abbott":{team:"CIN",hand:"L",era:3.55,xera:3.42,fip:3.60,xfip:3.48,babip:.286,kpct:25.8,bbpct:7.8,swstr:12.4,ip:148,tier:2},
+  "Joe Ryan":{team:"MIN",hand:"R",era:4.24,xera:3.45,fip:3.88,xfip:3.52,babip:.298,kpct:24.8,bbpct:6.2,swstr:12.8,ip:162,tier:2},
+  "Gavin Williams":{team:"CLE",hand:"R",era:3.88,xera:3.60,fip:3.72,xfip:3.65,babip:.292,kpct:23.8,bbpct:9.9,swstr:12.0,ip:168,tier:2},
+  "Sandy Alcantara":{team:"MIA",hand:"R",era:3.65,xera:3.22,fip:3.45,xfip:3.38,babip:.283,kpct:22.5,bbpct:5.8,swstr:11.8,ip:195,tier:2},
+  "Jacob Misiorowski":{team:"MIL",hand:"R",era:3.82,xera:3.75,fip:3.80,xfip:3.78,babip:.290,kpct:26.4,bbpct:8.5,swstr:13.2,ip:140,tier:3},
+  "Drew Rasmussen":{team:"TB",hand:"R",era:3.42,xera:3.82,fip:3.55,xfip:3.88,babip:.285,kpct:22.8,bbpct:6.2,swstr:11.5,ip:155,tier:3},
+  "Zac Gallen":{team:"AZ",hand:"R",era:3.95,xera:3.90,fip:4.02,xfip:3.95,babip:.301,kpct:22.1,bbpct:7.8,swstr:11.2,ip:165,tier:3},
+  "Yusei Kikuchi":{team:"LAA",hand:"L",era:4.28,xera:3.98,fip:4.12,xfip:4.05,babip:.308,kpct:23.5,bbpct:8.2,swstr:11.8,ip:158,tier:3},
+  "Matthew Boyd":{team:"CHC",hand:"L",era:4.05,xera:4.05,fip:4.10,xfip:4.08,babip:.302,kpct:22.2,bbpct:7.5,swstr:11.0,ip:144,tier:3},
+  "Trevor Rogers":{team:"BAL",hand:"L",era:3.88,xera:4.08,fip:3.95,xfip:4.12,babip:.294,kpct:21.8,bbpct:8.8,swstr:10.8,ip:152,tier:3},
+  "Kyle Freeland":{team:"COL",hand:"L",era:4.48,xera:4.12,fip:4.35,xfip:4.18,babip:.312,kpct:19.5,bbpct:7.5,swstr:10.2,ip:168,tier:3},
+  "Cade Cavalli":{team:"WSH",hand:"R",era:4.62,xera:4.25,fip:4.45,xfip:4.30,babip:.318,kpct:22.8,bbpct:10.5,swstr:11.2,ip:118,tier:3},
+  "Luis Severino":{team:"ATH",hand:"R",era:3.92,xera:4.15,fip:4.02,xfip:4.20,babip:.299,kpct:21.2,bbpct:8.5,swstr:10.5,ip:155,tier:3},
+  "Matthew Liberatore":{team:"STL",hand:"L",era:4.35,xera:4.28,fip:4.40,xfip:4.32,babip:.308,kpct:20.8,bbpct:8.2,swstr:10.2,ip:148,tier:3},
+  "Kumar Rocker":{team:"TEX",hand:"R",era:5.74,xera:5.74,fip:5.60,xfip:5.68,babip:.335,kpct:18.5,bbpct:11.2,swstr:8.8,ip:64,tier:4},
+  "Nick Pivetta":{team:"SD",hand:"R",era:4.58,xera:4.45,fip:4.62,xfip:4.50,babip:.315,kpct:21.5,bbpct:9.8,swstr:10.8,ip:145,tier:4},
+  "Shane Smith":{team:"CWS",hand:"R",era:5.20,xera:5.05,fip:5.10,xfip:5.12,babip:.328,kpct:17.8,bbpct:10.8,swstr:8.5,ip:88,tier:4},
+  "Mike Burrows":{team:"HOU",hand:"R",era:4.82,xera:4.58,fip:4.72,xfip:4.62,babip:.318,kpct:19.8,bbpct:9.5,swstr:9.8,ip:122,tier:4},
+  "Adrian Houser":{team:"SF",hand:"R",era:4.75,xera:4.62,fip:4.68,xfip:4.70,babip:.319,kpct:17.5,bbpct:9.2,swstr:9.2,ip:108,tier:4},
+
+  "Bubba Chandler":   {team:"PIT",hand:"R",era:3.88,xera:3.72,fip:3.78,xfip:3.75,babip:.291,kpct:25.8,bbpct:8.8,swstr:13.2,ip:118,tier:2},
+  "Jack Leiter":      {team:"TEX",hand:"R",era:4.25,xera:4.08,fip:4.15,xfip:4.12,babip:.308,kpct:23.2,bbpct:9.5,swstr:11.8,ip:128,tier:3},
+  "Cristian Javier":  {team:"HOU",hand:"R",era:3.98,xera:3.82,fip:3.88,xfip:3.85,babip:.295,kpct:24.5,bbpct:8.5,swstr:12.5,ip:145,tier:2},
+  "Luis Castillo":    {team:"SEA",hand:"R",era:3.52,xera:3.38,fip:3.45,xfip:3.42,babip:.282,kpct:24.8,bbpct:7.8,swstr:12.8,ip:172,tier:2},
+
+  "Shohei Ohtani":    {team:"LAD",hand:"R",era:0.00,xera:2.85,fip:2.90,xfip:2.88,babip:.245,kpct:30.5,bbpct:5.8,swstr:16.2,ip:6,tier:1},
+  "Tyler Mahle":      {team:"SF",hand:"R",era:5.40,xera:4.15,fip:4.42,xfip:4.28,babip:.322,kpct:23.2,bbpct:9.5,swstr:11.8,ip:78,tier:3},
+  "Sean Burke":       {team:"CWS",hand:"R",era:1.80,xera:3.22,fip:2.95,xfip:3.18,babip:.265,kpct:27.0,bbpct:2.5,swstr:14.2,ip:10,tier:3},
+  "Chad Patrick":     {team:"MIL",hand:"R",era:0.96,xera:3.41,fip:3.15,xfip:3.38,babip:.272,kpct:23.5,bbpct:7.2,swstr:12.8,ip:12,tier:3},
+
+  "Max Fried":        {team:"NYY",hand:"L",era:1.35,xera:2.42,fip:2.18,xfip:2.35,babip:.258,kpct:26.8,bbpct:5.2,swstr:14.5,ip:40,tier:1},
+  "Nick Martinez":    {team:"TB",hand:"R",era:2.25,xera:2.98,fip:2.72,xfip:2.88,babip:.268,kpct:22.5,bbpct:5.8,swstr:12.2,ip:36,tier:2},
+  "German Marquez":   {team:"SD",hand:"R",era:4.50,xera:4.12,fip:4.28,xfip:4.18,babip:.312,kpct:22.2,bbpct:8.5,swstr:11.2,ip:36,tier:3},
+  "Ryan Feltner":     {team:"COL",hand:"R",era:4.32,xera:4.18,fip:4.25,xfip:4.22,babip:.308,kpct:21.8,bbpct:8.2,swstr:10.8,ip:33,tier:3},
+  "Noah Cameron":{team:"KC",hand:"R",era:2.99,xera:4.08,fip:3.45,xfip:4.15,babip:.285,kpct:19.2,bbpct:7.5,swstr:9.5,ip:58,tier:4},
+
+  // ── 2026 pitchers (confirmed Apr 3-4) ──
+  "Framber Valdez":   {team:"DET",hand:"L",era:2.82,xera:3.05,fip:2.95,xfip:3.10,babip:.278,kpct:24.8,bbpct:6.2,swstr:13.1,ip:198,tier:2},
+  "Michael McGreevey":{team:"STL",hand:"R",era:3.45,xera:5.18,fip:4.85,xfip:5.00,babip:.285,kpct:18.2,bbpct:7.5,swstr:9.8,ip:142,tier:4},
+  "Emmett Sheehan":   {team:"LAD",hand:"R",era:4.22,xera:4.10,fip:4.18,xfip:4.15,babip:.305,kpct:23.5,bbpct:9.2,swstr:11.8,ip:128,tier:3},
+  "Miles Mikolas":    {team:"STL",hand:"R",era:4.65,xera:4.42,fip:4.55,xfip:4.48,babip:.312,kpct:17.8,bbpct:5.8,swstr:9.2,ip:175,tier:4},
+  "Michael King":     {team:"SD",hand:"R",era:3.28,xera:3.15,fip:3.22,xfip:3.18,babip:.278,kpct:26.8,bbpct:6.5,swstr:13.5,ip:168,tier:2},
+  "Dylan Cease":      {team:"TOR",hand:"R",era:3.45,xera:3.28,fip:3.38,xfip:3.32,babip:.282,kpct:28.5,bbpct:9.8,swstr:14.2,ip:178,tier:1},
+  "Bryan Woo":        {team:"SEA",hand:"R",era:3.18,xera:3.05,fip:3.12,xfip:3.08,babip:.275,kpct:25.8,bbpct:5.5,swstr:13.2,ip:162,tier:2},
+  "Aaron Nola":       {team:"PHI",hand:"R",era:6.01,xera:4.12,fip:4.45,xfip:4.28,babip:.335,kpct:22.5,bbpct:7.8,swstr:11.5,ip:94,tier:3},
+  "Eury Perez":       {team:"MIA",hand:"R",era:3.42,xera:3.25,fip:3.32,xfip:3.28,babip:.280,kpct:26.5,bbpct:7.2,swstr:13.8,ip:148,tier:2},
+  "Will Warren":      {team:"NYY",hand:"R",era:3.88,xera:3.72,fip:3.80,xfip:3.75,babip:.292,kpct:22.8,bbpct:7.5,swstr:11.5,ip:135,tier:3},
+  "MacKenzie Gore":   {team:"TEX",hand:"L",era:3.97,xera:2.99,fip:3.88,xfip:3.85,babip:.295,kpct:25.2,bbpct:9.5,swstr:12.8,ip:148,tier:2},
+  "Ryne Nelson":      {team:"AZ",hand:"R",era:2.71,xera:3.14,fip:2.95,xfip:3.18,babip:.268,kpct:22.8,bbpct:6.8,swstr:11.5,ip:158,tier:3},
+  "David Peterson":   {team:"NYM",hand:"L",era:3.65,xera:3.48,fip:3.55,xfip:3.52,babip:.285,kpct:22.5,bbpct:7.2,swstr:11.8,ip:162,tier:2},
+  "Robbie Ray":       {team:"SF",hand:"L",era:3.85,xera:3.68,fip:3.75,xfip:3.72,babip:.290,kpct:25.5,bbpct:9.8,swstr:13.2,ip:152,tier:2},
+  "Taj Bradley":      {team:"MIN",hand:"R",era:3.52,xera:3.38,fip:3.45,xfip:3.42,babip:.282,kpct:25.2,bbpct:7.8,swstr:12.8,ip:158,tier:2},
+  "Cole Ragans":      {team:"KC",hand:"L",era:4.12,xera:3.95,fip:4.02,xfip:3.98,babip:.302,kpct:24.5,bbpct:9.2,swstr:12.5,ip:145,tier:3},
+  "Reynaldo Lopez":   {team:"ATL",hand:"R",era:3.28,xera:3.12,fip:3.18,xfip:3.15,babip:.275,kpct:24.8,bbpct:6.8,swstr:12.8,ip:142,tier:2},
+  "Cade Horton":      {team:"CHC",hand:"R",era:3.82,xera:3.65,fip:3.72,xfip:3.68,babip:.288,kpct:25.8,bbpct:8.5,swstr:13.2,ip:132,tier:2},
+  "Joey Cantillo":    {team:"CLE",hand:"L",era:4.15,xera:3.98,fip:4.05,xfip:4.02,babip:.305,kpct:22.5,bbpct:9.2,swstr:11.2,ip:118,tier:3},
+  "Kyle Bradish":     {team:"BAL",hand:"R",era:3.68,xera:3.52,fip:3.58,xfip:3.55,babip:.285,kpct:24.2,bbpct:7.5,swstr:12.5,ip:128,tier:2},
+  "Mitch Keller":     {team:"PIT",hand:"R",era:4.25,xera:4.08,fip:4.15,xfip:4.12,babip:.308,kpct:22.2,bbpct:8.2,swstr:11.2,ip:155,tier:3},
+  "Colin Rea":        {team:"MIL",hand:"R",era:4.35,xera:4.18,fip:4.25,xfip:4.22,babip:.312,kpct:20.8,bbpct:8.5,swstr:10.5,ip:128,tier:3},
+  "Michael Wacha":    {team:"KC",hand:"R",era:3.92,xera:3.75,fip:3.82,xfip:3.78,babip:.295,kpct:20.5,bbpct:6.8,swstr:10.8,ip:145,tier:3},
+  "Joe Boyle":        {team:"ATH",hand:"R",era:4.28,xera:4.12,fip:4.18,xfip:4.15,babip:.308,kpct:22.5,bbpct:10.5,swstr:11.2,ip:115,tier:3},
+  "Hunter Brown":     {team:"HOU",hand:"R",era:3.85,xera:3.68,fip:3.75,xfip:3.72,babip:.292,kpct:24.5,bbpct:7.8,swstr:12.5,ip:162,tier:2},
+  "Mick Abel":        {team:"PHI",hand:"R",era:3.95,xera:3.78,fip:3.85,xfip:3.82,babip:.295,kpct:25.2,bbpct:8.5,swstr:12.8,ip:125,tier:2},
+  "Rhett Lowder":     {team:"CIN",hand:"R",era:3.78,xera:3.62,fip:3.68,xfip:3.65,babip:.288,kpct:23.5,bbpct:7.8,swstr:12.2,ip:128,tier:2},
+  "Emerson Hancock":  {team:"SEA",hand:"R",era:4.18,xera:4.02,fip:4.08,xfip:4.05,babip:.305,kpct:22.2,bbpct:8.2,swstr:11.2,ip:118,tier:3},
+  "Michael Lorenzen": {team:"COL",hand:"R",era:4.52,xera:4.35,fip:4.42,xfip:4.38,babip:.318,kpct:19.5,bbpct:8.8,swstr:10.2,ip:132,tier:3},
+  "Nolan McLean":     {team:"NYM",hand:"R",era:3.45,xera:3.28,fip:3.35,xfip:3.32,babip:.280,kpct:27.2,bbpct:8.2,swstr:13.8,ip:115,tier:2},
+  "Sonny Gray":       {team:"STL",hand:"R",era:3.72,xera:3.58,fip:3.65,xfip:3.62,babip:.288,kpct:24.2,bbpct:7.8,swstr:12.2,ip:155,tier:2},
+};
+
+// ══════════════════════════════════════════════
+// TEAM STATS 2025
+// ══════════════════════════════════════════════
+const S25={
+  NYY:{era:3.48,xfip:3.61,xera:3.44,babip:.285,kpct:24.1,bbpct:7.8,swstr:11.8,ops:.791,woba:.328,rpg:5.24,rapg:4.28,wpct:.574},
+  LAD:{era:3.22,xfip:3.18,xera:3.05,babip:.278,kpct:26.8,bbpct:7.2,swstr:13.1,ops:.783,woba:.325,rpg:5.10,rapg:3.98,wpct:.617},
+  MIL:{era:3.31,xfip:3.35,xera:3.20,babip:.282,kpct:25.4,bbpct:7.5,swstr:12.4,ops:.734,woba:.310,rpg:4.62,rapg:4.08,wpct:.568},
+  PHI:{era:3.71,xfip:3.48,xera:3.40,babip:.291,kpct:24.8,bbpct:7.4,swstr:12.2,ops:.759,woba:.320,rpg:4.98,rapg:4.58,wpct:.568},
+  CLE:{era:3.52,xfip:3.55,xera:3.38,babip:.288,kpct:23.9,bbpct:7.1,swstr:11.5,ops:.715,woba:.302,rpg:4.31,rapg:4.18,wpct:.549},
+  DET:{era:3.41,xfip:3.52,xera:3.35,babip:.292,kpct:23.2,bbpct:7.8,swstr:11.2,ops:.726,woba:.306,rpg:4.42,rapg:4.21,wpct:.543},
+  TOR:{era:3.78,xfip:3.68,xera:3.62,babip:.295,kpct:23.5,bbpct:8.1,swstr:11.9,ops:.758,woba:.318,rpg:4.89,rapg:4.66,wpct:.549},
+  SEA:{era:3.65,xfip:3.62,xera:3.55,babip:.290,kpct:24.4,bbpct:7.9,swstr:12.0,ops:.712,woba:.299,rpg:4.20,rapg:4.48,wpct:.531},
+  SD: {era:3.58,xfip:3.55,xera:3.42,babip:.286,kpct:24.1,bbpct:7.6,swstr:12.3,ops:.733,woba:.309,rpg:4.48,rapg:4.40,wpct:.537},
+  ATL:{era:3.67,xfip:3.65,xera:3.52,babip:.293,kpct:24.0,bbpct:8.0,swstr:11.8,ops:.761,woba:.321,rpg:4.88,rapg:4.51,wpct:.531},
+  BAL:{era:3.83,xfip:3.82,xera:3.70,babip:.298,kpct:22.8,bbpct:8.2,swstr:11.2,ops:.751,woba:.315,rpg:4.81,rapg:4.73,wpct:.549},
+  NYM:{era:3.88,xfip:3.78,xera:3.70,babip:.296,kpct:23.1,bbpct:8.4,swstr:11.4,ops:.740,woba:.311,rpg:4.72,rapg:4.79,wpct:.519},
+  HOU:{era:3.79,xfip:3.80,xera:3.68,babip:.297,kpct:23.5,bbpct:8.0,swstr:11.7,ops:.745,woba:.312,rpg:4.82,rapg:4.67,wpct:.537},
+  BOS:{era:3.98,xfip:3.88,xera:3.80,babip:.301,kpct:22.5,bbpct:8.5,swstr:11.0,ops:.749,woba:.314,rpg:4.91,rapg:4.91,wpct:.512},
+  TB: {era:3.82,xfip:3.75,xera:3.65,babip:.292,kpct:23.8,bbpct:8.1,swstr:11.6,ops:.718,woba:.303,rpg:4.42,rapg:4.71,wpct:.506},
+  STL:{era:4.15,xfip:4.05,xera:3.98,babip:.304,kpct:21.8,bbpct:8.6,swstr:10.5,ops:.728,woba:.306,rpg:4.52,rapg:5.12,wpct:.494},
+  MIN:{era:4.18,xfip:4.12,xera:4.05,babip:.305,kpct:21.5,bbpct:8.8,swstr:10.2,ops:.730,woba:.307,rpg:4.51,rapg:5.15,wpct:.488},
+  TEX:{era:4.22,xfip:4.20,xera:4.10,babip:.308,kpct:21.2,bbpct:9.0,swstr:10.0,ops:.743,woba:.311,rpg:4.72,rapg:5.20,wpct:.488},
+  CHC:{era:4.08,xfip:4.08,xera:4.00,babip:.302,kpct:22.0,bbpct:8.5,swstr:10.8,ops:.729,woba:.307,rpg:4.52,rapg:5.03,wpct:.481},
+  CIN:{era:4.31,xfip:4.18,xera:4.08,babip:.307,kpct:22.2,bbpct:9.1,swstr:10.4,ops:.736,woba:.309,rpg:4.58,rapg:5.31,wpct:.481},
+  MIA:{era:3.95,xfip:4.02,xera:3.90,babip:.299,kpct:22.4,bbpct:8.3,swstr:11.1,ops:.714,woba:.300,rpg:4.12,rapg:4.88,wpct:.500},
+  PIT:{era:3.72,xfip:3.98,xera:3.95,babip:.281,kpct:21.8,bbpct:8.2,swstr:10.6,ops:.701,woba:.296,rpg:4.02,rapg:4.60,wpct:.469},
+  KC: {era:4.35,xfip:4.30,xera:4.22,babip:.311,kpct:20.8,bbpct:9.2,swstr:10.0,ops:.721,woba:.304,rpg:4.32,rapg:5.38,wpct:.475},
+  LAA:{era:4.52,xfip:4.42,xera:4.35,babip:.315,kpct:20.5,bbpct:9.5,swstr:9.8,ops:.712,woba:.300,rpg:4.20,rapg:5.58,wpct:.463},
+  WSH:{era:4.68,xfip:4.58,xera:4.50,babip:.318,kpct:20.1,bbpct:9.8,swstr:9.4,ops:.706,woba:.298,rpg:4.02,rapg:5.78,wpct:.432},
+  SF: {era:4.42,xfip:4.40,xera:4.30,babip:.314,kpct:21.0,bbpct:9.4,swstr:9.8,ops:.710,woba:.299,rpg:4.12,rapg:5.45,wpct:.457},
+  AZ: {era:4.45,xfip:4.42,xera:4.32,babip:.312,kpct:21.2,bbpct:9.3,swstr:9.9,ops:.721,woba:.303,rpg:4.38,rapg:5.48,wpct:.481},
+  ATH:{era:4.72,xfip:4.60,xera:4.55,babip:.322,kpct:19.8,bbpct:10.1,swstr:9.2,ops:.696,woba:.293,rpg:3.92,rapg:5.82,wpct:.432},
+  COL:{era:5.18,xfip:4.88,xera:4.80,babip:.334,kpct:19.2,bbpct:10.8,swstr:8.5,ops:.720,woba:.305,rpg:4.22,rapg:6.40,wpct:.389},
+  CWS:{era:5.11,xfip:4.92,xera:4.85,babip:.332,kpct:18.8,bbpct:11.2,swstr:8.2,ops:.680,woba:.282,rpg:3.72,rapg:6.31,wpct:.358},
+};
+
+const PF={COL:1.32,BOS:1.11,CIN:1.09,TEX:1.08,PHI:1.07,NYY:1.05,CHC:1.04,HOU:1.02,KC:1.02,ATL:1.01,MIN:1.01,STL:1.00,BAL:1.00,TOR:.99,DET:.99,CLE:.98,MIL:.98,NYM:.97,SD:.97,LAD:.97,LAA:.96,AZ:.96,SF:.95,SEA:.95,WSH:.95,MIA:.94,TB:.94,ATH:.94,PIT:.93,CWS:.93};
+
+// WEATHER (Apr 1 2026, from RotoWire)
+const WX={
+  ATL:{t:75,pr:0,w:8,dir:'out',dome:false,note:'8mph out, partly cloudy'},
+  BAL:{t:81,pr:0,w:9,dir:'out_r',dome:false,note:'9mph out-right'},
+  CIN:{t:77,pr:15,w:15,dir:'cross',dome:false,note:'Rain risk, 15mph crosswind'},
+  STL:{t:72,pr:40,w:5,dir:'in',dome:false,note:'⚠ Rain delay risk'},
+  HOU:{t:80,pr:5,w:0,dir:'dome',dome:true,note:'Dome'},
+  CHC:{t:38,pr:11,w:20,dir:'in',dome:false,note:'❄ Cold + 20mph blowing IN'},
+  AZ:{t:82,pr:0,w:6,dir:'cross',dome:true,note:'Dome (open), light crosswind'},
+  SEA:{t:55,pr:95,w:8,dir:'dome',dome:true,note:'Dome (rain outside)'},
+  SD:{t:67,pr:3,w:10,dir:'cross',dome:false,note:'10mph crosswind L→R'},
+  LAD:{t:64,pr:1,w:11,dir:'out',dome:false,note:'11mph blowing out'},
+  KC:{t:60,pr:76,w:8,dir:'in',dome:false,note:'⚠ High rain risk (76%)'},
+  MIA:{t:82,pr:5,w:0,dir:'dome',dome:true,note:'Dome'},
+  MIL:{t:45,pr:5,w:0,dir:'dome',dome:true,note:'Dome (cold outside)'},
+  PHI:{t:72,pr:8,w:7,dir:'cross',dome:false,note:'Mild, 7mph crosswind'},
+  TOR:{t:52,pr:12,w:10,dir:'dome',dome:true,note:'Dome'},
+  COL:{t:58,pr:15,w:12,dir:'out',dome:false,note:'Altitude + 12mph out'},
+  TEX:{t:75,pr:2,w:0,dir:'dome',dome:true,note:'Globe Life Field dome'},
+  PIT:{t:68,pr:10,w:8,dir:'cross',dome:false,note:'Mild, 8mph crosswind'},
+  WSH:{t:70,pr:5,w:7,dir:'out',dome:false,note:'7mph blowing out'},
+  CWS:{t:50,pr:20,w:14,dir:'in',dome:false,note:'Cold, 14mph blowing in'},
+  NYM:{t:62,pr:8,w:12,dir:'in',dome:false,note:'12mph blowing in'},
+  NYY:{t:63,pr:5,w:10,dir:'cross',dome:false,note:'10mph crosswind'},
+  BOS:{t:55,pr:8,w:13,dir:'in',dome:false,note:'Fenway, 13mph blowing in'},
+  TB:{t:82,pr:3,w:0,dir:'dome',dome:true,note:'Tropicana (fully enclosed)'},
+  SF:{t:58,pr:5,w:14,dir:'in',dome:false,note:'Oracle, 14mph blowing in'},
+  LAA:{t:72,pr:1,w:6,dir:'cross',dome:false,note:'Light 6mph crosswind'},
+  DET:{t:55,pr:12,w:10,dir:'cross',dome:false,note:'Cool, 10mph crosswind'},
+  ATH:{t:65,pr:2,w:8,dir:'out',dome:false,note:'8mph blowing out'},
+  CLE:{t:50,pr:10,w:12,dir:'in',dome:false,note:'50°F, 12mph blowing in'},
+  MIN:{t:45,pr:5,w:0,dir:'dome',dome:true,note:'Dome'},
+};
+
+function wxAdj(homeTeam){
+  const w=WX[homeTeam];
+  if(!w||w.dome) return {adj:0,note:w?w.note:'Dome',icon:'🏟',risk:false};
+  let adj=0;
+  const mph=w.w;
+  if(w.dir.includes('out')&&mph>=10) adj+=0.4*Math.min(1,mph/15);
+  if(w.dir==='in'&&mph>=10) adj-=0.4*Math.min(1,mph/15);
+  if(w.t<50) adj-=0.3;
+  if(w.t>85) adj+=0.2;
+  const icon=adj>0?'💨⬆':adj<0?'💨⬇':'🌤';
+  const risk=w.pr>=40;
+  return{adj:+adj.toFixed(2),note:w.note,icon,risk,temp:w.t,precip:w.pr};
+}
+
+// H2H 2025 records (keyed away@home)
+const H2H={
+  'ATH@ATL':{hwpct:.333,g:3,avgTot:7.8},
+  'TEX@BAL':{hwpct:.571,g:7,avgTot:9.2},
+  'PIT@CIN':{hwpct:.429,g:7,avgTot:8.8},
+  'WSH@PHI':{hwpct:.222,g:9,avgTot:9.4},
+  'COL@TOR':{hwpct:.400,g:5,avgTot:11.2},
+  'CWS@MIA':{hwpct:.333,g:6,avgTot:8.2},
+  'NYM@STL':{hwpct:.400,g:5,avgTot:8.6},
+  'TB@MIL':{hwpct:.375,g:8,avgTot:8.4},
+  'BOS@HOU':{hwpct:.375,g:8,avgTot:9.6},
+  'LAA@CHC':{hwpct:.600,g:5,avgTot:9.0},
+  'DET@AZ':{hwpct:.500,g:6,avgTot:9.4},
+  'SF@SD':{hwpct:.414,g:14,avgTot:8.0},
+  'NYY@SEA':{hwpct:.333,g:6,avgTot:8.2},
+  'CLE@LAD':{hwpct:.333,g:3,avgTot:7.8},
+  'MIN@KC':{hwpct:.571,g:7,avgTot:9.2},
+};
+
+// vs LHP / RHP splits (team OPS)
+const SP={
+  NYY:{L:.812,R:.778},LAD:{L:.805,R:.771},PHI:{L:.788,R:.741},ATL:{L:.795,R:.748},
+  BOS:{L:.762,R:.743},HOU:{L:.758,R:.738},TOR:{L:.775,R:.748},MIL:{L:.748,R:.728},
+  NYM:{L:.762,R:.732},CLE:{L:.728,R:.710},SEA:{L:.724,R:.708},BAL:{L:.769,R:.742},
+  DET:{L:.742,R:.720},SD:{L:.748,R:.726},TB:{L:.732,R:.712},MIN:{L:.745,R:.722},
+  STL:{L:.742,R:.720},MIA:{L:.728,R:.708},CIN:{L:.752,R:.728},CHC:{L:.745,R:.722},
+  TEX:{L:.762,R:.734},PIT:{L:.718,R:.694},KC:{L:.738,R:.714},LAA:{L:.728,R:.705},
+  WSH:{L:.722,R:.698},SF:{L:.726,R:.704},AZ:{L:.738,R:.714},ATH:{L:.712,R:.690},
+  COL:{L:.738,R:.714},CWS:{L:.698,R:.674},
+};
+
+// All results
+const RESULTS=[
+  {d:'Mar 28',away:'LAA',home:'HOU',sc:{a:6,h:2}},{d:'Mar 28',away:'DET',home:'SD',sc:{a:5,h:2}},
+  {d:'Mar 28',away:'CLE',home:'SEA',sc:{a:1,h:5}},{d:'Mar 28',away:'AZ',home:'LAD',sc:{a:4,h:5}},
+  {d:'Mar 28',away:'TB',home:'STL',sc:{a:5,h:6}},{d:'Mar 28',away:'WSH',home:'CHC',sc:{a:2,h:10}},
+  {d:'Mar 28',away:'ATH',home:'TOR',sc:{a:7,h:8}},{d:'Mar 28',away:'TEX',home:'PHI',sc:{a:5,h:4}},
+  {d:'Mar 28',away:'MIN',home:'BAL',sc:{a:4,h:1}},{d:'Mar 28',away:'COL',home:'MIA',sc:{a:3,h:4}},
+  {d:'Mar 28',away:'PIT',home:'NYM',sc:{a:2,h:4}},{d:'Mar 28',away:'BOS',home:'CIN',sc:{a:5,h:6}},
+  {d:'Mar 28',away:'CWS',home:'MIL',sc:{a:1,h:6}},
+  {d:'Mar 29',away:'LAA',home:'HOU',sc:{a:9,h:11}},{d:'Mar 29',away:'NYY',home:'SF',sc:{a:3,h:1}},
+  {d:'Mar 29',away:'KC',home:'ATL',sc:{a:2,h:6}},{d:'Mar 29',away:'DET',home:'SD',sc:{a:0,h:3}},
+  {d:'Mar 29',away:'AZ',home:'LAD',sc:{a:2,h:3}},{d:'Mar 29',away:'CLE',home:'SEA',sc:{a:6,h:5}},
+  {d:'Mar 29',away:'TEX',home:'PHI',sc:{a:8,h:3}},{d:'Mar 29',away:'MIN',home:'BAL',sc:{a:6,h:8}},
+  {d:'Mar 29',away:'KC',home:'ATL',sc:{a:4,h:1}},{d:'Mar 29',away:'ATH',home:'TOR',sc:{a:2,h:5}},
+  {d:'Mar 29',away:'COL',home:'MIA',sc:{a:3,h:4}},{d:'Mar 29',away:'BOS',home:'CIN',sc:{a:2,h:3}},
+  {d:'Mar 29',away:'PIT',home:'NYM',sc:{a:4,h:3}},{d:'Mar 29',away:'LAA',home:'HOU',sc:{a:7,h:9}},
+  {d:'Mar 29',away:'CWS',home:'MIL',sc:{a:7,h:9}},{d:'Mar 29',away:'TB',home:'STL',sc:{a:11,h:7}},
+  {d:'Mar 29',away:'WSH',home:'CHC',sc:{a:6,h:3}},
+  {d:'Mar 30',away:'CLE',home:'SEA',sc:{a:0,h:8}},{d:'Mar 30',away:'MIN',home:'KC',sc:{a:1,h:3}},
+  {d:'Mar 31',away:'TEX',home:'BAL',sc:{a:5,h:2}},{d:'Mar 31',away:'PIT',home:'CIN',sc:{a:0,h:2}},
+  {d:'Mar 31',away:'WSH',home:'PHI',sc:{a:13,h:2}},{d:'Mar 31',away:'CWS',home:'MIA',sc:{a:9,h:4}},
+  {d:'Mar 31',away:'COL',home:'TOR',sc:{a:14,h:5}},{d:'Mar 31',away:'ATH',home:'ATL',sc:{a:0,h:4}},
+  {d:'Mar 31',away:'LAA',home:'CHC',sc:{a:2,h:7}},{d:'Mar 31',away:'TB',home:'MIL',sc:{a:3,h:2}},
+  {d:'Mar 31',away:'NYM',home:'STL',sc:{a:4,h:2}},{d:'Mar 31',away:'BOS',home:'HOU',sc:{a:1,h:8}},
+  {d:'Mar 31',away:'SF',home:'SD',sc:{a:3,h:2}},{d:'Mar 31',away:'NYY',home:'SEA',sc:{a:1,h:2}},
+  {d:'Mar 31',away:'DET',home:'AZ',sc:{a:6,h:9}},{d:'Mar 31',away:'CLE',home:'LAD',sc:{a:4,h:2}},
+  {d:'Apr 1',away:'TEX',home:'BAL',sc:{a:8,h:5}},{d:'Apr 1',away:'WSH',home:'PHI',sc:{a:2,h:3}},
+  {d:'Apr 1',away:'PIT',home:'CIN',sc:{a:8,h:3}},{d:'Apr 1',away:'CWS',home:'MIA',sc:{a:2,h:9}},
+  {d:'Apr 1',away:'COL',home:'TOR',sc:{a:1,h:5}},{d:'Apr 1',away:'ATH',home:'ATL',sc:{a:5,h:2}},
+  {d:'Apr 1',away:'LAA',home:'CHC',sc:{a:2,h:0}},{d:'Apr 1',away:'TB',home:'MIL',sc:{a:2,h:6}},
+  {d:'Apr 1',away:'NYM',home:'STL',sc:{a:0,h:3}},{d:'Apr 1',away:'BOS',home:'HOU',sc:{a:2,h:9}},
+  {d:'Apr 1',away:'SF',home:'SD',sc:{a:9,h:3}},{d:'Apr 1',away:'NYY',home:'SEA',sc:{a:5,h:0}},
+  {d:'Apr 1',away:'DET',home:'AZ',sc:{a:5,h:7}},{d:'Apr 1',away:'CLE',home:'LAD',sc:{a:1,h:4}},
+  // Apr 1 evening — MIN@KC was the late game not in morning batch
+  {d:'Apr 1',away:'MIN',home:'KC',sc:{a:9,h:13}},
+  // Apr 2
+  {d:'Apr 2',away:'CLE',home:'LAD',sc:{a:4,h:1}},
+  {d:'Apr 2',away:'MIN',home:'KC',sc:{a:5,h:1}},
+  // Apr 3
+  {d:'Apr 3',away:'ATL',home:'AZ',sc:{a:17,h:2}},
+  {d:'Apr 3',away:'NYM',home:'SF',sc:{a:2,h:7}},
+  {d:'Apr 3',away:'LAD',home:'WSH',sc:{a:13,h:6}},
+  {d:'Apr 3',away:'STL',home:'DET',sc:{a:0,h:4}},
+  {d:'Apr 3',away:'MIA',home:'NYY',sc:{a:2,h:8}},
+  {d:'Apr 3',away:'TOR',home:'CWS',sc:{a:4,h:5}},
+  {d:'Apr 3',away:'SD',home:'BOS',sc:{a:2,h:5}},
+  {d:'Apr 3',away:'CIN',home:'TEX',sc:{a:5,h:3}},
+  {d:'Apr 3',away:'CHC',home:'CLE',sc:{a:1,h:4}},
+  {d:'Apr 3',away:'PHI',home:'COL',sc:{a:10,h:1}},
+  {d:'Apr 3',away:'BAL',home:'PIT',sc:{a:4,h:5}},
+  // Apr 4 (closed games from API + schedule)
+  {d:'Apr 4',away:'STL',home:'DET',sc:{a:0,h:4}},
+  {d:'Apr 4',away:'MIA',home:'NYY',sc:{a:2,h:8}},
+  {d:'Apr 4',away:'TOR',home:'CWS',sc:{a:4,h:5}},
+  {d:'Apr 4',away:'SD',home:'BOS',sc:{a:2,h:5}},
+  // Apr 3 evening (from API)
+  {d:'Apr 3',away:'TB',home:'MIN',sc:{a:4,h:10}},
+  // Apr 4 (all closed games from API)
+  {d:'Apr 4',away:'SEA',home:'LAA',sc:{a:3,h:1}},
+  {d:'Apr 4',away:'HOU',home:'ATH',sc:{a:4,h:11}},
+  {d:'Apr 4',away:'ATL',home:'AZ',sc:{a:2,h:0}},
+  {d:'Apr 4',away:'NYM',home:'SF',sc:{a:10,h:3}},
+  {d:'Apr 4',away:'STL',home:'DET',sc:{a:6,h:11}},
+  {d:'Apr 4',away:'MIL',home:'KC',sc:{a:5,h:2}},
+  {d:'Apr 4',away:'TOR',home:'CWS',sc:{a:3,h:6}},
+  {d:'Apr 4',away:'LAD',home:'WSH',sc:{a:10,h:5}},
+  {d:'Apr 4',away:'HOU',home:'ATH',sc:{a:11,h:0}},
+  {d:'Apr 4',away:'BAL',home:'PIT',sc:{a:2,h:3}},
+  // Apr 4 late (CEST Apr 5 early AM)
+  {d:'Apr 4',away:'MIA',home:'NYY',sc:{a:7,h:9}},
+  {d:'Apr 4',away:'CIN',home:'TEX',sc:{a:2,h:0}},
+  {d:'Apr 4',away:'MIL',home:'KC',sc:{a:2,h:8}},
+  {d:'Apr 4',away:'TB',home:'MIN',sc:{a:7,h:1}},
+  {d:'Apr 4',away:'ATL',home:'AZ',sc:{a:1,h:2}},
+  {d:'Apr 4',away:'PHI',home:'COL',sc:{a:2,h:1}},
+  {d:'Apr 4',away:'NYM',home:'SF',sc:{a:9,h:0}},
+  {d:'Apr 4',away:'SEA',home:'LAA',sc:{a:0,h:1}},
+  // Apr 5 (closed from API)
+  {d:'Apr 5',away:'CLE',home:'CHC',sc:{a:5,h:6}},
+  {d:'Apr 5',away:'PHI',home:'COL',sc:{a:2,h:1}},
+  {d:'Apr 5',away:'NYM',home:'SF',sc:{a:9,h:0}},
+  {d:'Apr 5',away:'ATL',home:'AZ',sc:{a:1,h:2}},
+  {d:'Apr 5',away:'TB',home:'MIN',sc:{a:7,h:1}},
+  {d:'Apr 5',away:'MIL',home:'KC',sc:{a:2,h:8}},
+  {d:'Apr 5',away:'CIN',home:'TEX',sc:{a:2,h:0}},
+  {d:'Apr 5',away:'MIA',home:'NYY',sc:{a:7,h:9}},
+  {d:'Apr 5',away:'STL',home:'DET',sc:{a:5,h:3}},
+  // Apr 6 (closed)
+  {d:'Apr 6',away:'CHC',home:'TB',sc:{a:4,h:6}},
+  {d:'Apr 6',away:'KC',home:'CLE',sc:{a:4,h:2}},
+  {d:'Apr 6',away:'SD',home:'PIT',sc:{a:5,h:0}},
+  {d:'Apr 6',away:'CIN',home:'MIA',sc:{a:2,h:0}},
+  {d:'Apr 6',away:'MIL',home:'BOS',sc:{a:8,h:6}},
+  {d:'Apr 6',away:'STL',home:'WSH',sc:{a:6,h:9}},
+  {d:'Apr 6',away:'LAD',home:'TOR',sc:{a:14,h:2}},
+  {d:'Apr 6',away:'BAL',home:'CWS',sc:{a:2,h:1}},
+  {d:'Apr 6',away:'DET',home:'MIN',sc:{a:3,h:7}},
+  {d:'Apr 6',away:'SEA',home:'TEX',sc:{a:1,h:2}},
+  {d:'Apr 6',away:'HOU',home:'COL',sc:{a:7,h:9}},
+  {d:'Apr 6',away:'ATL',home:'LAA',sc:{a:2,h:6}},
+  {d:'Apr 6',away:'PHI',home:'SF',sc:{a:6,h:4}},
+  // Apr 7 (closed from API)
+  {d:'Apr 7',away:'CHC',home:'TB',sc:{a:9,h:2}},
+  {d:'Apr 7',away:'CIN',home:'MIA',sc:{a:6,h:3}},
+  {d:'Apr 7',away:'SD',home:'PIT',sc:{a:1,h:7}},
+  {d:'Apr 7',away:'MIL',home:'BOS',sc:{a:2,h:3}},
+  {d:'Apr 7',away:'STL',home:'WSH',sc:{a:7,h:6}},
+  {d:'Apr 7',away:'ATH',home:'NYY',sc:{a:3,h:5}},
+  {d:'Apr 7',away:'LAD',home:'TOR',sc:{a:4,h:1}},
+  {d:'Apr 7',away:'DET',home:'MIN',sc:{a:2,h:4}},
+  {d:'Apr 7',away:'SEA',home:'TEX',sc:{a:2,h:3}},
+  {d:'Apr 7',away:'HOU',home:'COL',sc:{a:1,h:5}},
+  {d:'Apr 7',away:'ATL',home:'LAA',sc:{a:7,h:2}},
+  {d:'Apr 7',away:'PHI',home:'SF',sc:{a:0,h:6}},
+  {d:'Apr 7',away:'AZ',home:'NYM',sc:{a:3,h:4}},
+  {d:'Apr 7',away:'KC',home:'CLE',sc:{a:1,h:2}},
+  {d:'Apr 7',away:'BAL',home:'CWS',sc:{a:4,h:2}},
+
+  // May 17 (closed)
+  {d:'May 17',away:'MIA',home:'TB',sc:{a:3,h:6}},
+  {d:'May 17',away:'BOS',home:'ATL',sc:{a:1,h:8}},
+  {d:'May 17',away:'PHI',home:'PIT',sc:{a:6,h:0}},
+  {d:'May 17',away:'BAL',home:'WSH',sc:{a:7,h:3}},
+  {d:'May 17',away:'NYY',home:'NYM',sc:{a:6,h:7}},
+  {d:'May 17',away:'CIN',home:'CLE',sc:{a:3,h:10}},
+  {d:'May 17',away:'TOR',home:'DET',sc:{a:4,h:1}},
+  {d:'May 17',away:'MIL',home:'MIN',sc:{a:4,h:5}},
+  {d:'May 17',away:'CHC',home:'CWS',sc:{a:8,h:9}},
+  {d:'May 17',away:'TEX',home:'HOU',sc:{a:8,h:0}},
+  {d:'May 17',away:'KC',home:'STL',sc:{a:2,h:0}},
+  {d:'May 17',away:'AZ',home:'COL',sc:{a:8,h:6}},
+  {d:'May 17',away:'SF',home:'ATH',sc:{a:10,h:1}},
+  {d:'May 17',away:'LAD',home:'LAA',sc:{a:10,h:1}},
+  {d:'May 17',away:'SD',home:'SEA',sc:{a:8,h:3}},
+  // May 18 (closed)
+  {d:'May 18',away:'MIA',home:'TB',sc:{a:6,h:16}},
+  {d:'May 18',away:'ATL',home:'MIA',sc:{a:0,h:12}},
+  {d:'May 18',away:'CLE',home:'DET',sc:{a:8,h:2}},
+  {d:'May 18',away:'CIN',home:'PHI',sc:{a:4,h:5}},
+  {d:'May 18',away:'NYM',home:'WSH',sc:{a:16,h:7}},
+  {d:'May 18',away:'TOR',home:'NYY',sc:{a:6,h:7}},
+  {d:'May 18',away:'BOS',home:'KC',sc:{a:3,h:1}},
+  {d:'May 18',away:'HOU',home:'MIN',sc:{a:3,h:6}},
+  {d:'May 18',away:'MIL',home:'CHC',sc:{a:9,h:3}},
+  {d:'May 18',away:'TEX',home:'COL',sc:{a:6,h:7}},
+  {d:'May 18',away:'ATH',home:'LAA',sc:{a:1,h:2}},
+  {d:'May 18',away:'LAD',home:'SD',sc:{a:0,h:1}},
+  {d:'May 18',away:'CWS',home:'SEA',sc:{a:1,h:6}},
+  {d:'May 18',away:'SF',home:'AZ',sc:{a:2,h:12}},
+  // May 19 (closed)
+  {d:'May 19',away:'ATL',home:'MIA',sc:{a:8,h:4}},
+];
+
+const TODAY=[
+  {t:'6:15 PM',away:'ATH',home:'ATL',awayP:'Luis Severino',homeP:'Chris Sale',mktML:{a:+180,h:-218},mktRL:{a:+135,h:-160},mktOU:8.5},
+  {t:'6:35 PM',away:'TEX',home:'BAL',awayP:'Kumar Rocker',homeP:'Trevor Rogers',mktML:{a:+128,h:-152},mktRL:{a:+205,h:-250},mktOU:8.5},
+  {t:'6:40 PM',away:'PIT',home:'CIN',awayP:'Paul Skenes',homeP:'Andrew Abbott',mktML:{a:-128,h:+108},mktRL:{a:+195,h:-235},mktOU:7.5},
+  {t:'7:05 PM',away:'WSH',home:'PHI',awayP:'Cade Cavalli',homeP:'Cristopher Sanchez',mktML:{a:+155,h:-185},mktRL:{a:+110,h:-130},mktOU:8.0},
+  {t:'7:07 PM',away:'COL',home:'TOR',awayP:'Kyle Freeland',homeP:'Kevin Gausman',mktML:{a:+285,h:-355},mktRL:{a:+110,h:-130},mktOU:9.0},
+  {t:'7:10 PM',away:'CWS',home:'MIA',awayP:'Shane Smith',homeP:'Sandy Alcantara',mktML:{a:+215,h:-265},mktRL:{a:+140,h:-168},mktOU:7.5},
+  {t:'7:15 PM',away:'NYM',home:'STL',awayP:'Freddy Peralta',homeP:'Matthew Liberatore',mktML:{a:-138,h:+116},mktRL:{a:+188,h:-228},mktOU:7.5},
+  {t:'7:40 PM',away:'TB',home:'MIL',awayP:'Drew Rasmussen',homeP:'Jacob Misiorowski',mktML:{a:+155,h:-185},mktRL:{a:+108,h:-128},mktOU:7.5},
+  {t:'8:10 PM',away:'BOS',home:'HOU',awayP:'Garrett Crochet',homeP:'Mike Burrows',mktML:{a:-148,h:+124},mktRL:{a:+215,h:-262},mktOU:8.5},
+  {t:'8:20 PM',away:'LAA',home:'CHC',awayP:'Yusei Kikuchi',homeP:'Matthew Boyd',mktML:{a:+195,h:-238},mktRL:{a:+130,h:-155},mktOU:8.0},
+  {t:'9:40 PM',away:'DET',home:'AZ',awayP:'Tarik Skubal',homeP:'Zac Gallen',mktML:{a:-165,h:+140},mktRL:{a:+242,h:-295},mktOU:8.0},
+  {t:'10:10 PM',away:'SF',home:'SD',awayP:'Adrian Houser',homeP:'Nick Pivetta',mktML:{a:+155,h:-185},mktRL:{a:+108,h:-128},mktOU:7.5},
+  {t:'10:10 PM',away:'NYY',home:'SEA',awayP:'Cam Schlittler',homeP:'George Kirby',mktML:{a:-155,h:+130},mktRL:{a:+225,h:-275},mktOU:8.0},
+  {t:'10:10 PM',away:'CLE',home:'LAD',awayP:'Gavin Williams',homeP:'Yoshinobu Yamamoto',mktML:{a:+185,h:-225},mktRL:{a:+128,h:-152},mktOU:7.5},
+  {t:'1:40 AM+',away:'MIN',home:'KC',awayP:'Joe Ryan',homeP:'Noah Cameron',mktML:{a:-122,h:+102},mktRL:{a:+195,h:-238},mktOU:8.0},
+];
+
+// ══════════════════════════════════════════════
+// ONLINE LEARNING — 2026 data
+// ══════════════════════════════════════════════
+
+// ══════════════════════════════════════════════
+// 2026 REAL STANDINGS (May 20, 2026 — from live API)
+// Updated: 48 avg games played, W26=64%, W25=36%
+// ══════════════════════════════════════════════
+const STANDINGS_2026 = {
+  TB:{w:31,l:15},NYY:{w:29,l:19},TOR:{w:21,l:26},BAL:{w:21,l:27},BOS:{w:20,l:27},
+  CLE:{w:27,l:22},CWS:{w:24,l:23},MIN:{w:22,l:26},DET:{w:20,l:28},KC:{w:20,l:28},
+  ATH:{w:23,l:24},SEA:{w:23,l:26},TEX:{w:22,l:25},HOU:{w:19,l:30},LAA:{w:17,l:31},
+  ATL:{w:33,l:16},PHI:{w:25,l:23},WSH:{w:23,l:25},MIA:{w:22,l:27},NYM:{w:21,l:26},
+  CHC:{w:29,l:19},MIL:{w:27,l:18},STL:{w:27,l:19},PIT:{w:24,l:23},CIN:{w:24,l:24},
+  SD:{w:29,l:18},LAD:{w:29,l:19},AZ:{w:23,l:23},SF:{w:20,l:28},COL:{w:19,l:29},
+};
+// Derive rpg/rapg from 2025 S25 data scaled by 2026 record (simple proxy)
+// and auto-compute blend weight
+const STANDINGS_GAMES = 48; // avg games played per team
+
+function compute26(){
+  // Use real 2026 standings + RESULTS for R/G proxy
+  const rg={},ag={};
+  Object.keys(S25).forEach(t=>{rg[t]={r:0,a:0,g:0};});
+  RESULTS.forEach(res=>{
+    ['home','away'].forEach(side=>{
+      const t=res[side],sc=side==='home'?res.sc.h:res.sc.a,opp=side==='home'?res.sc.a:res.sc.h;
+      rg[t].g++;rg[t].r+=sc;rg[t].a+=opp;
+    });
+  });
+  const out={};
+  Object.keys(S25).forEach(t=>{
+    const st=STANDINGS_2026[t];
+    const n=st?st.w+st.l:0;
+    const rpg=rg[t].g>0?rg[t].r/rg[t].g:null;
+    const rapg=rg[t].g>0?rg[t].a/rg[t].g:null;
+    const wpct26=st?st.w/n:null;
+    out[t]={games:n||rg[t].g,rpg26:rpg,rapg26:rapg,wpct26};
+  });
+  return out;
+}
+const s26=compute26();
+
+function blended(abbr){
+  const s=S25[abbr]||{era:4.2,xfip:4.15,xera:4.05,babip:.305,kpct:21,bbpct:9,swstr:10,ops:.720,woba:.302,rpg:4.26,rapg:4.26,wpct:.470};
+  const d=s26[abbr]||{games:0};
+  const g=Math.max(d.games||0, (STANDINGS_2026[abbr]?(STANDINGS_2026[abbr].w+STANDINGS_2026[abbr].l):0));
+  // 48 games avg → W26=64%, major weight on 2026
+  const W26=Math.min(.80, g/75);
+  const W25=1-W26;
+  if(!g) return {...s};
+  // Use real 2026 wpct from standings for W%
+  const wpct26=d.wpct26!=null?d.wpct26:s.wpct;
+  return{...s,
+    rpg:W25*s.rpg+W26*(d.rpg26|
+<truncated 74265 bytes>
+
+NOTE: The output was truncated because it was too long. Use a more targeted query or a smaller range to get the information you need.

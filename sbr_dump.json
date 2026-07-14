@@ -1,0 +1,4549 @@
+[
+  {
+    "league": "MLB",
+    "oddsTableModel": {
+      "gameRows": [
+        {
+          "gameView": {
+            "gameId": 368624,
+            "leagueName": "MLB",
+            "startDate": "2026-07-07T18:15:00+00:00",
+            "awayTeam": {
+              "name": "Milwaukee",
+              "fullName": "Milwaukee Brewers",
+              "shortName": "MIL",
+              "displayName": "Milwaukee",
+              "nickname": "Brewers",
+              "rank": -1
+            },
+            "awayTeamRotationNumber": "",
+            "awayStarter": {
+              "firstName": "Jacob",
+              "lastName": "Misiorowski",
+              "throwsShort": "R",
+              "firstInital": "J"
+            },
+            "awayTeamScore": 0,
+            "homeTeam": {
+              "name": "St. Louis",
+              "fullName": "St. Louis Cardinals",
+              "shortName": "STL",
+              "displayName": "St. Louis",
+              "nickname": "Cardinals",
+              "rank": -1
+            },
+            "homeStarter": null,
+            "homeTeamRotationNumber": "",
+            "homeTeamScore": 0,
+            "gameStatusText": "14:15 ET",
+            "status": "6",
+            "venueName": "Busch Stadium",
+            "city": "St. Louis",
+            "state": "MO",
+            "country": "USA",
+            "consensus": {
+              "homeMoneyLinePickPercent": 61.25356125356125,
+              "awayMoneyLinePickPercent": 38.74643874643874,
+              "homeSpreadPickPercent": 0,
+              "awaySpreadPickPercent": 0,
+              "overPickPercent": 66.79611650485437,
+              "underPickPercent": 33.20388349514563
+            },
+            "baseballLivescore": null
+          },
+          "oddsViews": [
+            {
+              "gameId": 368624,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -110,
+                "awayOdds": -110,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 155,
+                "awayOdds": -190,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368624,
+              "sportsbook": "fanduel",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -118,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 160,
+                "awayOdds": -190,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368624,
+              "sportsbook": "caesars",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 158,
+                "awayOdds": -190,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368624,
+              "sportsbook": "bet365",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 160,
+                "awayOdds": -190,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368624,
+              "sportsbook": "draftkings",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -118,
+                "awayOdds": -102,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 158,
+                "awayOdds": -193,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368624,
+              "sportsbook": "fanatics",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 155,
+                "awayOdds": -190,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "openingLineViews": [
+            {
+              "gameId": 368624,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -110,
+                "awayOdds": -110,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 155,
+                "awayOdds": -190,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "liveScoreViews": {
+            "viewdata": {
+              "GameTeamScoreDataList": []
+            }
+          }
+        },
+        {
+          "gameView": {
+            "gameId": 367886,
+            "leagueName": "MLB",
+            "startDate": "2026-07-07T22:35:00+00:00",
+            "awayTeam": {
+              "name": "Chicago",
+              "fullName": "Chicago Cubs",
+              "shortName": "CHC",
+              "displayName": "Chi. Cubs",
+              "nickname": "Cubs",
+              "rank": -1
+            },
+            "awayTeamRotationNumber": "",
+            "awayStarter": {
+              "firstName": "Matthew",
+              "lastName": "Boyd",
+              "throwsShort": "L",
+              "firstInital": "M"
+            },
+            "awayTeamScore": 0,
+            "homeTeam": {
+              "name": "Baltimore",
+              "fullName": "Baltimore Orioles",
+              "shortName": "BAL",
+              "displayName": "Baltimore",
+              "nickname": "Orioles",
+              "rank": -1
+            },
+            "homeStarter": {
+              "firstName": "Shane",
+              "lastName": "Baz",
+              "throwsShort": "R",
+              "firstInital": "S"
+            },
+            "homeTeamRotationNumber": "",
+            "homeTeamScore": 0,
+            "gameStatusText": "18:35 ET",
+            "status": "6",
+            "venueName": "Oriole Park at Camden Yards",
+            "city": "Baltimore",
+            "state": "MD",
+            "country": "USA",
+            "consensus": {
+              "homeMoneyLinePickPercent": 0,
+              "awayMoneyLinePickPercent": 0,
+              "homeSpreadPickPercent": 0,
+              "awaySpreadPickPercent": 0,
+              "overPickPercent": 59.199999999999996,
+              "underPickPercent": 40.8
+            },
+            "baseballLivescore": null
+          },
+          "oddsViews": [
+            {
+              "gameId": 367886,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": 100,
+                "awayOdds": -120,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -102,
+                "awayOdds": -118,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 367886,
+              "sportsbook": "fanduel",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -104,
+                "awayOdds": -112,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -104,
+                "awayOdds": -112,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 367886,
+              "sportsbook": "caesars",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": 100,
+                "awayOdds": -120,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 100,
+                "awayOdds": -120,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 367886,
+              "sportsbook": "bet365",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -110,
+                "awayOdds": -122,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -104,
+                "awayOdds": -127,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 367886,
+              "sportsbook": "draftkings",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": 100,
+                "awayOdds": -120,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -102,
+                "awayOdds": -118,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 367886,
+              "sportsbook": "fanatics",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": 110,
+                "awayOdds": -130,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -105,
+                "awayOdds": -115,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "openingLineViews": [
+            {
+              "gameId": 367886,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": 100,
+                "awayOdds": -120,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -102,
+                "awayOdds": -118,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "liveScoreViews": {
+            "viewdata": {
+              "GameTeamScoreDataList": []
+            }
+          }
+        },
+        {
+          "gameView": {
+            "gameId": 368560,
+            "leagueName": "MLB",
+            "startDate": "2026-07-07T22:40:00+00:00",
+            "awayTeam": {
+              "name": "Athletics",
+              "fullName": "Athletics Athletics",
+              "shortName": "ATH",
+              "displayName": "Athletics",
+              "nickname": "Athletics",
+              "rank": -1
+            },
+            "awayTeamRotationNumber": "",
+            "awayStarter": {
+              "firstName": "J.T.",
+              "lastName": "Ginn",
+              "throwsShort": "R",
+              "firstInital": "J"
+            },
+            "awayTeamScore": 0,
+            "homeTeam": {
+              "name": "Detroit",
+              "fullName": "Detroit Tigers",
+              "shortName": "DET",
+              "displayName": "Detroit",
+              "nickname": "Tigers",
+              "rank": -1
+            },
+            "homeStarter": {
+              "firstName": "Tarik",
+              "lastName": "Skubal",
+              "throwsShort": "L",
+              "firstInital": "T"
+            },
+            "homeTeamRotationNumber": "",
+            "homeTeamScore": 0,
+            "gameStatusText": "18:40 ET",
+            "status": "6",
+            "venueName": "Comerica Park",
+            "city": "Detroit",
+            "state": "MI",
+            "country": "USA",
+            "consensus": {
+              "homeMoneyLinePickPercent": 61,
+              "awayMoneyLinePickPercent": 39,
+              "homeSpreadPickPercent": 0,
+              "awaySpreadPickPercent": 0,
+              "overPickPercent": 64.61538461538461,
+              "underPickPercent": 35.38461538461539
+            },
+            "baseballLivescore": null
+          },
+          "oddsViews": [
+            {
+              "gameId": 368560,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -190,
+                "awayOdds": 155,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -190,
+                "awayOdds": 154,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368560,
+              "sportsbook": "fanduel",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -198,
+                "awayOdds": 166,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -190,
+                "awayOdds": 160,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368560,
+              "sportsbook": "caesars",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -190,
+                "awayOdds": 158,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -190,
+                "awayOdds": 158,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368560,
+              "sportsbook": "bet365",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -200,
+                "awayOdds": 150,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -200,
+                "awayOdds": 150,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368560,
+              "sportsbook": "draftkings",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -194,
+                "awayOdds": 159,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -187,
+                "awayOdds": 153,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368560,
+              "sportsbook": "fanatics",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -180,
+                "awayOdds": 150,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -180,
+                "awayOdds": 150,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "openingLineViews": [
+            {
+              "gameId": 368560,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -190,
+                "awayOdds": 155,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -190,
+                "awayOdds": 154,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "liveScoreViews": {
+            "viewdata": {
+              "GameTeamScoreDataList": []
+            }
+          }
+        },
+        {
+          "gameView": {
+            "gameId": 368565,
+            "leagueName": "MLB",
+            "startDate": "2026-07-07T22:40:00+00:00",
+            "awayTeam": {
+              "name": "Seattle",
+              "fullName": "Seattle Mariners",
+              "shortName": "SEA",
+              "displayName": "Seattle",
+              "nickname": "Mariners",
+              "rank": -1
+            },
+            "awayTeamRotationNumber": "",
+            "awayStarter": {
+              "firstName": "Bryan",
+              "lastName": "Woo",
+              "throwsShort": "R",
+              "firstInital": "B"
+            },
+            "awayTeamScore": 0,
+            "homeTeam": {
+              "name": "Miami",
+              "fullName": "Miami Marlins",
+              "shortName": "MIA",
+              "displayName": "Miami",
+              "nickname": "Marlins",
+              "rank": -1
+            },
+            "homeStarter": {
+              "firstName": "Max",
+              "lastName": "Meyer",
+              "throwsShort": "R",
+              "firstInital": "M"
+            },
+            "homeTeamRotationNumber": "",
+            "homeTeamScore": 0,
+            "gameStatusText": "18:40 ET",
+            "status": "6",
+            "venueName": "loanDepot park",
+            "city": "Miami",
+            "state": "FL",
+            "country": "USA",
+            "consensus": {
+              "homeMoneyLinePickPercent": 0,
+              "awayMoneyLinePickPercent": 0,
+              "homeSpreadPickPercent": 0,
+              "awaySpreadPickPercent": 0,
+              "overPickPercent": 50,
+              "underPickPercent": 50
+            },
+            "baseballLivescore": null
+          },
+          "oddsViews": [
+            {
+              "gameId": 368565,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -118,
+                "awayOdds": -102,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368565,
+              "sportsbook": "fanduel",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -106,
+                "awayOdds": -110,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -116,
+                "awayOdds": -102,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368565,
+              "sportsbook": "caesars",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -115,
+                "awayOdds": -105,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368565,
+              "sportsbook": "bet365",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -122,
+                "awayOdds": -110,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -127,
+                "awayOdds": -104,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368565,
+              "sportsbook": "draftkings",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -118,
+                "awayOdds": -102,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -118,
+                "awayOdds": -102,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368565,
+              "sportsbook": "fanatics",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -110,
+                "awayOdds": -110,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "openingLineViews": [
+            {
+              "gameId": 368565,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -118,
+                "awayOdds": -102,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "liveScoreViews": {
+            "viewdata": {
+              "GameTeamScoreDataList": []
+            }
+          }
+        },
+        {
+          "gameView": {
+            "gameId": 368796,
+            "leagueName": "MLB",
+            "startDate": "2026-07-07T22:40:00+00:00",
+            "awayTeam": {
+              "name": "Atlanta",
+              "fullName": "Atlanta Braves",
+              "shortName": "ATL",
+              "displayName": "Atlanta",
+              "nickname": "Braves",
+              "rank": -1
+            },
+            "awayTeamRotationNumber": "",
+            "awayStarter": {
+              "firstName": "Hurston",
+              "lastName": "Waldrep",
+              "throwsShort": "R",
+              "firstInital": "H"
+            },
+            "awayTeamScore": 0,
+            "homeTeam": {
+              "name": "Pittsburgh",
+              "fullName": "Pittsburgh Pirates",
+              "shortName": "PIT",
+              "displayName": "Pittsburgh",
+              "nickname": "Pirates",
+              "rank": -1
+            },
+            "homeStarter": {
+              "firstName": "Paul",
+              "lastName": "Skenes",
+              "throwsShort": "R",
+              "firstInital": "P"
+            },
+            "homeTeamRotationNumber": "",
+            "homeTeamScore": 0,
+            "gameStatusText": "18:40 ET",
+            "status": "6",
+            "venueName": "PNC Park",
+            "city": "Pittsburgh",
+            "state": "PA",
+            "country": "USA",
+            "consensus": {
+              "homeMoneyLinePickPercent": 51.724137931034484,
+              "awayMoneyLinePickPercent": 48.275862068965516,
+              "homeSpreadPickPercent": 0,
+              "awaySpreadPickPercent": 0,
+              "overPickPercent": 59.63302752293578,
+              "underPickPercent": 40.36697247706422
+            },
+            "baseballLivescore": null
+          },
+          "oddsViews": [
+            {
+              "gameId": 368796,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -185,
+                "awayOdds": 150,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -170,
+                "awayOdds": 140,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368796,
+              "sportsbook": "fanduel",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -188,
+                "awayOdds": 158,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -168,
+                "awayOdds": 142,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368796,
+              "sportsbook": "caesars",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -190,
+                "awayOdds": 158,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -170,
+                "awayOdds": 143,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368796,
+              "sportsbook": "bet365",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -200,
+                "awayOdds": 150,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -185,
+                "awayOdds": 140,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368796,
+              "sportsbook": "draftkings",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -181,
+                "awayOdds": 149,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -175,
+                "awayOdds": 144,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368796,
+              "sportsbook": "fanatics",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -190,
+                "awayOdds": 155,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -170,
+                "awayOdds": 140,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "openingLineViews": [
+            {
+              "gameId": 368796,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -185,
+                "awayOdds": 150,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -170,
+                "awayOdds": 140,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "liveScoreViews": {
+            "viewdata": {
+              "GameTeamScoreDataList": []
+            }
+          }
+        },
+        {
+          "gameView": {
+            "gameId": 368843,
+            "leagueName": "MLB",
+            "startDate": "2026-07-07T22:40:00+00:00",
+            "awayTeam": {
+              "name": "New York",
+              "fullName": "New York Yankees",
+              "shortName": "NYY",
+              "displayName": "NY Yankees",
+              "nickname": "Yankees",
+              "rank": -1
+            },
+            "awayTeamRotationNumber": "",
+            "awayStarter": {
+              "firstName": "Will",
+              "lastName": "Warren",
+              "throwsShort": "R",
+              "firstInital": "W"
+            },
+            "awayTeamScore": 0,
+            "homeTeam": {
+              "name": "Tampa Bay",
+              "fullName": "Tampa Bay Rays",
+              "shortName": "TB",
+              "displayName": "Tampa Bay",
+              "nickname": "Rays",
+              "rank": -1
+            },
+            "homeStarter": {
+              "firstName": "Ian",
+              "lastName": "Seymour",
+              "throwsShort": "L",
+              "firstInital": "I"
+            },
+            "homeTeamRotationNumber": "",
+            "homeTeamScore": 0,
+            "gameStatusText": "18:40 ET",
+            "status": "6",
+            "venueName": "Tropicana Field",
+            "city": "St. Petersburg",
+            "state": "FL",
+            "country": "USA",
+            "consensus": {
+              "homeMoneyLinePickPercent": 62.65822784810127,
+              "awayMoneyLinePickPercent": 37.34177215189873,
+              "homeSpreadPickPercent": 0,
+              "awaySpreadPickPercent": 0,
+              "overPickPercent": 0,
+              "underPickPercent": 0
+            },
+            "baseballLivescore": null
+          },
+          "oddsViews": [
+            {
+              "gameId": 368843,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368843,
+              "sportsbook": "fanduel",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -118,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -118,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368843,
+              "sportsbook": "caesars",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368843,
+              "sportsbook": "bet365",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -127,
+                "awayOdds": -104,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -127,
+                "awayOdds": -104,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368843,
+              "sportsbook": "draftkings",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -122,
+                "awayOdds": 101,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368843,
+              "sportsbook": "fanatics",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "openingLineViews": [
+            {
+              "gameId": 368843,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "liveScoreViews": {
+            "viewdata": {
+              "GameTeamScoreDataList": []
+            }
+          }
+        },
+        {
+          "gameView": {
+            "gameId": 369297,
+            "leagueName": "MLB",
+            "startDate": "2026-07-07T22:45:00+00:00",
+            "awayTeam": {
+              "name": "Houston",
+              "fullName": "Houston Astros",
+              "shortName": "HOU",
+              "displayName": "Houston",
+              "nickname": "Astros",
+              "rank": -1
+            },
+            "awayTeamRotationNumber": "",
+            "awayStarter": {
+              "firstName": "Tatsuya",
+              "lastName": "Imai",
+              "throwsShort": "R",
+              "firstInital": "T"
+            },
+            "awayTeamScore": 0,
+            "homeTeam": {
+              "name": "Washington",
+              "fullName": "Washington Nationals",
+              "shortName": "WAS",
+              "displayName": "Washington",
+              "nickname": "Nationals",
+              "rank": -1
+            },
+            "homeStarter": {
+              "firstName": "Andrew",
+              "lastName": "Alvarez",
+              "throwsShort": "L",
+              "firstInital": "A"
+            },
+            "homeTeamRotationNumber": "",
+            "homeTeamScore": 0,
+            "gameStatusText": "18:45 ET",
+            "status": "6",
+            "venueName": "Nationals Park",
+            "city": "Washington",
+            "state": "DC",
+            "country": "USA",
+            "consensus": {
+              "homeMoneyLinePickPercent": 64.9425287356322,
+              "awayMoneyLinePickPercent": 35.05747126436782,
+              "homeSpreadPickPercent": 0,
+              "awaySpreadPickPercent": 0,
+              "overPickPercent": 0,
+              "underPickPercent": 0
+            },
+            "baseballLivescore": null
+          },
+          "oddsViews": [
+            {
+              "gameId": 369297,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -118,
+                "awayOdds": -102,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -130,
+                "awayOdds": 105,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369297,
+              "sportsbook": "fanduel",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -118,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -118,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369297,
+              "sportsbook": "caesars",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -125,
+                "awayOdds": 105,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369297,
+              "sportsbook": "bet365",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -127,
+                "awayOdds": -104,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -132,
+                "awayOdds": 101,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369297,
+              "sportsbook": "draftkings",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -118,
+                "awayOdds": -102,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -122,
+                "awayOdds": 101,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369297,
+              "sportsbook": "fanatics",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -110,
+                "awayOdds": -110,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "openingLineViews": [
+            {
+              "gameId": 369297,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -118,
+                "awayOdds": -102,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -130,
+                "awayOdds": 105,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "liveScoreViews": {
+            "viewdata": {
+              "GameTeamScoreDataList": []
+            }
+          }
+        },
+        {
+          "gameView": {
+            "gameId": 368829,
+            "leagueName": "MLB",
+            "startDate": "2026-07-07T23:10:00+00:00",
+            "awayTeam": {
+              "name": "Kansas City",
+              "fullName": "Kansas City Royals",
+              "shortName": "KC",
+              "displayName": "Kansas City",
+              "nickname": "Royals",
+              "rank": -1
+            },
+            "awayTeamRotationNumber": "",
+            "awayStarter": {
+              "firstName": "Seth",
+              "lastName": "Lugo",
+              "throwsShort": "R",
+              "firstInital": "S"
+            },
+            "awayTeamScore": 0,
+            "homeTeam": {
+              "name": "New York",
+              "fullName": "New York Mets",
+              "shortName": "NYM",
+              "displayName": "NY Mets",
+              "nickname": "Mets",
+              "rank": -1
+            },
+            "homeStarter": null,
+            "homeTeamRotationNumber": "",
+            "homeTeamScore": 0,
+            "gameStatusText": "19:10 ET",
+            "status": "6",
+            "venueName": "Citi Field",
+            "city": "Flushing, Queens",
+            "state": "NY",
+            "country": "USA",
+            "consensus": {
+              "homeMoneyLinePickPercent": 0,
+              "awayMoneyLinePickPercent": 0,
+              "homeSpreadPickPercent": 0,
+              "awaySpreadPickPercent": 0,
+              "overPickPercent": 61.111111111111114,
+              "underPickPercent": 38.88888888888889
+            },
+            "baseballLivescore": null
+          },
+          "oddsViews": [
+            {
+              "gameId": 368829,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -150,
+                "awayOdds": 125,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -155,
+                "awayOdds": 125,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368829,
+              "sportsbook": "fanduel",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -152,
+                "awayOdds": 128,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -152,
+                "awayOdds": 128,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368829,
+              "sportsbook": "caesars",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -145,
+                "awayOdds": 122,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -155,
+                "awayOdds": 130,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368829,
+              "sportsbook": "bet365",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -161,
+                "awayOdds": 120,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -161,
+                "awayOdds": 120,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368829,
+              "sportsbook": "draftkings",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -149,
+                "awayOdds": 123,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -156,
+                "awayOdds": 129,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368829,
+              "sportsbook": "fanatics",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -145,
+                "awayOdds": 120,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -150,
+                "awayOdds": 125,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "openingLineViews": [
+            {
+              "gameId": 368829,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -150,
+                "awayOdds": 125,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -155,
+                "awayOdds": 125,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "liveScoreViews": {
+            "viewdata": {
+              "GameTeamScoreDataList": []
+            }
+          }
+        },
+        {
+          "gameView": {
+            "gameId": 368537,
+            "leagueName": "MLB",
+            "startDate": "2026-07-07T23:10:00+00:00",
+            "awayTeam": {
+              "name": "Philadelphia",
+              "fullName": "Philadelphia Phillies",
+              "shortName": "PHI",
+              "displayName": "Philadelphia",
+              "nickname": "Phillies",
+              "rank": -1
+            },
+            "awayTeamRotationNumber": "",
+            "awayStarter": {
+              "firstName": "Zack",
+              "lastName": "Wheeler",
+              "throwsShort": "R",
+              "firstInital": "Z"
+            },
+            "awayTeamScore": 0,
+            "homeTeam": {
+              "name": "Cincinnati",
+              "fullName": "Cincinnati Reds",
+              "shortName": "CIN",
+              "displayName": "Cincinnati",
+              "nickname": "Reds",
+              "rank": -1
+            },
+            "homeStarter": {
+              "firstName": "Andrew",
+              "lastName": "Abbott",
+              "throwsShort": "L",
+              "firstInital": "A"
+            },
+            "homeTeamRotationNumber": "",
+            "homeTeamScore": 0,
+            "gameStatusText": "19:10 ET",
+            "status": "6",
+            "venueName": "Great American Ball Park",
+            "city": "Cincinnati",
+            "state": "OH",
+            "country": "USA",
+            "consensus": {
+              "homeMoneyLinePickPercent": 42.028985507246375,
+              "awayMoneyLinePickPercent": 57.971014492753625,
+              "homeSpreadPickPercent": 0,
+              "awaySpreadPickPercent": 0,
+              "overPickPercent": 50.57471264367817,
+              "underPickPercent": 49.42528735632184
+            },
+            "baseballLivescore": null
+          },
+          "oddsViews": [
+            {
+              "gameId": 368537,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -10000,
+                "awayOdds": -10000,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 140,
+                "awayOdds": -170,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368537,
+              "sportsbook": "fanduel",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": 140,
+                "awayOdds": -166,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 140,
+                "awayOdds": -166,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368537,
+              "sportsbook": "caesars",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": 140,
+                "awayOdds": -165,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 140,
+                "awayOdds": -165,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368537,
+              "sportsbook": "bet365",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": 125,
+                "awayOdds": -167,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 135,
+                "awayOdds": -179,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368537,
+              "sportsbook": "draftkings",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": 139,
+                "awayOdds": -168,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 141,
+                "awayOdds": -171,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 368537,
+              "sportsbook": "fanatics",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": 140,
+                "awayOdds": -170,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 140,
+                "awayOdds": -170,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "openingLineViews": [
+            {
+              "gameId": 368537,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -10000,
+                "awayOdds": -10000,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 140,
+                "awayOdds": -170,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "liveScoreViews": {
+            "viewdata": {
+              "GameTeamScoreDataList": []
+            }
+          }
+        },
+        {
+          "gameView": {
+            "gameId": 369380,
+            "leagueName": "MLB",
+            "startDate": "2026-07-07T23:40:00+00:00",
+            "awayTeam": {
+              "name": "Cleveland",
+              "fullName": "Cleveland Guardians",
+              "shortName": "CLE",
+              "displayName": "Cleveland",
+              "nickname": "Guardians",
+              "rank": -1
+            },
+            "awayTeamRotationNumber": "",
+            "awayStarter": {
+              "firstName": "Joey",
+              "lastName": "Cantillo",
+              "throwsShort": "L",
+              "firstInital": "J"
+            },
+            "awayTeamScore": 0,
+            "homeTeam": {
+              "name": "Minnesota",
+              "fullName": "Minnesota Twins",
+              "shortName": "MIN",
+              "displayName": "Minnesota",
+              "nickname": "Twins",
+              "rank": -1
+            },
+            "homeStarter": {
+              "firstName": "Taj",
+              "lastName": "Bradley",
+              "throwsShort": "R",
+              "firstInital": "T"
+            },
+            "homeTeamRotationNumber": "",
+            "homeTeamScore": 0,
+            "gameStatusText": "19:40 ET",
+            "status": "6",
+            "venueName": "Target Field",
+            "city": "Minneapolis",
+            "state": "MN",
+            "country": "USA",
+            "consensus": {
+              "homeMoneyLinePickPercent": 0,
+              "awayMoneyLinePickPercent": 0,
+              "homeSpreadPickPercent": 0,
+              "awaySpreadPickPercent": 0,
+              "overPickPercent": 58.58585858585859,
+              "underPickPercent": 41.41414141414141
+            },
+            "baseballLivescore": null
+          },
+          "oddsViews": [
+            {
+              "gameId": 369380,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -118,
+                "awayOdds": -102,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369380,
+              "sportsbook": "fanduel",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -122,
+                "awayOdds": 104,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -118,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369380,
+              "sportsbook": "caesars",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369380,
+              "sportsbook": "bet365",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -127,
+                "awayOdds": -104,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -127,
+                "awayOdds": -104,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369380,
+              "sportsbook": "draftkings",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": -101,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369380,
+              "sportsbook": "fanatics",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -125,
+                "awayOdds": 105,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -115,
+                "awayOdds": -105,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "openingLineViews": [
+            {
+              "gameId": 369380,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -120,
+                "awayOdds": 100,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -118,
+                "awayOdds": -102,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "liveScoreViews": {
+            "viewdata": {
+              "GameTeamScoreDataList": []
+            }
+          }
+        },
+        {
+          "gameView": {
+            "gameId": 369610,
+            "leagueName": "MLB",
+            "startDate": "2026-07-07T23:40:00+00:00",
+            "awayTeam": {
+              "name": "Boston",
+              "fullName": "Boston Red Sox",
+              "shortName": "BOS",
+              "displayName": "Boston",
+              "nickname": "Red Sox",
+              "rank": -1
+            },
+            "awayTeamRotationNumber": "",
+            "awayStarter": {
+              "firstName": "Payton",
+              "lastName": "Tolle",
+              "throwsShort": "L",
+              "firstInital": "P"
+            },
+            "awayTeamScore": 0,
+            "homeTeam": {
+              "name": "Chicago",
+              "fullName": "Chicago White Sox",
+              "shortName": "CHW",
+              "displayName": "Chi. White Sox",
+              "nickname": "White Sox",
+              "rank": -1
+            },
+            "homeStarter": {
+              "firstName": "Noah",
+              "lastName": "Schultz",
+              "throwsShort": "L",
+              "firstInital": "N"
+            },
+            "homeTeamRotationNumber": "",
+            "homeTeamScore": 0,
+            "gameStatusText": "19:40 ET",
+            "status": "6",
+            "venueName": "Rate Field",
+            "city": "Chicago",
+            "state": "IL",
+            "country": "USA",
+            "consensus": {
+              "homeMoneyLinePickPercent": 58.64197530864198,
+              "awayMoneyLinePickPercent": 41.358024691358025,
+              "homeSpreadPickPercent": 0,
+              "awaySpreadPickPercent": 0,
+              "overPickPercent": 72.85714285714285,
+              "underPickPercent": 27.142857142857142
+            },
+            "baseballLivescore": null
+          },
+          "oddsViews": [
+            {
+              "gameId": 369610,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": 105,
+                "awayOdds": -130,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 110,
+                "awayOdds": -135,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369610,
+              "sportsbook": "fanduel",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -102,
+                "awayOdds": -116,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 106,
+                "awayOdds": -124,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369610,
+              "sportsbook": "caesars",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": 105,
+                "awayOdds": -125,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 110,
+                "awayOdds": -130,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369610,
+              "sportsbook": "bet365",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": 101,
+                "awayOdds": -132,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 105,
+                "awayOdds": -139,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369610,
+              "sportsbook": "draftkings",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": 104,
+                "awayOdds": -126,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 108,
+                "awayOdds": -131,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369610,
+              "sportsbook": "fanatics",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": 100,
+                "awayOdds": -120,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 105,
+                "awayOdds": -125,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "openingLineViews": [
+            {
+              "gameId": 369610,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": 105,
+                "awayOdds": -130,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 110,
+                "awayOdds": -135,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "liveScoreViews": {
+            "viewdata": {
+              "GameTeamScoreDataList": []
+            }
+          }
+        },
+        {
+          "gameView": {
+            "gameId": 370007,
+            "leagueName": "MLB",
+            "startDate": "2026-07-07T23:45:00+00:00",
+            "awayTeam": {
+              "name": "Milwaukee",
+              "fullName": "Milwaukee Brewers",
+              "shortName": "MIL",
+              "displayName": "Milwaukee",
+              "nickname": "Brewers",
+              "rank": -1
+            },
+            "awayTeamRotationNumber": "",
+            "awayStarter": null,
+            "awayTeamScore": 0,
+            "homeTeam": {
+              "name": "St. Louis",
+              "fullName": "St. Louis Cardinals",
+              "shortName": "STL",
+              "displayName": "St. Louis",
+              "nickname": "Cardinals",
+              "rank": -1
+            },
+            "homeStarter": null,
+            "homeTeamRotationNumber": "",
+            "homeTeamScore": 0,
+            "gameStatusText": "19:45 ET",
+            "status": "6",
+            "venueName": "Busch Stadium",
+            "city": "St. Louis",
+            "state": "MO",
+            "country": "USA",
+            "consensus": null,
+            "baseballLivescore": null
+          },
+          "oddsViews": [
+            {
+              "gameId": 370007,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -10000,
+                "awayOdds": -10000,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 120,
+                "awayOdds": -145,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            null,
+            null,
+            null,
+            null,
+            {
+              "gameId": 370007,
+              "sportsbook": "fanatics",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": 155,
+                "awayOdds": -190,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 120,
+                "awayOdds": -145,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "openingLineViews": [
+            {
+              "gameId": 370007,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -10000,
+                "awayOdds": -10000,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 120,
+                "awayOdds": -145,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "liveScoreViews": {
+            "viewdata": {
+              "GameTeamScoreDataList": []
+            }
+          }
+        },
+        {
+          "gameView": {
+            "gameId": 369098,
+            "leagueName": "MLB",
+            "startDate": "2026-07-08T00:05:00+00:00",
+            "awayTeam": {
+              "name": "Los Angeles",
+              "fullName": "Los Angeles Angels",
+              "shortName": "LAA",
+              "displayName": "LA Angels",
+              "nickname": "Angels",
+              "rank": -1
+            },
+            "awayTeamRotationNumber": "",
+            "awayStarter": {
+              "firstName": "Jose",
+              "lastName": "Soriano",
+              "throwsShort": "R",
+              "firstInital": "J"
+            },
+            "awayTeamScore": 0,
+            "homeTeam": {
+              "name": "Texas",
+              "fullName": "Texas Rangers",
+              "shortName": "TEX",
+              "displayName": "Texas",
+              "nickname": "Rangers",
+              "rank": -1
+            },
+            "homeStarter": {
+              "firstName": "Jacob",
+              "lastName": "deGrom",
+              "throwsShort": "R",
+              "firstInital": "J"
+            },
+            "homeTeamRotationNumber": "",
+            "homeTeamScore": 0,
+            "gameStatusText": "20:05 ET",
+            "status": "6",
+            "venueName": "Globe Life Field",
+            "city": "Arlington",
+            "state": "TX",
+            "country": "USA",
+            "consensus": {
+              "homeMoneyLinePickPercent": 0,
+              "awayMoneyLinePickPercent": 0,
+              "homeSpreadPickPercent": 0,
+              "awaySpreadPickPercent": 0,
+              "overPickPercent": 63.02521008403361,
+              "underPickPercent": 36.97478991596639
+            },
+            "baseballLivescore": null
+          },
+          "oddsViews": [
+            {
+              "gameId": 369098,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -165,
+                "awayOdds": 135,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -165,
+                "awayOdds": 135,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369098,
+              "sportsbook": "fanduel",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -166,
+                "awayOdds": 140,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -166,
+                "awayOdds": 140,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369098,
+              "sportsbook": "caesars",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -165,
+                "awayOdds": 140,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -165,
+                "awayOdds": 140,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369098,
+              "sportsbook": "bet365",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -179,
+                "awayOdds": 135,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -179,
+                "awayOdds": 135,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369098,
+              "sportsbook": "draftkings",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -163,
+                "awayOdds": 135,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -167,
+                "awayOdds": 138,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369098,
+              "sportsbook": "fanatics",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -170,
+                "awayOdds": 140,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -165,
+                "awayOdds": 135,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "openingLineViews": [
+            {
+              "gameId": 369098,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -165,
+                "awayOdds": 135,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -165,
+                "awayOdds": 135,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "liveScoreViews": {
+            "viewdata": {
+              "GameTeamScoreDataList": []
+            }
+          }
+        },
+        {
+          "gameView": {
+            "gameId": 369959,
+            "leagueName": "MLB",
+            "startDate": "2026-07-08T01:40:00+00:00",
+            "awayTeam": {
+              "name": "Arizona",
+              "fullName": "Arizona Diamondbacks",
+              "shortName": "AZ",
+              "displayName": "Arizona",
+              "nickname": "Diamondbacks",
+              "rank": -1
+            },
+            "awayTeamRotationNumber": "",
+            "awayStarter": {
+              "firstName": "Zac",
+              "lastName": "Gallen",
+              "throwsShort": "R",
+              "firstInital": "Z"
+            },
+            "awayTeamScore": 0,
+            "homeTeam": {
+              "name": "San Diego",
+              "fullName": "San Diego Padres",
+              "shortName": "SD",
+              "displayName": "San Diego",
+              "nickname": "Padres",
+              "rank": -1
+            },
+            "homeStarter": {
+              "firstName": "German",
+              "lastName": "Marquez",
+              "throwsShort": "R",
+              "firstInital": "G"
+            },
+            "homeTeamRotationNumber": "",
+            "homeTeamScore": 0,
+            "gameStatusText": "21:40 ET",
+            "status": "6",
+            "venueName": "Petco Park",
+            "city": "San Diego",
+            "state": "CA",
+            "country": "USA",
+            "consensus": {
+              "homeMoneyLinePickPercent": 0,
+              "awayMoneyLinePickPercent": 0,
+              "homeSpreadPickPercent": 0,
+              "awaySpreadPickPercent": 0,
+              "overPickPercent": 73.11827956989248,
+              "underPickPercent": 26.881720430107524
+            },
+            "baseballLivescore": null
+          },
+          "oddsViews": [
+            {
+              "gameId": 369959,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -135,
+                "awayOdds": 110,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -125,
+                "awayOdds": 105,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369959,
+              "sportsbook": "fanduel",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -130,
+                "awayOdds": 110,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -130,
+                "awayOdds": 110,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369959,
+              "sportsbook": "caesars",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -130,
+                "awayOdds": 110,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -125,
+                "awayOdds": 105,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369959,
+              "sportsbook": "bet365",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -139,
+                "awayOdds": 105,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -132,
+                "awayOdds": 101,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369959,
+              "sportsbook": "draftkings",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -131,
+                "awayOdds": 109,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -131,
+                "awayOdds": 109,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369959,
+              "sportsbook": "fanatics",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -130,
+                "awayOdds": 110,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -125,
+                "awayOdds": 105,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "openingLineViews": [
+            {
+              "gameId": 369959,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -135,
+                "awayOdds": 110,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -125,
+                "awayOdds": 105,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "liveScoreViews": {
+            "viewdata": {
+              "GameTeamScoreDataList": []
+            }
+          }
+        },
+        {
+          "gameView": {
+            "gameId": 370096,
+            "leagueName": "MLB",
+            "startDate": "2026-07-08T01:45:00+00:00",
+            "awayTeam": {
+              "name": "Toronto",
+              "fullName": "Toronto Blue Jays",
+              "shortName": "TOR",
+              "displayName": "Toronto",
+              "nickname": "Blue Jays",
+              "rank": -1
+            },
+            "awayTeamRotationNumber": "",
+            "awayStarter": null,
+            "awayTeamScore": 0,
+            "homeTeam": {
+              "name": "San Francisco",
+              "fullName": "San Francisco Giants",
+              "shortName": "SF",
+              "displayName": "San Francisco",
+              "nickname": "Giants",
+              "rank": -1
+            },
+            "homeStarter": {
+              "firstName": "Trevor",
+              "lastName": "McDonald",
+              "throwsShort": "R",
+              "firstInital": "T"
+            },
+            "homeTeamRotationNumber": "",
+            "homeTeamScore": 0,
+            "gameStatusText": "21:45 ET",
+            "status": "6",
+            "venueName": "Oracle Park",
+            "city": "San Francisco",
+            "state": "CA",
+            "country": "USA",
+            "consensus": {
+              "homeMoneyLinePickPercent": 53.84615384615385,
+              "awayMoneyLinePickPercent": 46.15384615384615,
+              "homeSpreadPickPercent": 0,
+              "awaySpreadPickPercent": 0,
+              "overPickPercent": 0,
+              "underPickPercent": 0
+            },
+            "baseballLivescore": null
+          },
+          "oddsViews": [
+            {
+              "gameId": 370096,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -110,
+                "awayOdds": -110,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -102,
+                "awayOdds": -118,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 370096,
+              "sportsbook": "fanduel",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -104,
+                "awayOdds": -112,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -110,
+                "awayOdds": -106,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 370096,
+              "sportsbook": "caesars",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -110,
+                "awayOdds": -110,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 100,
+                "awayOdds": -120,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 370096,
+              "sportsbook": "bet365",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -110,
+                "awayOdds": -122,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -104,
+                "awayOdds": -127,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 370096,
+              "sportsbook": "draftkings",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -108,
+                "awayOdds": -112,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -102,
+                "awayOdds": -118,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 370096,
+              "sportsbook": "fanatics",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -110,
+                "awayOdds": -110,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": 100,
+                "awayOdds": -120,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "openingLineViews": [
+            {
+              "gameId": 370096,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -110,
+                "awayOdds": -110,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -102,
+                "awayOdds": -118,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "liveScoreViews": {
+            "viewdata": {
+              "GameTeamScoreDataList": []
+            }
+          }
+        },
+        {
+          "gameView": {
+            "gameId": 369139,
+            "leagueName": "MLB",
+            "startDate": "2026-07-08T02:10:00+00:00",
+            "awayTeam": {
+              "name": "Colorado",
+              "fullName": "Colorado Rockies",
+              "shortName": "COL",
+              "displayName": "Colorado",
+              "nickname": "Rockies",
+              "rank": -1
+            },
+            "awayTeamRotationNumber": "",
+            "awayStarter": {
+              "firstName": "Michael",
+              "lastName": "Lorenzen",
+              "throwsShort": "R",
+              "firstInital": "M"
+            },
+            "awayTeamScore": 0,
+            "homeTeam": {
+              "name": "Los Angeles",
+              "fullName": "Los Angeles Dodgers",
+              "shortName": "LAD",
+              "displayName": "LA Dodgers",
+              "nickname": "Dodgers",
+              "rank": -1
+            },
+            "homeStarter": {
+              "firstName": "Justin",
+              "lastName": "Wrobleski",
+              "throwsShort": "L",
+              "firstInital": "J"
+            },
+            "homeTeamRotationNumber": "",
+            "homeTeamScore": 0,
+            "gameStatusText": "22:10 ET",
+            "status": "6",
+            "venueName": "UNIQLO Field at Dodger Stadium",
+            "city": "Los Angeles",
+            "state": "CA",
+            "country": "USA",
+            "consensus": {
+              "homeMoneyLinePickPercent": 0,
+              "awayMoneyLinePickPercent": 0,
+              "homeSpreadPickPercent": 0,
+              "awaySpreadPickPercent": 0,
+              "overPickPercent": 67.74193548387096,
+              "underPickPercent": 32.25806451612903
+            },
+            "baseballLivescore": null
+          },
+          "oddsViews": [
+            {
+              "gameId": 369139,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -275,
+                "awayOdds": 220,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -275,
+                "awayOdds": 220,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369139,
+              "sportsbook": "fanduel",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -250,
+                "awayOdds": 205,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -275,
+                "awayOdds": 225,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369139,
+              "sportsbook": "caesars",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -260,
+                "awayOdds": 210,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -267,
+                "awayOdds": 215,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369139,
+              "sportsbook": "bet365",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -270,
+                "awayOdds": 205,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -294,
+                "awayOdds": 220,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369139,
+              "sportsbook": "draftkings",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -267,
+                "awayOdds": 214,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -272,
+                "awayOdds": 218,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            },
+            {
+              "gameId": 369139,
+              "sportsbook": "fanatics",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -260,
+                "awayOdds": 210,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -260,
+                "awayOdds": 210,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "openingLineViews": [
+            {
+              "gameId": 369139,
+              "sportsbook": "betmgm",
+              "sportsbookId": null,
+              "viewType": "MoneyLineDataOpeningAndLatestOddsDataView",
+              "openingLine": {
+                "odds": null,
+                "homeOdds": -275,
+                "awayOdds": 220,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "currentLine": {
+                "odds": null,
+                "homeOdds": -275,
+                "awayOdds": 220,
+                "overOdds": null,
+                "underOdds": null,
+                "drawOdds": 0,
+                "homeSpread": null,
+                "awaySpread": null,
+                "total": null
+              },
+              "moneyLineHistory": null,
+              "spreadHistory": null,
+              "totalHistory": null
+            }
+          ],
+          "liveScoreViews": {
+            "viewdata": {
+              "GameTeamScoreDataList": []
+            }
+          }
+        }
+      ],
+      "sportsbooks": [
+        {
+          "sportsbookId": 28,
+          "slug": "betmgm-sportsbook",
+          "vertical": "betting",
+          "name": "BetMGM",
+          "machineName": "betmgm",
+          "affiliateLink": "https://c.sportsbookreview.com/betmgm_usa",
+          "iconMonochrome": {
+            "type": "image/svg+xml",
+            "title": "Betmgm  Bg",
+            "fileName": "a456acc5-63b1-4be7-a190-7f9b43a58bc6.svg",
+            "alt": "",
+            "width": 0,
+            "height": 0,
+            "caption": ""
+          },
+          "iconColor": {
+            "type": "image/svg+xml",
+            "title": "Betmgm  Mono",
+            "fileName": "9fc98473-f1cf-4b89-b51d-8b96e7c13294.svg",
+            "alt": "",
+            "width": 0,
+            "height": 0,
+            "caption": ""
+          },
+          "iconColorBackground": {
+            "type": "image/svg+xml",
+            "title": "Sportsbook=bet Mgm, Size=default",
+            "fileName": "979b6d14-7c50-4391-8bfb-5eea8bc84405.svg",
+            "alt": "",
+            "width": 0,
+            "height": 0,
+            "caption": ""
+          }
+        },
+        {
+          "sportsbookId": 34,
+          "slug": "fanduel",
+          "vertical": "betting",
+          "name": "FanDuel",
+          "machineName": "fanduel",
+          "affiliateLink": "https://c.sportsbookreview.com/fanduel_usa",
+          "iconMonochrome": {
+            "type": "image/svg+xml",
+            "title": "Fanduel  Bg",
+            "fileName": "bb0d7ce5-41ea-48d7-8f16-44819ed6ffa7.svg",
+            "alt": "",
+            "width": 0,
+            "height": 0,
+            "caption": ""
+          },
+          "iconColor": {
+            "type": "image/svg+xml",
+            "title": "Sportsbook=fanduel, Monochromatic=off",
+            "fileName": "d792a17d-a327-4930-8ac9-1fcc00b18aff.svg",
+            "alt": "",
+            "width": 0,
+            "height": 0,
+            "caption": ""
+          },
+          "iconColorBackground": {
+            "type": "image/svg+xml",
+            "title": "Sportsbook=fanduel, Size=default",
+            "fileName": "c40bbc6d-660d-4efe-83b4-0e944fc8d929.svg",
+            "alt": "",
+            "width": 0,
+            "height": 0,
+            "caption": ""
+          }
+        },
+        {
+          "sportsbookId": 41,
+          "slug": "caesars",
+          "vertical": "betting",
+          "name": "Caesars",
+          "machineName": "caesars",
+          "affiliateLink": "https://c.sportsbookreview.com/caesars_usa",
+          "iconMonochrome": {
+            "type": "image/svg+xml",
+            "title": "Caesars  Bg",
+            "fileName": "9ef190d7-7a5a-41d9-89ec-ac24661eac1a.svg",
+            "alt": "",
+            "width": 0,
+            "height": 0,
+            "caption": ""
+          },
+          "iconColor": {
+            "type": "image/svg+xml",
+            "title": "Sportsbook=caesars, Monochromatic=off",
+            "fileName": "0e736e96-799b-4ff7-ab1c-2a1a6a44d7aa.svg",
+            "alt": "",
+            "width": 0,
+            "height": 0,
+            "caption": ""
+          },
+          "iconColorBackground": {
+            "type": "image/svg+xml",
+            "title": "Sportsbook=caesars, Size=default",
+            "fileName": "ccbaaa0b-b4f4-49ea-a1e9-cbaeb9f88641.svg",
+            "alt": "",
+            "width": 0,
+            "height": 0,
+            "caption": ""
+          }
+        },
+        {
+          "sportsbookId": 2,
+          "slug": "bet365",
+          "vertical": "betting",
+          "name": "bet365",
+          "machineName": "bet365",
+          "affiliateLink": "https://c.sportsbookreview.com/bet365_usa",
+          "iconMonochrome": {
+            "type": "image/svg+xml",
+            "title": "Bet365  Bg",
+            "fileName": "da55b1e0-d8ec-49e2-b8f4-87383cb0c9d6.svg",
+            "alt": "",
+            "width": 0,
+            "height": 0,
+            "caption": ""
+          },
+          "iconColor": {
+            "type": "image/svg+xml",
+            "title": "Sportsbook=bet365, Monochromatic=off",
+            "fileName": "2372b182-9bcd-461c-8288-db88ea8e1c6a.svg",
+            "alt": "",
+            "width": 0,
+            "height": 0,
+            "caption": ""
+          },
+          "iconColorBackground": {
+            "type": "image/svg+xml",
+            "title": "Sportsbook=bet365, Size=default",
+            "fileName": "c003328c-855e-45d4-8a43-49017ad143b7.svg",
+            "alt": "",
+            "width": 0,
+            "height": 0,
+            "caption": ""
+          }
+        },
+        {
+          "sportsbookId": 42,
+          "slug": "draftkings",
+          "vertical": "betting",
+          "name": "DraftKings",
+          "machineName": "draftkings",
+          "affiliateLink": "https://c.sportsbookreview.com/draftkings_usa",
+          "iconMonochrome": {
+            "type": "image/svg+xml",
+            "title": "Draftkings  Bg",
+            "fileName": "f3939f89-fd89-4fb5-8cbd-3437b384a26b.svg",
+            "alt": "",
+            "width": 0,
+            "height": 0,
+            "caption": ""
+          },
+          "iconColor": {
+            "type": "image/svg+xml",
+            "title": "Sportsbook=draftkings, Monochromatic=off",
+            "fileName": "bb5e5e1b-a5ba-4b71-8d37-797fd5e93e76.svg",
+            "alt": "",
+            "width": 0,
+            "height": 0,
+            "caption": ""
+          },
+          "iconColorBackground": {
+            "type": "image/svg+xml",
+            "title": "Sportsbook=draftkings, Size=default",
+            "fileName": "81f4a23d-1623-479c-85a0-73236e7d368d.svg",
+            "alt": "",
+            "width": 0,
+            "height": 0,
+            "caption": ""
+          }
+        },
+        {
+          "sportsbookId": 122,
+          "slug": "betfanatics",
+          "vertical": "betting",
+          "name": "Fanatics Sportsbook",
+          "machineName": "fanatics",
+          "affiliateLink": "https://c.sportsbookreview.com/betfanatics_usa",
+          "iconMonochrome": {
+            "type": "image/svg+xml",
+            "title": "Fanatics  Bg",
+            "fileName": "6179f747-75a2-4cad-baed-2c46c684301d.svg",
+            "alt": "",
+            "width": 0,
+            "height": 0,
+            "caption": ""
+          },
+          "iconColor": {
+            "type": "image/svg+xml",
+            "title": "Fanatics",
+            "fileName": "c05da318-f034-429e-ad8d-e5d5490708d4.svg",
+            "alt": "",
+            "width": 0,
+            "height": 0,
+            "caption": ""
+          },
+          "iconColorBackground": {
+            "type": "image/svg+xml",
+            "title": "Sportsbook=fanatics, Size=default",
+            "fileName": "bf1255a9-d02e-442a-a683-d4d295f49143.svg",
+            "alt": "",
+            "width": 0,
+            "height": 0,
+            "caption": ""
+          }
+        }
+      ]
+    }
+  }
+]
