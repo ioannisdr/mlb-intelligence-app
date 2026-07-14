@@ -132,6 +132,11 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .tier{padding:2px 6px;border-radius:4px;font-size:9px;font-weight:700;color:#fff!important;}
 .t-elite{background:#ffd700; color:#000!important;}.t-strong{background:var(--g)}.t-mid{background:var(--b)}
 .b-flag{font-size:9px;font-weight:700}
+.scroll-x { overflow-x: auto; padding-bottom: 8px; }
+.scroll-x::-webkit-scrollbar { height: 8px; }
+.scroll-x::-webkit-scrollbar-track { background: var(--bg3); border-radius: 4px; }
+.scroll-x::-webkit-scrollbar-thumb { background: var(--tx3); border-radius: 4px; }
+.scroll-x::-webkit-scrollbar-thumb:hover { background: var(--tx2); }
 .bt-t { width:100%; border-collapse:collapse; font-size:11px; min-width:780px }
 .bt-t th { padding:8px 6px; text-align:left; border-bottom:1px solid var(--bdr2); font-size:9px; font-weight:600; color:var(--tx3); text-transform:uppercase; white-space:nowrap }
 .bt-t td { padding:8px 6px; border-bottom:1px solid var(--bdr); white-space:nowrap; color:var(--tx) }
@@ -216,18 +221,23 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
           <option value="OU">Over/Under</option>
         </select>
       </div>
-      <div style="overflow-x:auto; width:100%;">
+      <div class="scroll-x" style="width:100%;">
         <div style="min-width: 900px; height: 220px; position: relative;">
           <canvas id="pl-chart"></canvas>
         </div>
       </div>
     </div>
-  </div>
-  
-  <div class="chart-card" style="margin-bottom:20px;">
-    <h3>Monthly Profit/Loss (Units)</h3>
-    <div class="chart-container-wrapper">
-      <canvas id="monthly-chart"></canvas>
+    <div class="chart-card">
+      <h3>Monthly Profit/Loss (Units)</h3>
+      <div class="chart-container-wrapper">
+        <canvas id="monthly-chart"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <h3>Profit/Loss by Market (Units)</h3>
+      <div class="chart-container-wrapper">
+        <canvas id="market-chart"></canvas>
+      </div>
     </div>
   </div>
 
@@ -471,6 +481,13 @@ function renderApp() {
   
   if (TODAY.length === 0) {
     gList.innerHTML = '<div class="loading">No games scheduled.</div>';
+    document.getElementById('pred-summary').innerHTML = `
+      <div class="pred-box"><div class="lbl">GAMES</div><div class="val">0</div><div class="sub">${currentDate.toLocaleString('en-US',{month:'short',day:'numeric'})}</div></div>
+      <div class="pred-box"><div class="lbl">VALUE A+</div><div class="val">0</div><div class="sub">best bets</div></div>
+      <div class="pred-box"><div class="lbl">DOG PICKS</div><div class="val">0</div><div class="sub">ML underdog</div></div>
+      <div class="pred-box"><div class="lbl">UNDERS</div><div class="val">0</div><div class="sub">of 0</div></div>
+      <div class="pred-box"><div class="lbl">AVG PROJ</div><div class="val">0.0</div><div class="sub">runs/game</div></div>
+    `;
     return;
   }
   
@@ -491,8 +508,8 @@ function renderApp() {
     let isDog = false;
     let mlPickLine = 0;
     
-    if(mod.evH > mod.evA && mod.evH > 0) { bestPick = `${g.home} ML`; bestEV = mod.evH; isDog = mkt.ml.h > 0; mlPickLine = mkt.ml.h; } 
-    else if(mod.evA > mod.evH && mod.evA > 0) { bestPick = `${g.away} ML`; bestEV = mod.evA; isDog = mkt.ml.a > 0; mlPickLine = mkt.ml.a; }
+    if(mod.evH > mod.evA && mod.evH > 0) { bestPick = `${g.home} ML`; bestEV = mod.evH; isDog = mod.homeProb < mod.awayProb; mlPickLine = mkt.ml.h; } 
+    else if(mod.evA > mod.evH && mod.evA > 0) { bestPick = `${g.away} ML`; bestEV = mod.evA; isDog = mod.awayProb < mod.homeProb; mlPickLine = mkt.ml.a; }
 
     let ouPick = mod.projOU > mkt.ou ? 'OVER' : 'UNDER';
     // O/U EV approximated as 4% gain per 1 run of differential
@@ -648,7 +665,7 @@ async function runBacktest() {
            let mod = calculateModel(mockG, baselineMkt, winner, totalScore);
            
            let mlPick = mod.evH > mod.evA ? home : away;
-           let isDog = mlPick === home ? mod.mkt.ml.h > 0 : mod.mkt.ml.a > 0;
+           let isDog = mlPick === home ? (mod.homeProb < mod.awayProb) : (mod.awayProb < mod.homeProb);
            let mlEV = Math.max(mod.evH, mod.evA);
            let mlGr = getGrade(mlEV);
            let mlHit = mlPick === winner;
@@ -750,6 +767,7 @@ function renderCharts(pl, grHits, monthlyPL) {
   if (chartsObj.plChart) chartsObj.plChart.destroy();
   if (chartsObj.grChart) chartsObj.grChart.destroy();
   if (chartsObj.monthlyChart) chartsObj.monthlyChart.destroy();
+  if (chartsObj.marketChart) chartsObj.marketChart.destroy();
 
   Chart.defaults.color = '#8b91a8';
   Chart.defaults.font.family = 'Inter';
@@ -823,6 +841,36 @@ function renderCharts(pl, grHits, monthlyPL) {
         label: 'Monthly P/L',
         data: mVals,
         backgroundColor: mColors,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false, drawBorder: false } },
+        y: { grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false } }
+      }
+    }
+  });
+
+  let mktLabels = ['Moneyline', 'Run Line', 'Over/Under'];
+  let totalML = Object.values(pl.ML).reduce((a,b)=>a+b, 0);
+  let totalRL = Object.values(pl.RL).reduce((a,b)=>a+b, 0);
+  let totalOU = Object.values(pl.OU).reduce((a,b)=>a+b, 0);
+  let mktVals = [totalML, totalRL, totalOU];
+  let mktColors = mktVals.map(v => v >= 0 ? '#00d68f' : '#ef476f');
+
+  const ctxMkt = document.getElementById('market-chart').getContext('2d');
+  chartsObj.marketChart = new Chart(ctxMkt, {
+    type: 'bar',
+    data: {
+      labels: mktLabels,
+      datasets: [{
+        label: 'Market P/L',
+        data: mktVals,
+        backgroundColor: mktColors,
         borderRadius: 4
       }]
     },
