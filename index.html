@@ -450,11 +450,11 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
 }
 
 function getGrade(ev) {
-  // Stricter EV Thresholds to ensure realistic distribution
-  if(ev >= 0.12) return { l: 'A+', c: 'grade-s', v: 5 };
-  if(ev >= 0.08) return { l: 'A', c: 'grade-a', v: 4 };
-  if(ev >= 0.04) return { l: 'B', c: 'grade-b', v: 3 };
-  if(ev >= 0.01) return { l: 'C', c: 'grade-c', v: 2 };
+  // Stricter EV Thresholds to isolate extreme model edges
+  if(ev >= 0.20) return { l: 'A+', c: 'grade-s', v: 5 };
+  if(ev >= 0.12) return { l: 'A', c: 'grade-a', v: 4 };
+  if(ev >= 0.06) return { l: 'B', c: 'grade-b', v: 3 };
+  if(ev >= 0.02) return { l: 'C', c: 'grade-c', v: 2 };
   return { l: 'D', c: 'grade-d', v: 1 };
 }
 
