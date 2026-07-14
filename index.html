@@ -80,9 +80,9 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .bb-row { display:flex; background:var(--bg2); border:1px solid var(--bdr); border-radius:var(--R); margin-bottom:10px; overflow:hidden; }
 .bb-row:hover{ border-color:var(--bdr2); }
 .bb-grade-box { width:46px; display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:800; color:#000; border-radius:var(--Rs); margin:8px 12px 8px 8px; }
-.grade-s { background:linear-gradient(135deg, #ffd700, #ff8c00); }
-.grade-a { background:linear-gradient(135deg, #00d68f, #00b377); }
-.grade-b { background:linear-gradient(135deg, #4da6ff, #2080df); }
+.grade-s { background:linear-gradient(135deg, #00d68f, #00b377); }
+.grade-a { background:linear-gradient(135deg, #4da6ff, #2080df); }
+.grade-b { background:linear-gradient(135deg, #a78bfa, #8b5cf6); }
 .grade-c { background:linear-gradient(135deg, #ffd166, #e6b84d); }
 .grade-d { background:linear-gradient(135deg, #555d78, #3a4055); color:#fff!important; }
 .bb-info { flex:1; padding:10px 0; }
@@ -519,7 +519,7 @@ function renderApp() {
 
     let bestGrade = getGrade(bestEV);
     
-    if(bestGrade.l === 'A+' || bestGrade.l === 'A') aPlusCount++;
+    if(bestGrade.l === 'A+') aPlusCount++;
     if(isDog && !bestIsOU) dogCount++;
     if(ouPick === 'UNDER') underCount++;
     totalProj += mod.projOU;
@@ -590,26 +590,24 @@ function renderApp() {
     gList.innerHTML += pCardHtml;
 
     // BEST BETS UI
-    if(bestGrade.l !== 'D') {
-      let bCardHtml = `
-        <div class="bb-row">
-          <div class="bb-grade-box ${bestGrade.c}">${bestGrade.l.charAt(0)}</div>
-          <div class="bb-info">
-            <div class="bb-pick-title">${bestPick} <span class="bb-ev-tag">Best EV today</span></div>
-            <div class="bb-matchup">${g.away}@${g.home} · ${g.t} ET · ${bestIsOU ? 'OU' : 'ML'}</div>
-            <div class="bb-pitchers"><span>●</span> ${g.awayP} (Score ${P[g.awayP]?P[g.awayP].score:'0.00'}) vs <span>●</span> ${g.homeP} (Score ${P[g.homeP]?P[g.homeP].score:'0.00'})</div>
-            <div class="bb-stats">No H2H data · Proj ${mod.projOU.toFixed(1)} vs ${mkt.ou}</div>
-          </div>
-          <div class="bb-right">
-            <div class="bb-odds-prob">${!bestIsOU ? getOddsStr(mlPickLine) : '-110'} (${!bestIsOU ? (mod.evH>mod.evA?hPct:aPct) : (ouPick==='OVER'?'55':'55')}%)</div>
-            <div class="bb-mkt">Mkt: ${!bestIsOU ? getOddsStr(mlPickLine) : '-110'} (45%)</div>
-            <div class="bb-edge">Edge: +${(bestEV*100).toFixed(1)}%</div>
-            <div class="bb-ev">EV: +${((bestEV*100)+5).toFixed(1)}%</div>
-          </div>
+    let bCardHtml = `
+      <div class="bb-row">
+        <div class="bb-grade-box ${bestGrade.c}">${bestGrade.l.replace('+','')}</div>
+        <div class="bb-info">
+          <div class="bb-pick-title">${bestPick} <span class="bb-ev-tag">Best EV today</span></div>
+          <div class="bb-matchup">${g.away}@${g.home} · ${g.t} ET · ${bestIsOU ? 'OU' : 'ML'}</div>
+          <div class="bb-pitchers"><span>●</span> ${g.awayP} (Score ${P[g.awayP]?P[g.awayP].score:'0.00'}) vs <span>●</span> ${g.homeP} (Score ${P[g.homeP]?P[g.homeP].score:'0.00'})</div>
+          <div class="bb-stats">No H2H data · Proj ${mod.projOU.toFixed(1)} vs ${mkt.ou}</div>
         </div>
-      `;
-      vList.innerHTML += bCardHtml;
-    }
+        <div class="bb-right">
+          <div class="bb-odds-prob">${!bestIsOU ? getOddsStr(mlPickLine) : '-110'} (${!bestIsOU ? (mod.evH>mod.evA?hPct:aPct) : (ouPick==='OVER'?'55':'55')}%)</div>
+          <div class="bb-mkt">Mkt: ${!bestIsOU ? getOddsStr(mlPickLine) : '-110'} (45%)</div>
+          <div class="bb-edge">Edge: +${(bestEV*100).toFixed(1)}%</div>
+          <div class="bb-ev">EV: +${((bestEV*100)+5).toFixed(1)}%</div>
+        </div>
+      </div>
+    `;
+    vList.innerHTML += bCardHtml;
   });
 
   if(vList.innerHTML === '') vList.innerHTML = '<div class="loading">No A/B/C value bets found for this slate on '+currentBook+'.</div>';
@@ -813,7 +811,7 @@ function renderCharts(pl, grHits, monthlyPL) {
       datasets: [{
         label: 'Win Rate %',
         data: hitRates,
-        backgroundColor: ['#ffd700', '#00d68f', '#4da6ff', '#ffd166', '#555d78'],
+        backgroundColor: ['#00d68f', '#4da6ff', '#a78bfa', '#ffd166', '#555d78'],
         borderRadius: 4
       }]
     },
