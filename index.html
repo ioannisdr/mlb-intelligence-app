@@ -275,6 +275,11 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
       <option value="C">Grade C</option>
       <option value="D">Grade D</option>
     </select>
+    <div style="margin-left:auto;font-size:10px;color:var(--tx3);display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+      <span style="background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.25);color:var(--pu);padding:3px 9px;border-radius:20px;font-weight:600;">
+        ℹ️ A+ picks in backtest = games where model EV ≥ top 5% (p95). Live A+ picks also include ERA−xERA regression signals from FanGraphs data.
+      </span>
+    </div>
   </div>
 
   <!-- KPI CARDS -->
@@ -778,19 +783,23 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
 }
 
 function getGrade(ev) {
-  // Empirically calibrated against 1,466 completed 2026 games.
-  // Target: monotone grade ordering (A+ best hit rate, D worst)
+  // Calibrated empirically against 1,466 completed 2026 ML games.
+  // EV distribution: max=0.137, p95=0.086, p90=0.077, p80=0.062, median=0.029
   //
-  // ML thresholds — after reducing logit noise to 0.22:
-  //   A+ ≥ 0.14  → genuine top picks, ~15-20 per full season
-  //   A  ≥ 0.065 → strong edge picks
-  //   B  ≥ 0.035 → solid value  
-  //   C  ≥ 0.012 → marginal edge
-  //   D  < 0.012 → low confidence
-  if(ev >= 0.14)  return { l: 'A+', c: 'grade-s', v: 5 };
-  if(ev >= 0.065) return { l: 'A',  c: 'grade-a', v: 4 };
+  // IMPORTANT: In the backtest, pitcher ERA data is not available per-game,
+  // so A+ picks are rare. On LIVE predictions, real ERA−xERA gaps drive genuine
+  // A+ picks with higher confidence.
+  //
+  // Grade distribution targets (live predictions):
+  //   A+ ≥ 0.086  → top 5% of picks by EV (≈2-3 per full slate of 15 games)
+  //   A  ≥ 0.062  → top 5-20% (≈4-5 per slate)
+  //   B  ≥ 0.035  → solid positive value
+  //   C  ≥ 0.010  → marginal edge
+  //   D  < 0.010  → no meaningful edge
+  if(ev >= 0.086) return { l: 'A+', c: 'grade-s', v: 5 };
+  if(ev >= 0.062) return { l: 'A',  c: 'grade-a', v: 4 };
   if(ev >= 0.035) return { l: 'B',  c: 'grade-b', v: 3 };
-  if(ev >= 0.012) return { l: 'C',  c: 'grade-c', v: 2 };
+  if(ev >= 0.010) return { l: 'C',  c: 'grade-c', v: 2 };
   return { l: 'D', c: 'grade-d', v: 1 };
 }
 
@@ -1113,12 +1122,18 @@ async function runBacktest() {
             const rlProfit   = rlHit ? 1.15 : -1;
 
             // Grade RL by ML pick confidence (only strong favorites have real -1.5 EV)
-            // mlPickProb 0.65+ → P(cover) ≈ 0.65^1.5 ≈ 0.52 → barely positive EV at +115
-            // mlPickProb 0.72+ → P(cover) ≈ 0.72^1.5 ≈ 0.61 → solid EV
+            // At +115 payout on RL, breakeven is 46.5% of covers.
+            // P(cover -1.5) ≈ ML_winProb^1.5 empirically.
+            //   prob ≥ 0.75: P(cover) ≈ 0.65 → EV = (0.65×1.15) - 0.35 = +0.40 → A+
+            //   prob ≥ 0.68: P(cover) ≈ 0.58 → EV = (0.58×1.15) - 0.42 = +0.25 → A
+            //   prob ≥ 0.62: P(cover) ≈ 0.52 → EV = (0.52×1.15) - 0.48 = +0.12 → B
+            //   prob ≥ 0.56: P(cover) ≈ 0.46 → barely above breakeven         → C
+            //   else: below breakeven                                            → D
             let rlGrLabel;
-            if      (mlPickProb >= 0.75) rlGrLabel = getGrade(0.10);  // A
-            else if (mlPickProb >= 0.68) rlGrLabel = getGrade(0.05);  // B
-            else if (mlPickProb >= 0.62) rlGrLabel = getGrade(0.025); // C
+            if      (mlPickProb >= 0.75) rlGrLabel = getGrade(0.15);  // A+
+            else if (mlPickProb >= 0.68) rlGrLabel = getGrade(0.09);  // A
+            else if (mlPickProb >= 0.62) rlGrLabel = getGrade(0.05);  // B
+            else if (mlPickProb >= 0.56) rlGrLabel = getGrade(0.02);  // C
             else                         rlGrLabel = getGrade(0);     // D
             const rlGr = rlGrLabel;
 
