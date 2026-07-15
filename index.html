@@ -827,142 +827,179 @@ function renderApp() {
 }
 
 async function runBacktest() {
-  document.getElementById('bt-body').innerHTML = '<tr><td colspan="16" class="loading">Running 2026 Simulation & Plotting Analytics...</td></tr>';
-  const pastRes = await fetch('https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=2026-03-20&endDate=' + formatDateStr(new Date())).then(r=>r.json()).catch(()=>null);
-  
-  let html = '';
-  let pl = { ALL: {}, ML: {}, RL: {}, OU: {} };
+  const btBody = document.getElementById('bt-body');
+  btBody.innerHTML = '<tr><td colspan="16" class="loading">Loading 2026 season results from MLB API...</td></tr>';
 
-  // monthlyPL[grade][market][monthName] = profit
-  // 'ALL' is a catch-all for each dimension
-  const GRADES = ['ALL', 'A+', 'A', 'B', 'C', 'D'];
-  const MARKETS = ['ALL', 'ML', 'RL', 'OU'];
-  let monthlyPL = {};
-  GRADES.forEach(gr => { monthlyPL[gr] = {}; MARKETS.forEach(mk => { monthlyPL[gr][mk] = {}; }); });
+  try {
+    const pastRes = await fetch(
+      'https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=2026-03-20&endDate=' +
+      formatDateStr(new Date()) + '&gameType=R&sportId=1'
+    ).then(r => r.json()).catch(() => null);
 
-  // Helper: add profit to all relevant grade+market buckets
-  function addMonthly(grade, market, month, profit) {
-    [grade, 'ALL'].forEach(gr => {
-      [market, 'ALL'].forEach(mk => {
-        if (!monthlyPL[gr][mk][month]) monthlyPL[gr][mk][month] = 0;
-        monthlyPL[gr][mk][month] += profit;
+    if (!pastRes || !pastRes.dates || pastRes.dates.length === 0) {
+      btBody.innerHTML = '<tr><td colspan="16" class="loading" style="color:var(--y)">No completed games found for the 2026 season yet. Results will appear here once games are played.</td></tr>';
+      renderCharts({ ALL:{}, ML:{}, RL:{}, OU:{} }, {
+        ALL:{'A+':{w:0,t:0},'A':{w:0,t:0},'B':{w:0,t:0},'C':{w:0,t:0},'D':{w:0,t:0}},
+        ML: {'A+':{w:0,t:0},'A':{w:0,t:0},'B':{w:0,t:0},'C':{w:0,t:0},'D':{w:0,t:0}},
+        RL: {'A+':{w:0,t:0},'A':{w:0,t:0},'B':{w:0,t:0},'C':{w:0,t:0},'D':{w:0,t:0}},
+        OU: {'A+':{w:0,t:0},'A':{w:0,t:0},'B':{w:0,t:0},'C':{w:0,t:0},'D':{w:0,t:0}}
+      }, { ALL:{ ALL:{} } });
+      return;
+    }
+
+    let html = '';
+    let pl = { ALL: {}, ML: {}, RL: {}, OU: {} };
+    let totalGames = 0;
+
+    // monthlyPL[grade][market][monthName] = profit
+    const GRADES  = ['ALL', 'A+', 'A', 'B', 'C', 'D'];
+    const MARKETS = ['ALL', 'ML', 'RL', 'OU'];
+    let monthlyPL = {};
+    GRADES.forEach(gr  => { monthlyPL[gr]  = {}; MARKETS.forEach(mk => { monthlyPL[gr][mk]  = {}; }); });
+
+    function addMonthly(grade, market, month, profit) {
+      [grade, 'ALL'].forEach(gr => {
+        [market, 'ALL'].forEach(mk => {
+          if (!monthlyPL[gr][mk][month]) monthlyPL[gr][mk][month] = 0;
+          monthlyPL[gr][mk][month] += profit;
+        });
       });
+    }
+
+    let grHits = {
+       ALL: { 'A+':{w:0,t:0}, 'A':{w:0,t:0}, 'B':{w:0,t:0}, 'C':{w:0,t:0}, 'D':{w:0,t:0} },
+       ML:  { 'A+':{w:0,t:0}, 'A':{w:0,t:0}, 'B':{w:0,t:0}, 'C':{w:0,t:0}, 'D':{w:0,t:0} },
+       RL:  { 'A+':{w:0,t:0}, 'A':{w:0,t:0}, 'B':{w:0,t:0}, 'C':{w:0,t:0}, 'D':{w:0,t:0} },
+       OU:  { 'A+':{w:0,t:0}, 'A':{w:0,t:0}, 'B':{w:0,t:0}, 'C':{w:0,t:0}, 'D':{w:0,t:0} }
+    };
+
+    // Process all dates newest-first so the table shows most recent at top
+    [...pastRes.dates].reverse().forEach(d => {
+      const dStr = new Date(d.date + 'T12:00:00').toLocaleString('en-US', { month:'short', day:'numeric' });
+      const mStr = new Date(d.date + 'T12:00:00').toLocaleString('en-US', { month:'long' });
+
+      d.games
+        .filter(g => g.gameType === 'R' &&
+          (g.status.abstractGameState === 'Final' || g.status.statusCode === 'F'))
+        .forEach(g => {
+          try {
+            const away = getTeamName(g.teams.away.team.name);
+            const home = getTeamName(g.teams.home.team.name);
+
+            ['ALL','ML','RL','OU'].forEach(k => {
+              if (!pl[k][away]) pl[k][away] = 0;
+              if (!pl[k][home]) pl[k][home] = 0;
+            });
+
+            const awayScore  = g.teams.away.score ?? 0;
+            const homeScore  = g.teams.home.score ?? 0;
+            const totalScore = awayScore + homeScore;
+            const winner     = homeScore > awayScore ? home : away;
+
+            // Use model-derived market (date-keyed noise for per-game variation)
+            const mockG = { away, home, awayP:'TBD', homeP:'TBD', dateKey: d.date };
+            const mod   = calculateModel(mockG, null, winner, totalScore);
+
+            // ─ ML pick ───────────────────────────────────────────
+            const mlPick   = mod.evH >= mod.evA ? home : away;
+            const isDog    = mlPick === home ? mod.homeDog : mod.awayDog;
+            const mlEV     = Math.max(mod.evH, mod.evA);
+            const mlGr     = getGrade(mlEV);
+            const mlHit    = mlPick === winner;
+
+            const payoutLine = mlPick === home ? mod.mkt.ml.h : mod.mkt.ml.a;
+            const decOdds    = payoutLine > 0 ? (payoutLine/100)+1 : (100/Math.abs(payoutLine))+1;
+            const mlProfit   = mlHit ? (decOdds - 1) : -1;
+            pl.ALL[mlPick] += mlProfit;
+            pl.ML[mlPick]  += mlProfit;
+            addMonthly(mlGr.l, 'ML', mStr, mlProfit);
+            grHits.ALL[mlGr.l].t++; grHits.ML[mlGr.l].t++;
+            if (mlHit) { grHits.ALL[mlGr.l].w++; grHits.ML[mlGr.l].w++; }
+
+            // ─ RL pick ───────────────────────────────────────────
+            const rlPick  = mlPick;
+            const rlGr    = getGrade(Math.max(0, mlEV - 0.02));
+            const rlHit   = mlPick === home ? (homeScore - awayScore > 1) : (awayScore - homeScore > 1);
+            const rlProfit = rlHit ? 1.15 : -1;
+            pl.ALL[rlPick] += rlProfit;
+            pl.RL[rlPick]  += rlProfit;
+            addMonthly(rlGr.l, 'RL', mStr, rlProfit);
+            grHits.ALL[rlGr.l].t++; grHits.RL[rlGr.l].t++;
+            if (rlHit) { grHits.ALL[rlGr.l].w++; grHits.RL[rlGr.l].w++; }
+
+            // ─ O/U pick ─────────────────────────────────────────
+            const ouPick     = mod.projOU > mod.mkt.ou ? 'OVER' : 'UNDER';
+            const ouDiff     = Math.abs(mod.projOU - mod.mkt.ou);
+            const ouModelPr  = 1 / (1 + Math.exp(-ouDiff * 0.8));
+            const ouEV       = (ouModelPr * 0.909) - (1 - ouModelPr);
+            const ouGr       = getGrade(Math.max(0, ouEV));
+            const ouHit      = ouPick === 'OVER' ? totalScore > mod.mkt.ou : totalScore < mod.mkt.ou;
+            const ouProfit   = ouHit ? 0.909 : -1;
+            pl.ALL[home]  += ouProfit;
+            pl.OU[home]   += ouProfit;
+            addMonthly(ouGr.l, 'OU', mStr, ouProfit);
+            grHits.ALL[ouGr.l].t++; grHits.OU[ouGr.l].t++;
+            if (ouHit) { grHits.ALL[ouGr.l].w++; grHits.OU[ouGr.l].w++; }
+
+            // Best EV label for row
+            const bestEVStr = mlEV > ouEV
+              ? `<span class="gr-box ${mlGr.c}">${mlGr.l.charAt(0)}</span> <span style="font-weight:700;margin-left:4px">${mlPick} ML</span>`
+              : `<span class="gr-box ${ouGr.c}">${ouGr.l.charAt(0)}</span> <span style="font-weight:700;margin-left:4px">${ouPick} ${mod.mkt.ou.toFixed(1)}</span>`;
+
+            // Profit/loss coloring
+            const mlProfC = mlProfit > 0 ? 'color:var(--g)' : 'color:var(--r)';
+            const rlProfC = rlProfit > 0 ? 'color:var(--g)' : 'color:var(--r)';
+            const ouProfC = ouProfit > 0 ? 'color:var(--g)' : 'color:var(--r)';
+
+            html += `<tr>
+              <td style="color:var(--tx2)">${dStr}</td>
+              <td style="font-weight:700">${away} @ ${home}</td>
+              <td style="color:var(--tx2)">${awayScore}–${homeScore}</td>
+              <td style="font-weight:700;color:${mlHit&&mlPick===winner?'var(--g)':'var(--tx)'}">${winner}</td>
+              <td style="font-weight:700">${mlPick} ${isDog ? '<span class="dog-tag">DOG</span>' : ''}</td>
+              <td style="color:var(--b)">${(Math.max(mod.homeProb,mod.awayProb)*100).toFixed(0)}% <span style="font-size:9px;color:var(--tx3)">(model)</span></td>
+              <td><span class="gr-box ${mlGr.c}">${mlGr.l.charAt(0)}</span></td>
+              <td><span class="hit-box ${mlHit?'hit-w':'hit-l'}">${mlHit?'HIT':'MISS'}</span></td>
+              <td style="${mlProfC};font-weight:700">${mlProfit>=0?'+':''}${mlProfit.toFixed(2)}u</td>
+
+              <td style="font-weight:700">${rlPick} -1.5</td>
+              <td><span class="gr-box ${rlGr.c}">${rlGr.l.charAt(0)}</span></td>
+              <td><span class="hit-box ${rlHit?'hit-w':'hit-l'}">${rlHit?'HIT':'MISS'}</span></td>
+              <td style="${rlProfC};font-weight:700">${rlProfit>=0?'+':''}${rlProfit.toFixed(2)}u</td>
+
+              <td>${mod.projOU.toFixed(1)} / ${mod.mkt.ou.toFixed(1)}</td>
+              <td><span class="gr-box ${ouGr.c}">${ouGr.l.charAt(0)}</span></td>
+              <td><span class="hit-box ${ouHit?'hit-w':'hit-l'}">${ouHit?'HIT':'MISS'}</span></td>
+              <td style="${ouProfC};font-weight:700">${ouProfit>=0?'+':''}${ouProfit.toFixed(2)}u</td>
+
+              <td>${bestEVStr}</td>
+            </tr>`;
+            totalGames++;
+          } catch (gameErr) {
+            // Skip individual game errors silently
+            console.warn('Backtest game error:', gameErr.message);
+          }
+        });
     });
+
+    btBody.innerHTML = html || '<tr><td colspan="16" class="loading" style="color:var(--tx3)">No final games found in the selected date range.</td></tr>';
+
+    // Update table header to match new columns
+    const thead = document.querySelector('#bt-body')?.closest('table')?.querySelector('thead tr');
+    if (thead) {
+      thead.innerHTML = `<th>Date</th><th>Game</th><th>Score</th><th>Winner</th>
+        <th>ML Pick</th><th>Model%</th><th>GR</th><th>ML</th><th>ML P/L</th>
+        <th>RL Pick</th><th>GR</th><th>RL</th><th>RL P/L</th>
+        <th>Proj/Line</th><th>GR</th><th>O/U</th><th>O/U P/L</th><th>Best EV</th>`;
+    }
+
+    renderCharts(pl, grHits, monthlyPL);
+
+  } catch (err) {
+    console.error('runBacktest error:', err);
+    document.getElementById('bt-body').innerHTML =
+      `<tr><td colspan="16" class="loading" style="color:var(--r)">Backtest error: ${err.message}. Check console for details.</td></tr>`;
   }
-  
-  let grHits = {
-     ALL: { 'A+':{w:0,t:0}, 'A':{w:0,t:0}, 'B':{w:0,t:0}, 'C':{w:0,t:0}, 'D':{w:0,t:0} },
-     ML: { 'A+':{w:0,t:0}, 'A':{w:0,t:0}, 'B':{w:0,t:0}, 'C':{w:0,t:0}, 'D':{w:0,t:0} },
-     RL: { 'A+':{w:0,t:0}, 'A':{w:0,t:0}, 'B':{w:0,t:0}, 'C':{w:0,t:0}, 'D':{w:0,t:0} },
-     OU: { 'A+':{w:0,t:0}, 'A':{w:0,t:0}, 'B':{w:0,t:0}, 'C':{w:0,t:0}, 'D':{w:0,t:0} }
-  };
-
-  if (pastRes && pastRes.dates) {
-    pastRes.dates.reverse().forEach(d => {
-      let dStr = new Date(d.date).toLocaleString('en-US', {month:'short', day:'numeric'});
-      let mStr = new Date(d.date).toLocaleString('en-US', {month:'long'});
-      if(!monthlyPL['ALL']['ALL'][mStr]) { /* already initialised by GRADES loop */ }
-      
-      d.games.filter(g => g.gameType === 'R').forEach(g => {
-        if(g.status.abstractGameState === "Final" || g.status.statusCode === "F") {
-           let away = getTeamName(g.teams.away.team.name);
-           let home = getTeamName(g.teams.home.team.name);
-           
-           ['ALL','ML','RL','OU'].forEach(k => {
-             if(!pl[k][away]) pl[k][away] = 0;
-             if(!pl[k][home]) pl[k][home] = 0;
-           });
-
-           let awayScore = g.teams.away.score || 0;
-           let homeScore = g.teams.home.score || 0;
-           let totalScore = awayScore + homeScore;
-           let winner = homeScore > awayScore ? home : away;
-           
-           // Backtest: use model-derived market for consistency with live predictions
-           // dateKey causes per-game variation in market noise
-           let mockG = { away, home, awayP:'TBD', homeP:'TBD', dateKey: d.date };
-           let mod = calculateModel(mockG, null, winner, totalScore);
-
-           // ML: model picks whichever side has higher EV
-           let mlPick = mod.evH >= mod.evA ? home : away;
-           let isDog = mlPick === home ? mod.homeDog : mod.awayDog;
-           let mlEV = Math.max(mod.evH, mod.evA);
-           let mlGr = getGrade(mlEV);
-           let mlHit = mlPick === winner;
-
-           let payoutLine = mlPick === home ? mod.mkt.ml.h : mod.mkt.ml.a;
-           let decOdds = payoutLine > 0 ? (payoutLine / 100) + 1 : (100 / Math.abs(payoutLine)) + 1;
-           let mlProfit = mlHit ? (decOdds - 1) : -1;
-           pl.ALL[mlPick] += mlProfit;
-           pl.ML[mlPick] += mlProfit;
-           addMonthly(mlGr.l, 'ML', mStr, mlProfit);
-
-           grHits.ALL[mlGr.l].t++; grHits.ML[mlGr.l].t++;
-           if(mlHit) { grHits.ALL[mlGr.l].w++; grHits.ML[mlGr.l].w++; }
-
-           // RL: same direction as ML pick, payout ~+115
-           let rlPick = mlPick;
-           let rlGr = getGrade(Math.max(0, mlEV - 0.02));
-           let rlHit = mlPick === home ? (homeScore - awayScore > 1) : (awayScore - homeScore > 1);
-           let rlProfit = rlHit ? 1.15 : -1;
-           pl.ALL[rlPick] += rlProfit;
-           pl.RL[rlPick] += rlProfit;
-           addMonthly(rlGr.l, 'RL', mStr, rlProfit);
-
-           grHits.ALL[rlGr.l].t++; grHits.RL[rlGr.l].t++;
-           if(rlHit) { grHits.ALL[rlGr.l].w++; grHits.RL[rlGr.l].w++; }
-
-           // OU: ONE bet per game using proper sigmoid EV
-           let ouPick = mod.projOU > mod.mkt.ou ? 'OVER' : 'UNDER';
-           let ouDiff = Math.abs(mod.projOU - mod.mkt.ou);
-           let ouModelProb = 1 / (1 + Math.exp(-ouDiff * 0.8));
-           let ouEV = (ouModelProb * 0.909) - (1 - ouModelProb);
-           let ouGr = getGrade(Math.max(0, ouEV));
-           let ouHit = (ouPick === 'OVER' && totalScore > mod.mkt.ou) || (ouPick === 'UNDER' && totalScore < mod.mkt.ou);
-           let ouProfit = ouHit ? 0.909 : -1;
-           pl.ALL[home] += ouProfit;
-           pl.OU[home] += ouProfit;
-           addMonthly(ouGr.l, 'OU', mStr, ouProfit);
-
-           grHits.ALL[ouGr.l].t++; grHits.OU[ouGr.l].t++;
-           if(ouHit) { grHits.ALL[ouGr.l].w++; grHits.OU[ouGr.l].w++; }
-
-           let bestEVStr = '';
-           if(mlEV > ouEV) {
-              bestEVStr = `<span class="gr-box ${mlGr.c}">${mlGr.l.charAt(0)}</span> <span style="font-weight:700;margin-left:4px">${mlPick} ML</span>`;
-           } else {
-              bestEVStr = `<span class="gr-box ${ouGr.c}">${ouGr.l.charAt(0)}</span> <span style="font-weight:700;margin-left:4px">${ouPick} ${mod.mkt.ou.toFixed(1)}</span>`;
-           }
-
-           html += `<tr>
-             <td style="color:var(--tx2)">${dStr}</td>
-             <td style="font-weight:700">${away}@${home}</td>
-             <td style="color:var(--tx2)">${awayScore}-${homeScore}</td>
-             <td style="font-weight:700">${winner}</td>
-             <td style="font-weight:700">${mlPick} ${isDog ? '<span class="dog-tag">DOG</span>' : ''}</td>
-             <td style="color:var(--b)">${(Math.max(mod.homeProb, mod.awayProb)*100).toFixed(0)}% <span style="font-size:9px;color:var(--tx3)">(model)</span></td>
-             <td><span class="gr-box ${mlGr.c}">${mlGr.l.charAt(0)}</span></td>
-             <td><span class="hit-box ${mlHit?'hit-w':'hit-l'}">${mlHit?'HIT':'MISS'}</span></td>
-             
-             <td style="font-weight:700">${rlPick} -1.5</td>
-             <td><span class="gr-box ${rlGr.c}">${rlGr.l.charAt(0)}</span></td>
-             <td><span class="hit-box ${rlHit?'hit-w':'hit-l'}">${rlHit?'HIT':'MISS'}</span></td>
-             
-             <td>${mod.projOU.toFixed(1)}</td>
-             <td style="color:var(--tx2)">${mod.mkt.ou.toFixed(1)}</td>
-             <td><span class="gr-box ${ouGr.c}">${ouGr.l.charAt(0)}</span></td>
-             <td><span class="hit-box ${ouHit?'hit-w':'hit-l'}">${ouHit?'HIT':'MISS'}</span></td>
-             
-             <td>${bestEVStr}</td>
-           </tr>`;
-        }
-      });
-    });
-  }
-  document.getElementById('bt-body').innerHTML = html;
-
-  // Render Charts
-  renderCharts(pl, grHits, monthlyPL);
 }
 
 let currentPlData = {};
@@ -1126,64 +1163,87 @@ function updateMonthlyFilter() {
 }
 
 function renderPitchers() {
-  let pArr = Object.values(P).filter(p => p.name !== 'TBD').sort((a,b)=>b.score - a.score);
-  let cardHtml = '';
+  const pArr = Object.values(P)
+    .filter(p => p.name && p.name !== 'TBD' && p.xera)
+    .sort((a, b) => parseFloat(b.score) - parseFloat(a.score));
+
+  if (pArr.length === 0) {
+    const msg = '<div class="loading" style="color:var(--tx3);padding:40px;text-align:center;">Pitcher data loading from FanGraphs... If this persists, the FanGraphs API may be temporarily unavailable.</div>';
+    document.getElementById('pitch-cards').innerHTML  = msg;
+    document.getElementById('pitch-tbody').innerHTML  = `<tr><td colspan="15" class="loading" style="color:var(--tx3)">No pitcher data available yet.</td></tr>`;
+    return;
+  }
+
+  let cardHtml  = '';
   let tbodyHtml = '';
 
   pArr.forEach(p => {
-    let diff = (p.era - p.xera).toFixed(2);
-    let diffC = diff > 0 ? 'c-g' : 'c-r';
-    let babipDiff = (p.babip - 0.300).toFixed(3);
-    let bFlag = p.babip < 0.270 ? '<span class="b-flag c-r">↓↓ Double lucky</span>' : (p.babip > 0.310 ? '<span class="b-flag c-g">↑ Unlucky</span>' : '—');
-    let tClass = p.tier==='Elite' ? 't-elite' : (p.tier==='Strong' ? 't-strong' : 't-mid');
+    const era    = parseFloat(p.era)    || parseFloat(p.xera) || 4.20;
+    const xera   = parseFloat(p.xera)  || 4.20;
+    const xFIP   = parseFloat(p.xFIP)  || parseFloat(p.fip) || (xera + 0.1);
+    const babip  = parseFloat(p.babip) || 0.292;
+    const kpct   = parseFloat(p.kpct)  || 22.5;
+    const bbpct  = parseFloat(p.bbpct) || 7.5;
+    const swstr  = parseFloat(p.swstr) || 11.0;
+    const ip     = parseFloat(p.ip)    || 0;
+    const score  = parseFloat(p.score);
+
+    const diff    = (era - xera).toFixed(2);
+    const diffC   = parseFloat(diff) > 0 ? 'c-g' : 'c-r'; // lucky if ERA > xERA (regression coming)
+    const babipDiff = (babip - 0.300).toFixed(3);
+    const bFlag   = babip < 0.270
+      ? '<span class="b-flag c-r">⇓⇓ Lucky (regression risk)</span>'
+      : babip > 0.310
+      ? '<span class="b-flag c-g">⇑ Unlucky (bounce-back candidate)</span>'
+      : '—';
+    const tClass = p.tier === 'Elite' ? 't-elite' : p.tier === 'Strong' ? 't-strong' : 't-mid';
 
     cardHtml += `
       <div class="pc">
         <div class="pc-hdr">
           <div>
             <div class="pc-title"><span class="pc-dot">●</span> ${p.name}</div>
-            <div class="pc-sub">${p.team} · ${p.hand} · ${p.ip} IP '26</div>
+            <div class="pc-sub">${p.team || 'UNK'} · ${p.hand || 'RHP'} · ${ip > 0 ? ip + ' IP' : 'No IP data'}</div>
           </div>
           <div class="pc-score-box">
-            <div class="pc-score">${p.score > 0 ? '+'+p.score : p.score}</div>
+            <div class="pc-score">${score >= 0 ? '+' + score : score}</div>
             <div class="pc-score-lbl">model score</div>
-            <div class="pc-score-diff">ERA${diff>0?'+'+diff:diff} vs xERA</div>
-            <div class="pc-score-diff">BABIP${babipDiff>0?'+'+babipDiff:babipDiff} vs .300</div>
+            <div class="pc-score-diff">ERA ${parseFloat(diff) >= 0 ? '+' : ''}${diff} vs xERA</div>
+            <div class="pc-score-diff">BABIP ${parseFloat(babipDiff) >= 0 ? '+' : ''}${babipDiff} vs .300</div>
           </div>
         </div>
         <div class="pc-grid">
-          <div class="pc-stat"><div class="pc-v ${p.xera<3?'c-g':''}">${p.xera.toFixed(2)}</div><div class="pc-l">xERA</div></div>
-          <div class="pc-stat"><div class="pc-v ${p.xFIP<3?'c-g':''}">${p.xFIP.toFixed(2)}</div><div class="pc-l">xFIP</div></div>
-          <div class="pc-stat"><div class="pc-v">${p.kpct.toFixed(1)}%</div><div class="pc-l">K%</div></div>
-          <div class="pc-stat"><div class="pc-v">${p.bbpct.toFixed(1)}%</div><div class="pc-l">BB%</div></div>
-          <div class="pc-stat"><div class="pc-v">${p.babip.toFixed(3).replace('0.', '.')}</div><div class="pc-l">BABIP</div></div>
-          <div class="pc-stat"><div class="pc-v">${p.swstr.toFixed(1)}%</div><div class="pc-l">SwStr</div></div>
+          <div class="pc-stat"><div class="pc-v ${xera < 3 ? 'c-g' : xera > 5 ? 'c-r' : ''}">${xera.toFixed(2)}</div><div class="pc-l">xERA</div></div>
+          <div class="pc-stat"><div class="pc-v ${xFIP < 3 ? 'c-g' : xFIP > 5 ? 'c-r' : ''}">${xFIP.toFixed(2)}</div><div class="pc-l">xFIP</div></div>
+          <div class="pc-stat"><div class="pc-v ${kpct > 28 ? 'c-g' : kpct < 15 ? 'c-r' : ''}">${kpct.toFixed(1)}%</div><div class="pc-l">K%</div></div>
+          <div class="pc-stat"><div class="pc-v ${bbpct < 5 ? 'c-g' : bbpct > 10 ? 'c-r' : ''}">${bbpct.toFixed(1)}%</div><div class="pc-l">BB%</div></div>
+          <div class="pc-stat"><div class="pc-v ${babip < 0.270 ? 'c-r' : babip > 0.310 ? 'c-g' : ''}">${babip.toFixed(3).replace('0.', '.')}</div><div class="pc-l">BABIP</div></div>
+          <div class="pc-stat"><div class="pc-v ${swstr > 13 ? 'c-g' : swstr < 8 ? 'c-r' : ''}">${swstr.toFixed(1)}%</div><div class="pc-l">SwStr%</div></div>
         </div>
-      </div>
-    `;
+      </div>`;
 
     tbodyHtml += `
       <tr>
         <td style="font-weight:700"><span style="color:var(--y)">●</span> ${p.name}</td>
-        <td>${p.team}</td><td>${p.hand}</td>
-        <td><span class="tier ${tClass}">${p.tier}</span></td>
-        <td class="${p.era<3?'c-g':''}">${p.era.toFixed(2)}</td>
-        <td class="${p.xera<3?'c-g':''}">${p.xera.toFixed(2)}</td>
-        <td class="${p.xFIP<3?'c-g':''}">${p.xFIP.toFixed(2)}</td>
-        <td class="${p.babip<0.270?'c-g':''}">${p.babip.toFixed(3).replace('0.', '.')}</td>
-        <td class="${p.kpct>28?'c-g':''}">${p.kpct.toFixed(1)}%</td>
-        <td>${p.bbpct.toFixed(1)}%</td>
-        <td>${p.swstr.toFixed(1)}%</td>
-        <td>${p.ip}</td>
-        <td style="color:var(--g);font-weight:700">${p.score>0?'+'+p.score:p.score}</td>
-        <td class="${diffC}">${diff>0?'+'+diff:diff}</td>
+        <td>${p.team || 'UNK'}</td>
+        <td>${p.hand || 'RHP'}</td>
+        <td><span class="tier ${tClass}">${p.tier || 'Mid'}</span></td>
+        <td class="${era < 3 ? 'c-g' : era > 5 ? 'c-r' : ''}">${era.toFixed(2)}</td>
+        <td class="${xera < 3 ? 'c-g' : xera > 5 ? 'c-r' : ''}">${xera.toFixed(2)}</td>
+        <td class="${xFIP < 3 ? 'c-g' : xFIP > 5 ? 'c-r' : ''}">${xFIP.toFixed(2)}</td>
+        <td class="${babip < 0.270 ? 'c-r' : babip > 0.310 ? 'c-g' : ''}">${babip.toFixed(3).replace('0.', '.')}</td>
+        <td class="${kpct > 28 ? 'c-g' : kpct < 15 ? 'c-r' : ''}">${kpct.toFixed(1)}%</td>
+        <td>${bbpct.toFixed(1)}%</td>
+        <td class="${swstr > 13 ? 'c-g' : swstr < 8 ? 'c-r' : ''}">${swstr.toFixed(1)}%</td>
+        <td>${ip > 0 ? ip : '—'}</td>
+        <td style="color:var(--g);font-weight:700">${score >= 0 ? '+' + score : score}</td>
+        <td class="${diffC}">${parseFloat(diff) >= 0 ? '+' : ''}${diff}</td>
         <td>${bFlag}</td>
-      </tr>
-    `;
+      </tr>`;
   });
 
-  document.getElementById('pitch-cards').innerHTML = cardHtml;
-  document.getElementById('pitch-tbody').innerHTML = tbodyHtml;
+  document.getElementById('pitch-cards').innerHTML  = cardHtml;
+  document.getElementById('pitch-tbody').innerHTML  = tbodyHtml;
 }
 
 function sw(id, el) {
