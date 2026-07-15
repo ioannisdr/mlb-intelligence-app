@@ -5,7 +5,7 @@ export default async function handler(req, res) {
   const date = req.query.date || new Date().toISOString().split('T')[0];
 
   try {
-    const response = await fetch(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${date}&hydrate=probablePitcher,linescore,team`, {
+    const response = await fetch(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${date}&hydrate=probablePitcher,linescore,team,lineups`, {
       headers: {
         'Accept': 'application/json'
       }

@@ -290,14 +290,41 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 <script>
 let currentBook = 'DraftKings';
 let P = {};
-let S = {}; 
-let WX = {};
+let S = {};   // team batting stats — keyed by team nickname
+let WX = {};  // weather per team — keyed by home team nickname
+let STADIUMS = {}; // stadium metadata (lat, lon, pf, dome, cfBearing)
 let ODDS = {};
 let TODAY = [];
 let currentDate = new Date();
 
-let chartsObj = {}; // Store chart instances to destroy on re-render
-let currentGrHits = {}; // Store for chart filtering
+let chartsObj = {};
+let currentGrHits = {};
+
+// ── Weather helpers ─────────────────────────────────────────────────────────
+function windLabel(windMph, dir) {
+  if (dir === 'dome') return '🏟️ Dome';
+  if (windMph < 5)   return '🍃 Calm';
+  const arrow = dir === 'out' ? '⬆️ Out' : dir === 'in' ? '⬇️ In' : '↔️ Cross';
+  return `💨 ${windMph}mph ${arrow}`;
+}
+function windEffect(windMph, dir) {
+  // Run adjustment: out=favorable for hitters, in=suppresses scoring
+  if (dir === 'dome' || windMph < 5) return 0;
+  const factor = dir === 'out' ? 0.028 : dir === 'in' ? -0.025 : 0.008;
+  return windMph * factor;
+}
+function tempEffect(tempF) {
+  // Ball travels further in heat — ~0.012 runs per °F above 72°F
+  return (tempF - 72) * 0.012;
+}
+function pfLabel(pf) {
+  if (pf >= 110) return `🏟️ PF ${pf} 🔥 Extreme Hitters Park`;
+  if (pf >= 105) return `🏟️ PF ${pf} 🔴 Hitters Park`;
+  if (pf >= 102) return `🏟️ PF ${pf} 🟠 Slight Hitters`;
+  if (pf >= 99)  return `🏟️ PF ${pf} ⚪ Neutral`;
+  if (pf >= 96)  return `🏟️ PF ${pf} 🔵 Slight Pitchers`;
+  return `🏟️ PF ${pf} 🟣 Pitchers Park`;
+}
 
 function changeBook(b) {
   currentBook = b;
@@ -325,76 +352,138 @@ function seedRand(str) {
 
 async function fetchAllData() {
   document.getElementById('live-status').textContent = "Fetching Live Data...";
-  
+
   try {
-    const [pitcherRes, teamRes, weatherRes, scheduleRes, oddsRes] = await Promise.all([
-      fetch('/api/pitchers').then(r => r.json()).catch(()=>({})),
-      fetch('/api/teams').then(r => r.json()).catch(()=>({})),
-      fetch('/api/weather').then(r => r.json()).catch(()=>({})),
-      fetch(`/api/schedule?date=${formatDateStr(currentDate)}`).then(r => r.json()).catch(()=>({dates:[]})),
-      fetch('/api/odds').then(r => r.json()).catch(()=>[])
+    // Phase 1: fetch all API data in parallel
+    const [pitcherRes, teamRes, stadiumRes, scheduleRes, oddsRes] = await Promise.all([
+      fetch('/api/pitchers').then(r => r.json()).catch(() => ({})),
+      fetch('/api/teams').then(r => r.json()).catch(() => ({})),
+      fetch('/api/weather').then(r => r.json()).catch(() => ({})), // returns stadium metadata
+      fetch(`/api/schedule?date=${formatDateStr(currentDate)}`).then(r => r.json()).catch(() => ({ dates: [] })),
+      fetch('/api/odds').then(r => r.json()).catch(() => [])
     ]);
 
+    // ── Team batting stats (real wOBA from MLB Stats API) ──────────────────
     S = teamRes || {};
-    WX = weatherRes || {};
+
+    // ── Stadium metadata (park factors, coordinates) ──────────────────────
+    STADIUMS = stadiumRes || {};
+
+    // ── Odds ──────────────────────────────────────────────────────────────
     ODDS = {};
-    
     if (Array.isArray(oddsRes)) {
       oddsRes.forEach(o => { ODDS[o.home] = o.books || o; });
     }
-    
+
+    // ── Pitcher stats ─────────────────────────────────────────────────────
     P = pitcherRes || {};
     Object.keys(P).forEach(k => {
-      let p = P[k];
-      p.xera = p.xera || 3.50;
-      p.xFIP = p.fip || (p.xera + 0.1);
-      p.kpct = p.kpct || 22.5;
-      p.bbpct = 7.2;
-      p.babip = 0.285 + (Math.random()*0.02 - 0.01);
-      p.swstr = 11.2 + (Math.random()*2);
-      p.era = p.xera + (Math.random()*0.4 - 0.2); 
-      p.ip = Math.floor(Math.random()*150)+30;
-      p.hand = Math.random() > 0.7 ? 'LHP' : 'RHP';
-      p.tier = p.xera < 3.0 ? 'Elite' : (p.xera < 3.8 ? 'Strong' : 'Mid');
-      p.score = ((4.0 - p.xera) * 1.5).toFixed(2);
-      p.team = "UNK";
-      p.name = k;
+      const p = P[k];
+      p.xera  = p.xera  || 4.20;
+      p.fip   = p.fip   || (p.xera + 0.12);
+      p.kpct  = p.kpct  || 22.5;
+      p.bbpct = p.bbpct || 7.2;
+      p.babip = p.babip || 0.292;
+      p.swstr = p.swstr || 11.2;
+      p.era   = p.era   || p.xera;
+      p.ip    = p.ip    || 80;
+      p.hand  = p.hand  || (seedRand(k + 'hand') > 0.7 ? 'LHP' : 'RHP');
+      p.tier  = p.xera < 3.0 ? 'Elite' : (p.xera < 3.8 ? 'Strong' : 'Mid');
+      p.score = ((4.5 - p.xera) * 1.5).toFixed(2);
+      p.team  = 'UNK';
+      p.name  = k;
     });
 
+    // ── Today's schedule ──────────────────────────────────────────────────
     TODAY = [];
+    WX    = {}; // will be populated by Open-Meteo calls below
+
+    const homesNeedingWeather = new Set();
+
     if (scheduleRes.dates && scheduleRes.dates[0]) {
       scheduleRes.dates[0].games.filter(g => g.gameType === 'R').forEach(g => {
-        let away = getTeamName(g.teams.away.team.name);
-        let home = getTeamName(g.teams.home.team.name);
-        
-        let awayP = g.teams.away.probablePitcher ? g.teams.away.probablePitcher.fullName : 'TBD';
-        let homeP = g.teams.home.probablePitcher ? g.teams.home.probablePitcher.fullName : 'TBD';
-        
-        if(P[awayP]) P[awayP].team = away;
-        if(P[homeP]) P[homeP].team = home;
+        const away = getTeamName(g.teams.away.team.name);
+        const home = getTeamName(g.teams.home.team.name);
 
-        let awayForm = generateForm(away+home+"A");
-        let homeForm = generateForm(away+home+"H");
-        
+        const awayP = g.teams.away.probablePitcher?.fullName || 'TBD';
+        const homeP = g.teams.home.probablePitcher?.fullName || 'TBD';
+
+        if (P[awayP]) P[awayP].team = away;
+        if (P[homeP]) P[homeP].team = home;
+
+        // Lineup quality: extract batting order if hydrated
+        let awayLineupWoba = null, homeLineupWoba = null;
+        const lin = g.lineups;
+        if (lin) {
+          // lineups object has homePlayers / awayPlayers arrays
+          // We don't have per-player wOBA in schedule hydration,
+          // so use team wOBA as proxy (enhanced when boxscore is available)
+          awayLineupWoba = S[away]?.woba || null;
+          homeLineupWoba = S[home]?.woba || null;
+        }
+
+        // Pre-seed WX with dome stadiums so model doesn't wait
+        if (STADIUMS[home]?.dome) {
+          WX[home] = { temp: 72, windMph: 0, windDir: 'dome', sky: 'Dome',
+                       pf: STADIUMS[home].pf, dome: true };
+        } else {
+          homesNeedingWeather.add(home);
+        }
+
         TODAY.push({
-          t: new Date(g.gameDate).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+          t: new Date(g.gameDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           away, home, awayP, homeP,
-          awayForm, homeForm
+          awayForm: generateForm(away + home + 'A'),
+          homeForm: generateForm(away + home + 'H'),
+          awayLineupWoba, homeLineupWoba
         });
       });
     }
-    
-    document.getElementById('live-status').textContent = "Data Live";
-    let opts = { month: 'short', day: 'numeric' };
-    document.getElementById('hdr-date').textContent = currentDate.toLocaleDateString('en-US', opts);
-    document.getElementById('slate-label').textContent = currentDate.toLocaleDateString('en-US', opts) + " — LIVE";
-    
+
+    document.getElementById('live-status').textContent = 'Data Live';
+    const opts = { month: 'short', day: 'numeric' };
+    document.getElementById('hdr-date').textContent  = currentDate.toLocaleDateString('en-US', opts);
+    document.getElementById('slate-label').textContent = currentDate.toLocaleDateString('en-US', opts) + ' — LIVE';
+
+    // Render immediately with available data
     renderApp();
     renderPitchers();
     runBacktest();
-    
+
+    // Phase 2: Fetch Open-Meteo weather for each outdoor home stadium (async, re-renders)
+    homesNeedingWeather.forEach(async home => {
+      const st = STADIUMS[home];
+      if (!st) return;
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${st.lat}&longitude=${st.lon}` +
+          `&current=temperature_2m,wind_speed_10m,wind_direction_10m,weather_code` +
+          `&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto&forecast_days=1`;
+        const wx = await fetch(url).then(r => r.json());
+        const cur = wx.current || {};
+        const tempF  = Math.round(cur.temperature_2m  || 72);
+        const wMph   = Math.round(cur.wind_speed_10m  || 0);
+        const wDeg   = cur.wind_direction_10m || 0;
+        // Classify wind direction relative to this park's CF bearing
+        // Wind blows "out" when wind comes FROM (cfBearing+180)°±60°
+        const outFrom   = (st.cfBearing + 180) % 360;
+        const angleDiff = Math.abs(((wDeg - outFrom + 540) % 360) - 180);
+        const dir = wMph < 5 ? 'calm' : angleDiff < 60 ? 'out' : angleDiff > 120 ? 'in' : 'cross';
+        // WMO weather code → sky description
+        const wmo = cur.weather_code || 0;
+        const sky = wmo >= 95 ? 'Thunderstorm' : wmo >= 80 ? 'Showers' :
+                    wmo >= 51 ? 'Rain' : wmo >= 45 ? 'Foggy' :
+                    wmo >= 3  ? 'Overcast' : wmo >= 1 ? 'Partly Cloudy' : 'Clear';
+        WX[home] = { temp: tempF, windMph: wMph, windDir: dir, windDeg: wDeg, sky, pf: st.pf, dome: false };
+      } catch (_) {
+        // Weather failed — fall back to neutral
+        WX[home] = { temp: 72, windMph: 0, windDir: 'calm', sky: 'N/A', pf: st?.pf || 100, dome: false };
+      }
+      // Re-render cards with weather data as it arrives
+      renderApp();
+    });
+
   } catch (err) {
-    document.getElementById('live-status').textContent = "Error";
+    document.getElementById('live-status').textContent = 'Error';
     console.error(err);
   }
 }
@@ -482,20 +571,51 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   let edgeH = homeProb - mktHomeImplied;
   let edgeA = awayProb - mktAwayImplied;
 
-  let projOU = mkt.ou + ((hp.xera - 4.2) * 0.5) + ((ap.xera - 4.2) * 0.5) + (r1 * 0.5);
+  // ── O/U projection ────────────────────────────────────────────────────────
+  // Base: pitcher quality vs league-average (4.20 xERA)
+  let projOU = mkt.ou + ((hp.xera - 4.20) * 0.50) + ((ap.xera - 4.20) * 0.50) + (r1 * 0.40);
 
-  // OU nudge — only on ~25% of games
+  // Park factor adjustment (Coors = 1.17 multiplier; Petco = 0.92)
+  const wxH = WX[g.home] || STADIUMS[g.home];
+  const pf  = wxH?.pf || 100;
+  projOU *= (pf / 100);
+
+  // Weather adjustments (only meaningful for outdoor parks)
+  if (wxH && !wxH.dome) {
+    projOU += windEffect(wxH.windMph || 0, wxH.windDir || 'calm');
+    projOU += tempEffect(wxH.temp || 72);
+  }
+
+  // Offense quality adjustment: high-wOBA lineup → more runs projected
+  const awOBA = (as.woba || 0.315) - 0.315;
+  const hwOBA = (hs.woba || 0.315) - 0.315;
+  projOU += (awOBA + hwOBA) * 8; // each 0.01 wOBA above avg ≈ +0.08 projected runs
+
+  projOU = Math.round(projOU * 10) / 10;
+
+  // OU nudge for backtest — only on ~25% of games
   if (backtestTotal) {
-    let ouNudgeSeed = seedRand(g.away + g.home + String(backtestTotal) + "ounudge");
+    const ouNudgeSeed = seedRand(g.away + g.home + String(backtestTotal) + 'ounudge');
     if (ouNudgeSeed > 0.75) projOU += backtestTotal > mkt.ou ? 1.2 : -1.2;
   }
 
   // DOG = market prices the team at positive (+) American odds
-  let homeDog = mkt.ml.h > 0;
-  let awayDog = mkt.ml.a > 0;
+  const homeDog = mkt.ml.h > 0;
+  const awayDog = mkt.ml.a > 0;
 
-  let wStr = "10mph crosswind";
-  return { homeProb, awayProb, evH, evA, edgeH, edgeA, projOU, wStr, hp, ap, mkt, homeDog, awayDog, mktHomeImplied, mktAwayImplied };
+  // Build a rich weather string for display
+  let wStr;
+  if (!wxH) {
+    wStr = '⏳ Fetching weather...';
+  } else if (wxH.dome) {
+    wStr = `🏟️ Dome · ${pfLabel(pf)}`;
+  } else {
+    const wLabel = windLabel(wxH.windMph || 0, wxH.windDir || 'calm');
+    const sky    = wxH.sky || 'Clear';
+    wStr = `🌡️ ${wxH.temp || 72}°F · ${wLabel} · ${sky} · ${pfLabel(pf)}`;
+  }
+
+  return { homeProb, awayProb, evH, evA, edgeH, edgeA, projOU, wStr, hp, ap, mkt, homeDog, awayDog, mktHomeImplied, mktAwayImplied, pf, wxH };
 }
 
 function getGrade(ev) {
@@ -604,12 +724,26 @@ function renderApp() {
           </div>
           
           <div class="pt-row">
-            <div><span style="color:var(--b)">●</span> ${g.awayP} <br><span class="tier ${P[g.awayP]?P[g.awayP].tier==='Elite'?'t-elite':P[g.awayP].tier==='Strong'?'t-strong':'t-mid':'t-mid'}">${P[g.awayP]?P[g.awayP].tier:'Mid'}</span> <span style="color:var(--tx3)">xERA — K% —</span> <span style="color:var(--b)">${P[g.awayP]?P[g.awayP].xera.toFixed(2):'0.00'}</span></div>
+            <div>
+              <span style="color:var(--b)">●</span> ${g.awayP}
+              <br><span class="tier ${P[g.awayP]?P[g.awayP].tier==='Elite'?'t-elite':P[g.awayP].tier==='Strong'?'t-strong':'t-mid':'t-mid'}">${P[g.awayP]?P[g.awayP].tier:'Mid'}</span>
+              <span style="color:var(--tx3)"> xERA</span> <span style="color:var(--b)">${P[g.awayP]?P[g.awayP].xera.toFixed(2):'—'}</span>
+              <span style="color:var(--tx3)"> K%</span> <span style="color:var(--b)">${P[g.awayP]?P[g.awayP].kpct.toFixed(1):'—'}%</span>
+              <span style="color:var(--tx3)"> BABIP</span> <span style="color:var(--tx2)">${P[g.awayP]?P[g.awayP].babip.toFixed(3):'—'}</span>
+              <br><span style="font-size:10px;color:var(--tx3)">Off wOBA: </span><span style="font-size:10px;color:var(--b)">${S[g.away]?.woba?.toFixed(3) || '—'}</span>
+            </div>
             <div style="font-size:9px;color:var(--tx3);margin-top:8px;">vs</div>
-            <div style="text-align:right;">${g.homeP} <span style="color:var(--b)">●</span><br><span style="color:var(--b)">${P[g.homeP]?P[g.homeP].xera.toFixed(2):'0.00'}</span> <span style="color:var(--tx3)">xERA — K% —</span> <span class="tier ${P[g.homeP]?P[g.homeP].tier==='Elite'?'t-elite':P[g.homeP].tier==='Strong'?'t-strong':'t-mid':'t-mid'}">${P[g.homeP]?P[g.homeP].tier:'Mid'}</span></div>
+            <div style="text-align:right;">
+              ${g.homeP} <span style="color:var(--b)">●</span>
+              <br><span style="color:var(--b)">${P[g.homeP]?P[g.homeP].xera.toFixed(2):'—'}</span> <span style="color:var(--tx3)">xERA </span>
+              <span style="color:var(--b)">${P[g.homeP]?P[g.homeP].kpct.toFixed(1):'—'}%</span> <span style="color:var(--tx3)">K% </span>
+              <span style="color:var(--tx2)">${P[g.homeP]?P[g.homeP].babip.toFixed(3):'—'}</span> <span style="color:var(--tx3)">BABIP</span>
+              <span class="tier ${P[g.homeP]?P[g.homeP].tier==='Elite'?'t-elite':P[g.homeP].tier==='Strong'?'t-strong':'t-mid':'t-mid'}">${P[g.homeP]?P[g.homeP].tier:'Mid'}</span>
+              <br><span style="font-size:10px;color:var(--tx3)">Off wOBA: </span><span style="font-size:10px;color:var(--b)">${S[g.home]?.woba?.toFixed(3) || '—'}</span>
+            </div>
           </div>
-          
-          <div class="weather-row">☁ ${mod.wStr}</div>
+
+          <div class="weather-row" style="font-size:11px;line-height:1.6;">${mod.wStr}</div>
         </div>
         
         <div class="gc-best-banner">

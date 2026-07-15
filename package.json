@@ -1,15 +1,14 @@
 {
   "name": "mlb-intelligence",
-  "version": "8.0.0",
-  "description": "MLB Betting Intelligence with real-time data",
+  "version": "9.0.0",
+  "description": "MLB Betting Intelligence — real wOBA, live weather, park factors, lineup data",
   "main": "index.html",
   "scripts": {
     "start": "npx serve ."
   },
-  "dependencies": {
-    "cheerio": "^1.2.0"
-  },
+  "dependencies": {},
   "engines": {
     "node": ">=18"
   }
 }
+
