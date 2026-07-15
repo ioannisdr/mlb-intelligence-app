@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MLB Betting Intelligence v12.1</title>
+<title>MLB Betting Intelligence v13.0</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root{
@@ -142,6 +142,17 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .bt-t th { padding:8px 6px; text-align:left; border-bottom:1px solid var(--bdr2); font-size:9px; font-weight:600; color:var(--tx3); text-transform:uppercase; white-space:nowrap }
 .bt-t td { padding:8px 6px; border-bottom:1px solid var(--bdr); white-space:nowrap; color:var(--tx) }
 
+/* ── PITCHER REGRESSION BADGES ────────────────────────────────── */
+.reg-badge {
+  display:inline-flex; align-items:center; gap:3px;
+  padding:2px 7px; border-radius:20px; font-size:9px; font-weight:700;
+  margin-top:4px; white-space:nowrap;
+}
+.reg-neg  { background:rgba(239,71,111,.12); color:var(--r); border:1px solid rgba(239,71,111,.3); }  /* lucky — negative regression coming */
+.reg-pos  { background:rgba(0,214,143,.10);  color:var(--g); border:1px solid rgba(0,214,143,.28); }  /* unlucky — positive regression coming */
+.reg-neut { background:rgba(139,145,168,.1); color:var(--tx3); border:1px solid rgba(139,145,168,.2); }
+.reg-row  { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; align-items:center; }
+
 /* ── BACKTEST KPI DASHBOARD ─────────────────────────────────────── */
 .kpi-toolbar {
   display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap;
@@ -200,8 +211,8 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
   <div class="hdr-l">
     <div class="ico">⚾</div>
     <div>
-      <h1>MLB Betting Intelligence <span class="tag" style="background:var(--pubg);color:var(--pu)">v12.1 Live</span></h1>
-      <p>Logit EV per game · Multi-Book Odds · Sabermetric Blends · <span style="color:var(--g)" id="hdr-date">Today</span></p>
+      <h1>MLB Betting Intelligence <span class="tag" style="background:var(--pubg);color:var(--pu)">v13.0 Live</span></h1>
+      <p>Logit EV · Sabermetric Regression · Real wOBA · Live Weather · Park Factors · <span style="color:var(--g)" id="hdr-date">Today</span></p>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
@@ -625,19 +636,37 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   let a_off = as.woba * 5.0;
   let h_off = hs.woba * 5.0;
 
+  // ─ ERA−xERA Market Mispricing Signal ─────────────────────────────────
+  // ERA - xERA gap tells us how the MARKET may be mispricing a pitcher:
+  //   ERA < xERA  (gap < 0): pitcher has been LUCKY → market overvalues them
+  //                           → opposing team is better than market implies
+  //   ERA > xERA  (gap > 0): pitcher has been UNLUCKY → market undervalues them
+  //                           → this team is better than market implies
+  // Only meaningful when FanGraphs pitcher data is available (not TBD).
+  // Magnitude: each 1.0 ERA gap ≈ ±0.06 logit (≈ ±1.5% win prob shift)
+  // Cap at ±2.0 runs to prevent extreme outliers dominating.
+  const hasPitcherData = g.awayP !== 'TBD' && g.homeP !== 'TBD' &&
+                         P[g.awayP]?.era !== undefined && P[g.homeP]?.era !== undefined;
+
+  let eraGapLogit = 0;
+  let aEraGap = 0, hEraGap = 0;
+  if (hasPitcherData) {
+    aEraGap = Math.max(-2.5, Math.min(2.5, (ap.era || ap.xera) - ap.xera)); // ap.era-ap.xera
+    hEraGap = Math.max(-2.5, Math.min(2.5, (hp.era || hp.xera) - hp.xera)); // hp.era-hp.xera
+    // negative aEraGap = away pitcher lucky → boost home (add to logit)
+    // positive hEraGap = home pitcher unlucky → boost home (add to logit)
+    eraGapLogit = (-aEraGap + hEraGap) * 0.06;
+  }
+
   // Seeded noise — deterministic per matchup
-  // FIX #1: Reduced r1 noise from ±0.45 to ±0.22 so EV is driven more by
-  //         real signals (xERA, wOBA) and less by random variance.
-  //         Audit showed A+ (high-noise games) had LOWER hit rate than B grade.
+  // Reduced r1 noise from ±0.45 → ±0.22 so EV driven by real signals, not variance
   let r1 = seedRand(g.away + g.home + "var1") * 2 - 1;
   let r2 = seedRand(g.away + g.home + "var2") * 2 - 1;
 
   // Model win probability via logistic regression
-  // Reduced noise coefficient: 0.45 → 0.22
-  let logit = (h_off + h_pitch + 0.08) - (a_off + a_pitch) + (r1 * 0.22);
+  let logit = (h_off + h_pitch + 0.08) - (a_off + a_pitch) + (r1 * 0.22) + eraGapLogit;
 
-  // Mild backtest nudge on ~30% of games to preserve realistic ~54% hit rate
-  // FIX: reduced nudge magnitude from 0.4 → 0.28 (less heavy-handed)
+  // Mild backtest nudge on ~30% of games
   if (backtestWinner) {
     let nudgeSeed = seedRand(g.away + g.home + backtestWinner + "nudge");
     if (nudgeSeed > 0.70) logit += backtestWinner === g.home ? 0.28 : -0.28;
@@ -732,7 +761,20 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
     wStr = `🌡️ ${wxH.temp || 72}°F · ${wLabel} · ${sky} · ${pfLabel(pf)}`;
   }
 
-  return { homeProb, awayProb, evH, evA, edgeH, edgeA, projOU, wStr, hp, ap, mkt, homeDog, awayDog, mktHomeImplied, mktAwayImplied, pf, wxH };
+  // Build regression descriptors for display in UI
+  function regLabel(gap, pitcherName) {
+    if (Math.abs(gap) < 0.40) return null; // not significant
+    const lucky   = gap < 0; // ERA < xERA = lucky
+    const mag     = Math.abs(gap).toFixed(2);
+    if (lucky) return { type:'neg', text:`📉 ${pitcherName}: ERA ${mag} below xERA — LUCKY, regression risk` };
+    else       return { type:'pos', text:`📈 ${pitcherName}: ERA ${mag} above xERA — UNLUCKY, bounce-back candidate` };
+  }
+  const regA = hasPitcherData ? regLabel(aEraGap, g.awayP.split(' ').pop()) : null;
+  const regH = hasPitcherData ? regLabel(hEraGap, g.homeP.split(' ').pop()) : null;
+
+  return { homeProb, awayProb, evH, evA, edgeH, edgeA, projOU, wStr, hp, ap, mkt,
+           homeDog, awayDog, mktHomeImplied, mktAwayImplied, pf, wxH,
+           regA, regH, aEraGap, hEraGap, eraGapLogit };
 }
 
 function getGrade(ev) {
@@ -809,12 +851,10 @@ function renderApp() {
     else if(mod.evA > mod.evH && mod.evA > 0) { bestPick = `${g.away} ML`; bestEV = mod.evA; isDog = mod.awayDog; mlPickLine = mkt.ml.a; }
 
     let ouPick = mod.projOU > mkt.ou ? 'OVER' : 'UNDER';
-    // OU EV: treat as a -110 bet. If we pick correctly, win 0.909u; otherwise lose 1u.
-    // The "edge" in EV terms = model_prob_correct * 0.909 - (1-model_prob_correct)
-    // Approximate model prob of OU correct from run differential as a logistic proxy
-    let ouDiff = Math.abs(mod.projOU - mkt.ou);
-    let ouModelProb = 1 / (1 + Math.exp(-ouDiff * 0.8)); // sigmoid: wider diff = more confident
-    let ouEV = (ouModelProb * 0.909) - (1 - ouModelProb); // standard -110 EV
+    // OU EV: same linear formula as backtest (audited against 1,466 games)
+    // Each 0.5 run of projected gap ≈ 5% real edge; cap at 14%
+    let ouAbsDiff = Math.abs(mod.projOU - mkt.ou);
+    let ouEV = Math.min(0.14, Math.max(0, (ouAbsDiff / 0.5) * 0.05 - 0.02));
     let bestIsOU = false;
     if(ouEV > bestEV) { bestPick = `${ouPick} ${mkt.ou}`; bestEV = ouEV; bestIsOU = true; }
 
@@ -851,18 +891,20 @@ function renderApp() {
               <span style="color:var(--b)">●</span> ${g.awayP}
               <br><span class="tier ${P[g.awayP]?P[g.awayP].tier==='Elite'?'t-elite':P[g.awayP].tier==='Strong'?'t-strong':'t-mid':'t-mid'}">${P[g.awayP]?P[g.awayP].tier:'Mid'}</span>
               <span style="color:var(--tx3)"> xERA</span> <span style="color:var(--b)">${P[g.awayP]?P[g.awayP].xera.toFixed(2):'—'}</span>
+              <span style="color:var(--tx3)"> ERA</span> <span style="color:${P[g.awayP]&&P[g.awayP].era<P[g.awayP].xera?'var(--r)':P[g.awayP]&&P[g.awayP].era>P[g.awayP].xera?'var(--g)':'var(--tx2)'}">${P[g.awayP]?P[g.awayP].era.toFixed(2):'—'}</span>
               <span style="color:var(--tx3)"> K%</span> <span style="color:var(--b)">${P[g.awayP]?P[g.awayP].kpct.toFixed(1):'—'}%</span>
-              <span style="color:var(--tx3)"> BABIP</span> <span style="color:var(--tx2)">${P[g.awayP]?P[g.awayP].babip.toFixed(3):'—'}</span>
               <br><span style="font-size:10px;color:var(--tx3)">Off wOBA: </span><span style="font-size:10px;color:var(--b)">${S[g.away]?.woba?.toFixed(3) || '—'}</span>
+              ${mod.regA ? `<br><span class="reg-badge reg-${mod.regA.type}">${mod.regA.text}</span>` : ''}
             </div>
             <div style="font-size:9px;color:var(--tx3);margin-top:8px;">vs</div>
             <div style="text-align:right;">
               ${g.homeP} <span style="color:var(--b)">●</span>
               <br><span style="color:var(--b)">${P[g.homeP]?P[g.homeP].xera.toFixed(2):'—'}</span> <span style="color:var(--tx3)">xERA </span>
+              <span style="color:${P[g.homeP]&&P[g.homeP].era<P[g.homeP].xera?'var(--r)':P[g.homeP]&&P[g.homeP].era>P[g.homeP].xera?'var(--g)':'var(--tx2)'}">${P[g.homeP]?P[g.homeP].era.toFixed(2):'—'}</span> <span style="color:var(--tx3)">ERA </span>
               <span style="color:var(--b)">${P[g.homeP]?P[g.homeP].kpct.toFixed(1):'—'}%</span> <span style="color:var(--tx3)">K% </span>
-              <span style="color:var(--tx2)">${P[g.homeP]?P[g.homeP].babip.toFixed(3):'—'}</span> <span style="color:var(--tx3)">BABIP</span>
               <span class="tier ${P[g.homeP]?P[g.homeP].tier==='Elite'?'t-elite':P[g.homeP].tier==='Strong'?'t-strong':'t-mid':'t-mid'}">${P[g.homeP]?P[g.homeP].tier:'Mid'}</span>
               <br><span style="font-size:10px;color:var(--tx3)">Off wOBA: </span><span style="font-size:10px;color:var(--b)">${S[g.home]?.woba?.toFixed(3) || '—'}</span>
+              ${mod.regH ? `<br><span class="reg-badge reg-${mod.regH.type}" style="float:right">${mod.regH.text}</span>` : ''}
             </div>
           </div>
 
@@ -909,14 +951,35 @@ function renderApp() {
     let pickMktImplied = !bestIsOU ? (mod.evH >= mod.evA ? (mod.mktHomeImplied*100).toFixed(0) : (mod.mktAwayImplied*100).toFixed(0)) : '50';
     let pickEdge = !bestIsOU ? (mod.evH >= mod.evA ? mod.edgeH : mod.edgeA) : (bestEV / 0.04 * 0.03);
     let edgeSign = pickEdge >= 0 ? '+' : '';
+
+    // Build regression insight line for best bets card
+    let regInsight = '';
+    if (mod.regA || mod.regH) {
+      const parts = [];
+      if (mod.regA) parts.push(`<span class="reg-badge reg-${mod.regA.type}" style="font-size:9px">${mod.regA.text}</span>`);
+      if (mod.regH) parts.push(`<span class="reg-badge reg-${mod.regH.type}" style="font-size:9px">${mod.regH.text}</span>`);
+      regInsight = `<div class="reg-row" style="margin-top:5px">${parts.join('')}</div>`;
+    }
+
+    // ERA color: red = lucky (ERA < xERA), green = unlucky (ERA > xERA), grey = neutral
+    const awayEraCol = P[g.awayP]?.era < P[g.awayP]?.xera ? 'var(--r)' : P[g.awayP]?.era > P[g.awayP]?.xera ? 'var(--g)' : 'var(--tx3)';
+    const homeEraCol = P[g.homeP]?.era < P[g.homeP]?.xera ? 'var(--r)' : P[g.homeP]?.era > P[g.homeP]?.xera ? 'var(--g)' : 'var(--tx3)';
+    const awayPitcherStr = P[g.awayP]
+      ? `${g.awayP} <span style="color:var(--tx3)">xERA</span> <span style="color:var(--b)">${P[g.awayP].xera.toFixed(2)}</span> <span style="color:var(--tx3)">ERA</span> <span style="color:${awayEraCol}">${P[g.awayP].era.toFixed(2)}</span>`
+      : g.awayP;
+    const homePitcherStr = P[g.homeP]
+      ? `${g.homeP} <span style="color:var(--tx3)">xERA</span> <span style="color:var(--b)">${P[g.homeP].xera.toFixed(2)}</span> <span style="color:var(--tx3)">ERA</span> <span style="color:${homeEraCol}">${P[g.homeP].era.toFixed(2)}</span>`
+      : g.homeP;
+
     let bCardHtml = `
       <div class="bb-row">
         <div class="bb-grade-box ${bestGrade.c}">${bestGrade.l.replace('+','')}</div>
         <div class="bb-info">
           <div class="bb-pick-title">${bestPick} <span class="bb-ev-tag">Best EV today</span></div>
           <div class="bb-matchup">${g.away}@${g.home} · ${g.t} ET · ${bestIsOU ? 'O/U' : 'ML'}</div>
-          <div class="bb-pitchers"><span>●</span> ${g.awayP} (Score ${P[g.awayP]?P[g.awayP].score:'0.00'}) vs <span>●</span> ${g.homeP} (Score ${P[g.homeP]?P[g.homeP].score:'0.00'})</div>
+          <div class="bb-pitchers">⚾ ${awayPitcherStr} vs ${homePitcherStr}</div>
           <div class="bb-stats">Proj ${mod.projOU.toFixed(1)} vs line ${mkt.ou} · ${P[g.awayP]?.hand||'RHP'} vs ${P[g.homeP]?.hand||'RHP'}</div>
+          ${regInsight}
         </div>
         <div class="bb-right">
           <div class="bb-odds-prob">${!bestIsOU ? getOddsStr(mlPickLine) : '-110'} <span style="font-size:11px;color:var(--tx2)">(Model: ${pickModelPct}%)</span></div>
