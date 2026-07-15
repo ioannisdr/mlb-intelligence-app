@@ -141,6 +141,56 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .bt-t { width:100%; border-collapse:collapse; font-size:11px; min-width:780px }
 .bt-t th { padding:8px 6px; text-align:left; border-bottom:1px solid var(--bdr2); font-size:9px; font-weight:600; color:var(--tx3); text-transform:uppercase; white-space:nowrap }
 .bt-t td { padding:8px 6px; border-bottom:1px solid var(--bdr); white-space:nowrap; color:var(--tx) }
+
+/* ── BACKTEST KPI DASHBOARD ─────────────────────────────────────── */
+.kpi-toolbar {
+  display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap;
+}
+.kpi-toolbar label { font-size:10px; color:var(--tx3); text-transform:uppercase; letter-spacing:.5px; white-space:nowrap; }
+.kpi-sel {
+  background:var(--bg3); color:var(--tx); border:1px solid var(--bdr2);
+  border-radius:6px; padding:5px 10px; font-size:11px; outline:none; cursor:pointer;
+  transition:border-color .15s;
+}
+.kpi-sel:hover { border-color:var(--b); }
+.kpi-grid {
+  display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin-bottom:22px;
+}
+.kpi-card {
+  background:var(--bg2); border:1px solid var(--bdr); border-radius:var(--R);
+  padding:16px 14px; position:relative; overflow:hidden;
+  transition:border-color .2s, transform .2s;
+}
+.kpi-card:hover { border-color:var(--bdr2); transform:translateY(-1px); }
+.kpi-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:2px;
+  background:var(--kpi-accent, var(--b));
+}
+.kpi-card.kc-games { --kpi-accent: var(--b); }
+.kpi-card.kc-hit   { --kpi-accent: var(--g); }
+.kpi-card.kc-miss  { --kpi-accent: var(--r); }
+.kpi-card.kc-pct   { --kpi-accent: var(--pu); }
+.kpi-card.kc-units { --kpi-accent: var(--y); }
+.kpi-card.kc-net   { --kpi-accent: var(--or); }
+.kpi-label {
+  font-size:9px; font-weight:600; color:var(--tx3); text-transform:uppercase;
+  letter-spacing:.6px; margin-bottom:10px;
+}
+.kpi-val {
+  font-size:26px; font-weight:800; line-height:1; color:var(--tx);
+  font-variant-numeric:tabular-nums;
+}
+.kpi-sub { font-size:10px; color:var(--tx3); margin-top:6px; }
+.kpi-badge {
+  display:inline-block; padding:2px 7px; border-radius:20px;
+  font-size:9px; font-weight:700; margin-top:6px;
+}
+.kpi-badge.pos { background:var(--gbg); color:var(--g); border:1px solid var(--gbr); }
+.kpi-badge.neg { background:var(--rbg); color:var(--r); border:1px solid var(--rbr); }
+.kpi-badge.neu { background:var(--bbg); color:var(--b); border:1px solid var(--bbr); }
+.kpi-badge.pur { background:var(--pubg); color:var(--pu); }
+@media(max-width:900px){ .kpi-grid{grid-template-columns:repeat(3,1fr)} }
+@media(max-width:550px){ .kpi-grid{grid-template-columns:repeat(2,1fr)} }
 </style>
 </head>
 <body>
@@ -196,7 +246,66 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 
 <div class="panel" id="tab-back">
   <div class="sec">2026 Season Backtester Analytics</div>
-  
+
+  <!-- KPI TOOLBAR -->
+  <div class="kpi-toolbar">
+    <label>Filter by</label>
+    <select id="kpi-market" class="kpi-sel" onchange="updateKPI()">
+      <option value="ALL">All Markets</option>
+      <option value="ML">Moneyline</option>
+      <option value="RL">Run Line</option>
+      <option value="OU">Over/Under</option>
+    </select>
+    <select id="kpi-grade" class="kpi-sel" onchange="updateKPI()">
+      <option value="ALL">All Grades</option>
+      <option value="A+">Grade A+</option>
+      <option value="A">Grade A</option>
+      <option value="B">Grade B</option>
+      <option value="C">Grade C</option>
+      <option value="D">Grade D</option>
+    </select>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="kpi-grid" id="kpi-grid">
+    <div class="kpi-card kc-games">
+      <div class="kpi-label">Bets Placed</div>
+      <div class="kpi-val" id="kpi-games">—</div>
+      <div class="kpi-sub">total bets</div>
+      <span class="kpi-badge neu" id="kpi-games-badge">2026 Season</span>
+    </div>
+    <div class="kpi-card kc-hit">
+      <div class="kpi-label">Hits</div>
+      <div class="kpi-val" id="kpi-hits" style="color:var(--g)">—</div>
+      <div class="kpi-sub">correct predictions</div>
+      <span class="kpi-badge pos" id="kpi-hits-badge">—</span>
+    </div>
+    <div class="kpi-card kc-miss">
+      <div class="kpi-label">Misses</div>
+      <div class="kpi-val" id="kpi-misses" style="color:var(--r)">—</div>
+      <div class="kpi-sub">incorrect predictions</div>
+      <span class="kpi-badge neg" id="kpi-misses-badge">—</span>
+    </div>
+    <div class="kpi-card kc-pct">
+      <div class="kpi-label">Hit Rate</div>
+      <div class="kpi-val" id="kpi-pct" style="color:var(--pu)">—</div>
+      <div class="kpi-sub">prediction accuracy</div>
+      <span class="kpi-badge pur" id="kpi-pct-badge">vs 52.4% breakeven</span>
+    </div>
+    <div class="kpi-card kc-units">
+      <div class="kpi-label">Units Wagered</div>
+      <div class="kpi-val" id="kpi-units">—</div>
+      <div class="kpi-sub">total units risked</div>
+      <span class="kpi-badge neu" id="kpi-units-badge">1u per bet</span>
+    </div>
+    <div class="kpi-card kc-net">
+      <div class="kpi-label">Net Profit</div>
+      <div class="kpi-val" id="kpi-net">—</div>
+      <div class="kpi-sub">units profit/loss</div>
+      <span class="kpi-badge pos" id="kpi-net-badge">—</span>
+    </div>
+  </div>
+
   <div class="charts-grid">
     <div class="chart-card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
@@ -1004,10 +1113,15 @@ async function runBacktest() {
 
 let currentPlData = {};
 let currentMonthlyPL = {};
+let currentGrHitsRaw = {}; // full grHits object — keyed [market][grade]
+let currentPlRaw     = {}; // full pl object — keyed [market][team]
+
 function renderCharts(pl, grHits, monthlyPL) {
-  currentGrHits = grHits;
-  currentPlData = pl;
+  currentGrHits    = grHits;
+  currentPlData    = pl;
   currentMonthlyPL = monthlyPL;
+  currentGrHitsRaw = grHits;
+  currentPlRaw     = pl;
   if (chartsObj.plChart) chartsObj.plChart.destroy();
   if (chartsObj.grChart) chartsObj.grChart.destroy();
   if (chartsObj.monthlyChart) chartsObj.monthlyChart.destroy();
@@ -1130,6 +1244,8 @@ function renderCharts(pl, grHits, monthlyPL) {
       }
     }
   });
+  // Refresh KPI dashboard with the new data
+  updateKPI();
 }
 
 function updatePlFilter(val) {
@@ -1147,6 +1263,79 @@ function updateGrFilter(val) {
    let hitRates = grades.map(g => currentGrHits[val][g].t > 0 ? (currentGrHits[val][g].w / currentGrHits[val][g].t * 100).toFixed(1) : 0);
    chartsObj.grChart.data.datasets[0].data = hitRates;
    chartsObj.grChart.update();
+}
+
+// ── KPI DASHBOARD ────────────────────────────────────────────────────────────
+function updateKPI() {
+  const marketEl = document.getElementById('kpi-market');
+  const gradeEl  = document.getElementById('kpi-grade');
+  const market   = marketEl ? marketEl.value : 'ALL';
+  const grade    = gradeEl  ? gradeEl.value  : 'ALL';
+  const gh       = currentGrHitsRaw;
+  const pl       = currentPlRaw;
+
+  if (!gh || !gh.ALL) return;
+
+  const GRADE_KEYS = grade === 'ALL' ? ['A+','A','B','C','D'] : [grade];
+  const MKT_KEY    = market === 'ALL' ? 'ALL' : market;
+
+  let totalBets = 0, totalHits = 0;
+  GRADE_KEYS.forEach(g => {
+    const row = (gh[MKT_KEY] && gh[MKT_KEY][g]) ? gh[MKT_KEY][g] : { w:0, t:0 };
+    totalHits += row.w;
+    totalBets += row.t;
+  });
+
+  const totalMisses = totalBets - totalHits;
+  const hitRate     = totalBets > 0 ? (totalHits / totalBets * 100) : 0;
+
+  // Average payout per market (based on standard juice)
+  const MKT_PAYOUT = { ML: 0.926, RL: 1.15, OU: 0.909, ALL: 0.935 };
+  const payout   = MKT_PAYOUT[market] || 0.935;
+  const netProfit = (totalHits * payout) - totalMisses;
+  const totalUnits = totalBets;
+  const roi = totalUnits > 0 ? (netProfit / totalUnits * 100) : 0;
+
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const setBadge = (id, cls, val) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = val;
+    el.className = 'kpi-badge ' + cls;
+  };
+
+  const mktLabel = { ALL:'All Markets', ML:'Moneyline', RL:'Run Line', OU:'Over/Under' }[market];
+  const grLabel  = grade === 'ALL' ? 'All Grades' : 'Grade ' + grade;
+
+  set('kpi-games', totalBets > 0 ? totalBets.toLocaleString() : '—');
+  setBadge('kpi-games-badge', 'neu', mktLabel + ' · ' + grLabel);
+
+  set('kpi-hits', totalHits > 0 ? totalHits.toLocaleString() : (totalBets > 0 ? '0' : '—'));
+  setBadge('kpi-hits-badge', 'pos', totalBets > 0 ? hitRate.toFixed(1) + '% of bets' : '—');
+
+  set('kpi-misses', totalBets > 0 ? totalMisses.toLocaleString() : '—');
+  setBadge('kpi-misses-badge', 'neg', totalBets > 0 ? (100 - hitRate).toFixed(1) + '% miss rate' : '—');
+
+  const pctEl = document.getElementById('kpi-pct');
+  if (pctEl) {
+    pctEl.textContent = totalBets > 0 ? hitRate.toFixed(1) + '%' : '—';
+    pctEl.style.color = hitRate >= 55 ? 'var(--g)' : hitRate >= 52.4 ? 'var(--y)' : totalBets > 0 ? 'var(--r)' : 'var(--tx)';
+  }
+  setBadge('kpi-pct-badge', 'pur',
+    totalBets === 0 ? 'No data' :
+    hitRate >= 55   ? '↑ Above breakeven' :
+    hitRate >= 52.4 ? '≈ At breakeven' : '↓ Below breakeven');
+
+  set('kpi-units', totalUnits > 0 ? totalUnits + 'u' : '—');
+  setBadge('kpi-units-badge', 'neu', '1u flat staking');
+
+  const netEl = document.getElementById('kpi-net');
+  if (netEl) {
+    netEl.textContent = totalBets > 0 ? (netProfit >= 0 ? '+' : '') + netProfit.toFixed(2) + 'u' : '—';
+    netEl.style.color = netProfit > 0 ? 'var(--g)' : netProfit < 0 ? 'var(--r)' : 'var(--tx)';
+  }
+  const roiStr = totalBets > 0 ? (roi >= 0 ? '+' : '') + roi.toFixed(1) + '% ROI' : '—';
+  setBadge('kpi-net-badge', netProfit >= 0 ? 'pos' : 'neg', roiStr);
 }
 
 function updateMonthlyFilter() {
