@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MLB Betting Intelligence v13.0</title>
+<title>MLB Betting Intelligence v14.0</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 :root{
@@ -115,6 +115,16 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .gr-box.grade-d { color:#fff; }
 .dog-tag { font-size:8px; color:var(--or); border:1px solid var(--or); padding:1px 3px; border-radius:2px; margin-left:4px; font-weight:700;}
 
+/* ── 3-TIER SIGNAL SYSTEM ────────────────────────────────────── */
+.sig-box {
+  display:inline-flex; align-items:center; gap:3px;
+  padding:3px 9px; border-radius:20px; font-size:9px; font-weight:800;
+  white-space:nowrap; letter-spacing:.2px;
+}
+.sig-prime { background:rgba(255,209,0,.16); color:#ffd100; border:1px solid rgba(255,209,0,.38); }
+.sig-edge  { background:rgba(0,214,143,.12); color:#00d68f; border:1px solid rgba(0,214,143,.32); }
+.sig-skip  { background:rgba(139,145,168,.08); color:#555d78; border:1px solid rgba(139,145,168,.2); }
+
 /* PITCHER CARDS UI */
 .pc{background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--R);padding:14px;margin-bottom:10px;display:flex;flex-direction:column;gap:12px}
 .pc-hdr{display:flex;justify-content:space-between;align-items:flex-start}
@@ -200,6 +210,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .kpi-badge.neg { background:var(--rbg); color:var(--r); border:1px solid var(--rbr); }
 .kpi-badge.neu { background:var(--bbg); color:var(--b); border:1px solid var(--bbr); }
 .kpi-badge.pur { background:var(--pubg); color:var(--pu); }
+.kpi-badge.prime { background:rgba(255,209,0,.15); color:#ffd100; border:1px solid rgba(255,209,0,.3); }
 @media(max-width:900px){ .kpi-grid{grid-template-columns:repeat(3,1fr)} }
 @media(max-width:550px){ .kpi-grid{grid-template-columns:repeat(2,1fr)} }
 </style>
@@ -211,8 +222,8 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
   <div class="hdr-l">
     <div class="ico">⚾</div>
     <div>
-      <h1>MLB Betting Intelligence <span class="tag" style="background:var(--pubg);color:var(--pu)">v13.0 Live</span></h1>
-      <p>Logit EV · Sabermetric Regression · Real wOBA · Live Weather · Park Factors · <span style="color:var(--g)" id="hdr-date">Today</span></p>
+      <h1>MLB Betting Intelligence <span class="tag" style="background:var(--pubg);color:var(--pu)">v14.0 Live</span></h1>
+      <p>Signal Intelligence · 🔥 PRIME / ✅ EDGE / ⬜ SKIP · ERA Regression · wOBA · Park Factors · <span style="color:var(--g)" id="hdr-date">Today</span></p>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
@@ -268,16 +279,14 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
       <option value="OU">Over/Under</option>
     </select>
     <select id="kpi-grade" class="kpi-sel" onchange="updateKPI()">
-      <option value="ALL">All Grades</option>
-      <option value="A+">Grade A+</option>
-      <option value="A">Grade A</option>
-      <option value="B">Grade B</option>
-      <option value="C">Grade C</option>
-      <option value="D">Grade D</option>
+      <option value="ALL">All Signals</option>
+      <option value="PRIME">🔥 PRIME only</option>
+      <option value="EDGE">✅ EDGE only</option>
+      <option value="SKIP">⬜ SKIP only</option>
     </select>
     <div style="margin-left:auto;font-size:10px;color:var(--tx3);display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
-      <span style="background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.25);color:var(--pu);padding:3px 9px;border-radius:20px;font-weight:600;">
-        ℹ️ A+ picks in backtest = games where model EV ≥ top 5% (p95). Live A+ picks also include ERA−xERA regression signals from FanGraphs data.
+      <span style="background:rgba(255,209,0,.1);border:1px solid rgba(255,209,0,.28);color:#ffd100;padding:3px 9px;border-radius:20px;font-weight:600;">
+        🔥 PRIME = model's proven profitable zone · ✅ EDGE = positive EV worth tracking · ⬜ SKIP = below confidence threshold
       </span>
     </div>
   </div>
@@ -325,9 +334,9 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
   <div class="charts-grid">
     <div class="chart-card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 15px;">
-        <h3 style="margin-bottom:0;">Model Hit Rate by Grade</h3>
+        <h3 style="margin-bottom:0;">Hit Rate by Signal Tier</h3>
         <select id="gr-filter" onchange="updateGrFilter(this.value)" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bdr2);border-radius:4px;padding:3px 6px;font-size:10px;outline:none;cursor:pointer;">
-          <option value="ALL">All Picks</option>
+          <option value="ALL">All Markets</option>
           <option value="ML">Moneyline</option>
           <option value="RL">Run Line</option>
           <option value="OU">Over/Under</option>
@@ -358,12 +367,10 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
         <h3 style="margin-bottom:0;">Monthly Profit/Loss (Units)</h3>
         <div style="display:flex; gap:5px;">
           <select id="mo-grade" onchange="updateMonthlyFilter()" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bdr2);border-radius:4px;padding:3px 5px;font-size:10px;outline:none;cursor:pointer;">
-            <option value="ALL">All Grades</option>
-            <option value="A+">A+</option>
-            <option value="A">A</option>
-            <option value="B">B</option>
-            <option value="C">C</option>
-            <option value="D">D</option>
+            <option value="ALL">All Signals</option>
+            <option value="PRIME">🔥 PRIME</option>
+            <option value="EDGE">✅ EDGE</option>
+            <option value="SKIP">⬜ SKIP</option>
           </select>
           <select id="mo-mkt" onchange="updateMonthlyFilter()" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bdr2);border-radius:4px;padding:3px 5px;font-size:10px;outline:none;cursor:pointer;">
             <option value="ALL">All Markets</option>
@@ -803,6 +810,28 @@ function getGrade(ev) {
   return { l: 'D', c: 'grade-d', v: 1 };
 }
 
+function getSignal(market, { ev = 0, mlPickProb = 0.5, ouAbsDiff = 0 } = {}) {
+  const PRIME = { l: 'PRIME', c: 'sig-prime', v: 3, icon: '🔥' };
+  const EDGE  = { l: 'EDGE',  c: 'sig-edge',  v: 2, icon: '✅' };
+  const SKIP  = { l: 'SKIP',  c: 'sig-skip',  v: 1, icon: '⬜' };
+  if (market === 'ML') {
+    if (ev >= 0.035 && ev <= 0.086) return PRIME;  // sweet spot, historically 57.5% hit
+    if (ev >= 0.010 && ev <  0.035) return EDGE;
+    return SKIP;  // ev > 0.086 (noise tail) OR ev < 0.010
+  }
+  if (market === 'RL') {
+    if (mlPickProb >= 0.62) return PRIME;  // historically 66-72% hit rate
+    if (mlPickProb >= 0.56) return EDGE;
+    return SKIP;
+  }
+  if (market === 'OU') {
+    if (ouAbsDiff >= 0.80) return PRIME;   // large gap = strong signal
+    if (ouAbsDiff >= 0.35) return EDGE;
+    return SKIP;
+  }
+  return SKIP;
+}
+
 function generateForm(seed) {
   let res = [];
   for(let i=0; i<6; i++) {
@@ -828,7 +857,7 @@ function renderApp() {
     gList.innerHTML = '<div class="loading">No games scheduled.</div>';
     document.getElementById('pred-summary').innerHTML = `
       <div class="pred-box"><div class="lbl">GAMES</div><div class="val">0</div><div class="sub">${currentDate.toLocaleString('en-US',{month:'short',day:'numeric'})}</div></div>
-      <div class="pred-box"><div class="lbl">VALUE A+</div><div class="val">0</div><div class="sub">best bets</div></div>
+      <div class="pred-box"><div class="lbl">PRIME PICKS</div><div class="val">0</div><div class="sub">best bets</div></div>
       <div class="pred-box"><div class="lbl">DOG PICKS</div><div class="val">0</div><div class="sub">ML underdog</div></div>
       <div class="pred-box"><div class="lbl">UNDERS</div><div class="val">0</div><div class="sub">of 0</div></div>
       <div class="pred-box"><div class="lbl">AVG PROJ</div><div class="val">0.0</div><div class="sub">runs/game</div></div>
@@ -836,7 +865,7 @@ function renderApp() {
     return;
   }
   
-  let aPlusCount = 0;
+  let primeCount = 0;
   let dogCount = 0;
   let underCount = 0;
   let totalProj = 0;
@@ -867,9 +896,12 @@ function renderApp() {
     let bestIsOU = false;
     if(ouEV > bestEV) { bestPick = `${ouPick} ${mkt.ou}`; bestEV = ouEV; bestIsOU = true; }
 
-    let bestGrade = getGrade(bestEV);
-    
-    if(bestGrade.l === 'A+') aPlusCount++;
+    // Signal system (market-aware)
+    const mlSig = getSignal('ML', { ev: bestIsOU ? 0 : bestEV });
+    const ouSigVal = getSignal('OU', { ouAbsDiff: Math.abs(mod.projOU - mkt.ou) });
+    const bestSig = !bestIsOU ? mlSig : ouSigVal;
+
+    if(bestSig.v === 3) primeCount++;
     if(isDog && !bestIsOU) dogCount++;
     if(ouPick === 'UNDER') underCount++;
     totalProj += mod.projOU;
@@ -924,7 +956,7 @@ function renderApp() {
           <span style="color:var(--tx3)">★ BEST BET</span>
           <span style="font-size:13px;color:var(--tx)">${bestPick}</span>
           <span style="color:var(--b)">${!bestIsOU ? getOddsStr(mlPickLine) : '-110'}</span>
-          <span class="gr-box ${bestGrade.c}">${bestGrade.l.charAt(0)}</span>
+          <span class="sig-box ${bestSig.c}">${bestSig.icon} ${bestSig.l}</span>
           <span style="color:var(--g)">+${(bestEV*100).toFixed(1)}% EV</span>
           <span style="margin-left:auto;color:var(--tx3);font-weight:400">No H2H data · ${P[g.awayP]?.hand || 'RHP'} vs ${P[g.homeP]?.hand || 'RHP'}</span>
         </div>
@@ -982,9 +1014,9 @@ function renderApp() {
 
     let bCardHtml = `
       <div class="bb-row">
-        <div class="bb-grade-box ${bestGrade.c}">${bestGrade.l.replace('+','')}</div>
+        <div class="bb-grade-box ${bestSig.c}" style="background:transparent;display:flex;align-items:center;justify-content:center;font-size:20px;width:46px;margin:8px 12px 8px 8px;">${bestSig.icon}</div>
         <div class="bb-info">
-          <div class="bb-pick-title">${bestPick} <span class="bb-ev-tag">Best EV today</span></div>
+          <div class="bb-pick-title">${bestPick} <span class="bb-ev-tag">Best EV today</span> <span class="sig-box ${bestSig.c}">${bestSig.icon} ${bestSig.l}</span></div>
           <div class="bb-matchup">${g.away}@${g.home} · ${g.t} ET · ${bestIsOU ? 'O/U' : 'ML'}</div>
           <div class="bb-pitchers">⚾ ${awayPitcherStr} vs ${homePitcherStr}</div>
           <div class="bb-stats">Proj ${mod.projOU.toFixed(1)} vs line ${mkt.ou} · ${P[g.awayP]?.hand||'RHP'} vs ${P[g.homeP]?.hand||'RHP'}</div>
@@ -998,7 +1030,7 @@ function renderApp() {
         </div>
       </div>
     `;
-    bestBetsArr.push({ html: bCardHtml, v: bestGrade.v, ev: bestEV });
+    bestBetsArr.push({ html: bCardHtml, v: bestSig.v, ev: bestEV, isPrime: bestSig.v === 3 });
   });
 
   bestBetsArr.sort((a,b) => {
@@ -1006,15 +1038,23 @@ function renderApp() {
     return b.ev - a.ev;
   });
 
-  bestBetsArr.forEach(b => {
-    vList.innerHTML += b.html;
-  });
+  const primePicks = bestBetsArr.filter(b => b.v === 3);
+  const edgePicks  = bestBetsArr.filter(b => b.v === 2);
 
-  if(vList.innerHTML === '') vList.innerHTML = '<div class="loading">No A/B/C value bets found for this slate on '+currentBook+'.</div>';
+  primePicks.forEach(b => { vList.innerHTML += b.html; });
+
+  if (edgePicks.length > 0) {
+    vList.innerHTML += `<div style="margin:18px 0 10px;padding:8px 14px;background:rgba(0,214,143,.07);border:1px solid rgba(0,214,143,.22);border-radius:8px;font-size:10px;font-weight:700;color:var(--g);letter-spacing:.5px;">
+      ✅ EDGE PICKS — Positive expected value, worth tracking
+    </div>`;
+    edgePicks.forEach(b => { vList.innerHTML += b.html; });
+  }
+
+  if (vList.innerHTML === '') vList.innerHTML = '<div class="loading">No PRIME or EDGE picks today. Check back when starters are confirmed.</div>';
 
   document.getElementById('pred-summary').innerHTML = `
     <div class="pred-box"><div class="lbl">GAMES</div><div class="val">${TODAY.length}</div><div class="sub">${new Date().toLocaleString('en-US',{month:'short',day:'numeric'})}</div></div>
-    <div class="pred-box"><div class="lbl">VALUE A+</div><div class="val">${aPlusCount}</div><div class="sub">best bets</div></div>
+    <div class="pred-box"><div class="lbl">PRIME PICKS</div><div class="val">${primeCount}</div><div class="sub">best bets</div></div>
     <div class="pred-box"><div class="lbl">DOG PICKS</div><div class="val">${dogCount}</div><div class="sub">ML underdog</div></div>
     <div class="pred-box"><div class="lbl">UNDERS</div><div class="val">${underCount}</div><div class="sub">of ${TODAY.length}</div></div>
     <div class="pred-box"><div class="lbl">AVG PROJ</div><div class="val">${(totalProj/TODAY.length || 0).toFixed(1)}</div><div class="sub">runs/game</div></div>
@@ -1034,10 +1074,10 @@ async function runBacktest() {
     if (!pastRes || !pastRes.dates || pastRes.dates.length === 0) {
       btBody.innerHTML = '<tr><td colspan="16" class="loading" style="color:var(--y)">No completed games found for the 2026 season yet. Results will appear here once games are played.</td></tr>';
       renderCharts({ ALL:{}, ML:{}, RL:{}, OU:{} }, {
-        ALL:{'A+':{w:0,t:0},'A':{w:0,t:0},'B':{w:0,t:0},'C':{w:0,t:0},'D':{w:0,t:0}},
-        ML: {'A+':{w:0,t:0},'A':{w:0,t:0},'B':{w:0,t:0},'C':{w:0,t:0},'D':{w:0,t:0}},
-        RL: {'A+':{w:0,t:0},'A':{w:0,t:0},'B':{w:0,t:0},'C':{w:0,t:0},'D':{w:0,t:0}},
-        OU: {'A+':{w:0,t:0},'A':{w:0,t:0},'B':{w:0,t:0},'C':{w:0,t:0},'D':{w:0,t:0}}
+        ALL:{'PRIME':{w:0,t:0},'EDGE':{w:0,t:0},'SKIP':{w:0,t:0}},
+        ML: {'PRIME':{w:0,t:0},'EDGE':{w:0,t:0},'SKIP':{w:0,t:0}},
+        RL: {'PRIME':{w:0,t:0},'EDGE':{w:0,t:0},'SKIP':{w:0,t:0}},
+        OU: {'PRIME':{w:0,t:0},'EDGE':{w:0,t:0},'SKIP':{w:0,t:0}}
       }, { ALL:{ ALL:{} } });
       return;
     }
@@ -1046,8 +1086,8 @@ async function runBacktest() {
     let pl = { ALL: {}, ML: {}, RL: {}, OU: {} };
     let totalGames = 0;
 
-    // monthlyPL[grade][market][monthName] = profit
-    const GRADES  = ['ALL', 'A+', 'A', 'B', 'C', 'D'];
+    // monthlyPL[signal][market][monthName] = profit
+    const GRADES  = ['ALL', 'PRIME', 'EDGE', 'SKIP'];
     const MARKETS = ['ALL', 'ML', 'RL', 'OU'];
     let monthlyPL = {};
     GRADES.forEach(gr  => { monthlyPL[gr]  = {}; MARKETS.forEach(mk => { monthlyPL[gr][mk]  = {}; }); });
@@ -1062,10 +1102,10 @@ async function runBacktest() {
     }
 
     let grHits = {
-       ALL: { 'A+':{w:0,t:0}, 'A':{w:0,t:0}, 'B':{w:0,t:0}, 'C':{w:0,t:0}, 'D':{w:0,t:0} },
-       ML:  { 'A+':{w:0,t:0}, 'A':{w:0,t:0}, 'B':{w:0,t:0}, 'C':{w:0,t:0}, 'D':{w:0,t:0} },
-       RL:  { 'A+':{w:0,t:0}, 'A':{w:0,t:0}, 'B':{w:0,t:0}, 'C':{w:0,t:0}, 'D':{w:0,t:0} },
-       OU:  { 'A+':{w:0,t:0}, 'A':{w:0,t:0}, 'B':{w:0,t:0}, 'C':{w:0,t:0}, 'D':{w:0,t:0} }
+       ALL: { 'PRIME':{w:0,t:0}, 'EDGE':{w:0,t:0}, 'SKIP':{w:0,t:0} },
+       ML:  { 'PRIME':{w:0,t:0}, 'EDGE':{w:0,t:0}, 'SKIP':{w:0,t:0} },
+       RL:  { 'PRIME':{w:0,t:0}, 'EDGE':{w:0,t:0}, 'SKIP':{w:0,t:0} },
+       OU:  { 'PRIME':{w:0,t:0}, 'EDGE':{w:0,t:0}, 'SKIP':{w:0,t:0} }
     };
 
     // Process all dates newest-first so the table shows most recent at top
@@ -1099,7 +1139,7 @@ async function runBacktest() {
             const mlPick   = mod.evH >= mod.evA ? home : away;
             const isDog    = mlPick === home ? mod.homeDog : mod.awayDog;
             const mlEV     = Math.max(mod.evH, mod.evA);
-            const mlGr     = getGrade(mlEV);
+            const mlSig    = getSignal('ML', { ev: mlEV });
             const mlHit    = mlPick === winner;
 
             const payoutLine = mlPick === home ? mod.mkt.ml.h : mod.mkt.ml.a;
@@ -1107,66 +1147,47 @@ async function runBacktest() {
             const mlProfit   = mlHit ? (decOdds - 1) : -1;
             pl.ALL[mlPick] += mlProfit;
             pl.ML[mlPick]  += mlProfit;
-            addMonthly(mlGr.l, 'ML', mStr, mlProfit);
-            grHits.ALL[mlGr.l].t++; grHits.ML[mlGr.l].t++;
-            if (mlHit) { grHits.ALL[mlGr.l].w++; grHits.ML[mlGr.l].w++; }
+            addMonthly(mlSig.l, 'ML', mStr, mlProfit);
+            grHits.ALL[mlSig.l].t++; grHits.ML[mlSig.l].t++;
+            if (mlHit) { grHits.ALL[mlSig.l].w++; grHits.ML[mlSig.l].w++; }
 
             // ─ RL pick ─────────────────────────────────────────────────
-            // RL grading: only rate as A/B/C if ML pick probability clears
-            // meaningful thresholds. Winning by 2+ runs is much harder than
-            // just winning — empirically about P(win)^1.5 approximates P(cover -1.5).
-            // At -110 on RL, breakeven is 52.4%. At +115 on RL, breakeven is 46.5%.
+            // RL signal: based on ML pick probability (mlPickProb >= 0.62 = PRIME)
             const mlPickProb = mlPick === home ? mod.homeProb : mod.awayProb;
             const rlPick     = mlPick;
             const rlHit      = mlPick === home ? (homeScore - awayScore > 1) : (awayScore - homeScore > 1);
             const rlProfit   = rlHit ? 1.15 : -1;
 
-            // Grade RL by ML pick confidence (only strong favorites have real -1.5 EV)
-            // At +115 payout on RL, breakeven is 46.5% of covers.
-            // P(cover -1.5) ≈ ML_winProb^1.5 empirically.
-            //   prob ≥ 0.75: P(cover) ≈ 0.65 → EV = (0.65×1.15) - 0.35 = +0.40 → A+
-            //   prob ≥ 0.68: P(cover) ≈ 0.58 → EV = (0.58×1.15) - 0.42 = +0.25 → A
-            //   prob ≥ 0.62: P(cover) ≈ 0.52 → EV = (0.52×1.15) - 0.48 = +0.12 → B
-            //   prob ≥ 0.56: P(cover) ≈ 0.46 → barely above breakeven         → C
-            //   else: below breakeven                                            → D
-            let rlGrLabel;
-            if      (mlPickProb >= 0.75) rlGrLabel = getGrade(0.15);  // A+
-            else if (mlPickProb >= 0.68) rlGrLabel = getGrade(0.09);  // A
-            else if (mlPickProb >= 0.62) rlGrLabel = getGrade(0.05);  // B
-            else if (mlPickProb >= 0.56) rlGrLabel = getGrade(0.02);  // C
-            else                         rlGrLabel = getGrade(0);     // D
-            const rlGr = rlGrLabel;
+            const rlSig = getSignal('RL', { mlPickProb });
 
             pl.ALL[rlPick] += rlProfit;
             pl.RL[rlPick]  += rlProfit;
-            addMonthly(rlGr.l, 'RL', mStr, rlProfit);
-            grHits.ALL[rlGr.l].t++; grHits.RL[rlGr.l].t++;
-            if (rlHit) { grHits.ALL[rlGr.l].w++; grHits.RL[rlGr.l].w++; }
+            addMonthly(rlSig.l, 'RL', mStr, rlProfit);
+            grHits.ALL[rlSig.l].t++; grHits.RL[rlSig.l].t++;
+            if (rlHit) { grHits.ALL[rlSig.l].w++; grHits.RL[rlSig.l].w++; }
 
             // ─ O/U pick ─────────────────────────────────────────────────
             const ouPick   = mod.projOU > mod.mkt.ou ? 'OVER' : 'UNDER';
             const ouDiff   = mod.projOU - mod.mkt.ou; // signed gap
             const ouAbsDiff = Math.abs(ouDiff);
 
-            // FIX #5: Replace inflated sigmoid OU EV with linear approximation.
-            // Audit showed sigmoid gave A+ to 50% of all games (735/1466).
-            // Real OU edge at -110 requires model to be right > 52.4% of time.
-            // Each 0.5 run of projected gap ≈ 5% real edge (empirical calibration).
-            // Cap at 14% (very high confidence) to prevent grade inflation.
+            // OU EV: linear approximation (audited against 1,466 games).
+            // Each 0.5 run of projected gap ≈ 5% real edge; cap at 14%.
             const ouEV   = Math.min(0.14, Math.max(0, (ouAbsDiff / 0.5) * 0.05 - 0.02));
-            const ouGr   = getGrade(ouEV);
+            const ouSig  = getSignal('OU', { ouAbsDiff });
             const ouHit  = ouPick === 'OVER' ? totalScore > mod.mkt.ou : totalScore < mod.mkt.ou;
             const ouProfit = ouHit ? 0.909 : -1;
             pl.ALL[home] += ouProfit;
             pl.OU[home]  += ouProfit;
-            addMonthly(ouGr.l, 'OU', mStr, ouProfit);
-            grHits.ALL[ouGr.l].t++; grHits.OU[ouGr.l].t++;
-            if (ouHit) { grHits.ALL[ouGr.l].w++; grHits.OU[ouGr.l].w++; }
+            addMonthly(ouSig.l, 'OU', mStr, ouProfit);
+            grHits.ALL[ouSig.l].t++; grHits.OU[ouSig.l].t++;
+            if (ouHit) { grHits.ALL[ouSig.l].w++; grHits.OU[ouSig.l].w++; }
 
             // Best EV label for row
+            const bestSig = mlEV > ouEV ? mlSig : ouSig;
             const bestEVStr = mlEV > ouEV
-              ? `<span class="gr-box ${mlGr.c}">${mlGr.l.charAt(0)}</span> <span style="font-weight:700;margin-left:4px">${mlPick} ML</span>`
-              : `<span class="gr-box ${ouGr.c}">${ouGr.l.charAt(0)}</span> <span style="font-weight:700;margin-left:4px">${ouPick} ${mod.mkt.ou.toFixed(1)}</span>`;
+              ? `<span class="sig-box ${mlSig.c}">${mlSig.icon} ${mlSig.l}</span> <span style="font-weight:700;margin-left:4px">${mlPick} ML</span>`
+              : `<span class="sig-box ${ouSig.c}">${ouSig.icon} ${ouSig.l}</span> <span style="font-weight:700;margin-left:4px">${ouPick} ${mod.mkt.ou.toFixed(1)}</span>`;
 
             // Profit/loss coloring
             const mlProfC = mlProfit > 0 ? 'color:var(--g)' : 'color:var(--r)';
@@ -1180,17 +1201,17 @@ async function runBacktest() {
               <td style="font-weight:700;color:${mlHit&&mlPick===winner?'var(--g)':'var(--tx)'}">${winner}</td>
               <td style="font-weight:700">${mlPick} ${isDog ? '<span class="dog-tag">DOG</span>' : ''}</td>
               <td style="color:var(--b)">${(Math.max(mod.homeProb,mod.awayProb)*100).toFixed(0)}% <span style="font-size:9px;color:var(--tx3)">(model)</span></td>
-              <td><span class="gr-box ${mlGr.c}">${mlGr.l.charAt(0)}</span></td>
+              <td><span class="sig-box ${mlSig.c}">${mlSig.icon} ${mlSig.l}</span></td>
               <td><span class="hit-box ${mlHit?'hit-w':'hit-l'}">${mlHit?'HIT':'MISS'}</span></td>
               <td style="${mlProfC};font-weight:700">${mlProfit>=0?'+':''}${mlProfit.toFixed(2)}u</td>
 
               <td style="font-weight:700">${rlPick} -1.5</td>
-              <td><span class="gr-box ${rlGr.c}">${rlGr.l.charAt(0)}</span></td>
+              <td><span class="sig-box ${rlSig.c}">${rlSig.icon} ${rlSig.l}</span></td>
               <td><span class="hit-box ${rlHit?'hit-w':'hit-l'}">${rlHit?'HIT':'MISS'}</span></td>
               <td style="${rlProfC};font-weight:700">${rlProfit>=0?'+':''}${rlProfit.toFixed(2)}u</td>
 
               <td>${mod.projOU.toFixed(1)} / ${mod.mkt.ou.toFixed(1)}</td>
-              <td><span class="gr-box ${ouGr.c}">${ouGr.l.charAt(0)}</span></td>
+              <td><span class="sig-box ${ouSig.c}">${ouSig.icon} ${ouSig.l}</span></td>
               <td><span class="hit-box ${ouHit?'hit-w':'hit-l'}">${ouHit?'HIT':'MISS'}</span></td>
               <td style="${ouProfC};font-weight:700">${ouProfit>=0?'+':''}${ouProfit.toFixed(2)}u</td>
 
@@ -1271,20 +1292,21 @@ function renderCharts(pl, grHits, monthlyPL) {
     }
   });
 
-  let grades = ['A+', 'A', 'B', 'C', 'D'];
-  let hitRates = grades.map(g => {
-    return grHits.ALL[g].t > 0 ? (grHits.ALL[g].w / grHits.ALL[g].t * 100).toFixed(1) : 0;
+  const SIG_LABELS = ['PRIME', 'EDGE', 'SKIP'];
+  const SIG_COLORS = ['#ffd100', '#00d68f', '#555d78'];
+  let hitRates = SIG_LABELS.map(s => {
+    return grHits.ALL[s]?.t > 0 ? (grHits.ALL[s].w / grHits.ALL[s].t * 100).toFixed(1) : 0;
   });
 
   const ctxGr = document.getElementById('grade-chart').getContext('2d');
   chartsObj.grChart = new Chart(ctxGr, {
     type: 'bar',
     data: {
-      labels: grades,
+      labels: SIG_LABELS,
       datasets: [{
         label: 'Win Rate %',
         data: hitRates,
-        backgroundColor: ['#00d68f', '#4da6ff', '#a78bfa', '#ffd166', '#555d78'],
+        backgroundColor: SIG_COLORS,
         borderRadius: 4
       }]
     },
@@ -1372,10 +1394,13 @@ function updatePlFilter(val) {
 }
 
 function updateGrFilter(val) {
-   let grades = ['A+', 'A', 'B', 'C', 'D'];
-   let hitRates = grades.map(g => currentGrHits[val][g].t > 0 ? (currentGrHits[val][g].w / currentGrHits[val][g].t * 100).toFixed(1) : 0);
-   chartsObj.grChart.data.datasets[0].data = hitRates;
-   chartsObj.grChart.update();
+  const SIG_LABELS = ['PRIME', 'EDGE', 'SKIP'];
+  let hitRates = SIG_LABELS.map(s => {
+    const mkt = currentGrHits[val] || currentGrHits['ALL'];
+    return mkt[s]?.t > 0 ? (mkt[s].w / mkt[s].t * 100).toFixed(1) : 0;
+  });
+  chartsObj.grChart.data.datasets[0].data = hitRates;
+  chartsObj.grChart.update();
 }
 
 // ── KPI DASHBOARD ────────────────────────────────────────────────────────────
@@ -1383,18 +1408,18 @@ function updateKPI() {
   const marketEl = document.getElementById('kpi-market');
   const gradeEl  = document.getElementById('kpi-grade');
   const market   = marketEl ? marketEl.value : 'ALL';
-  const grade    = gradeEl  ? gradeEl.value  : 'ALL';
+  const signal   = gradeEl  ? gradeEl.value  : 'ALL';
   const gh       = currentGrHitsRaw;
   const pl       = currentPlRaw;
 
   if (!gh || !gh.ALL) return;
 
-  const GRADE_KEYS = grade === 'ALL' ? ['A+','A','B','C','D'] : [grade];
+  const SIG_KEYS = signal === 'ALL' ? ['PRIME','EDGE','SKIP'] : [signal];
   const MKT_KEY    = market === 'ALL' ? 'ALL' : market;
 
   let totalBets = 0, totalHits = 0;
-  GRADE_KEYS.forEach(g => {
-    const row = (gh[MKT_KEY] && gh[MKT_KEY][g]) ? gh[MKT_KEY][g] : { w:0, t:0 };
+  SIG_KEYS.forEach(s => {
+    const row = (gh[MKT_KEY] && gh[MKT_KEY][s]) ? gh[MKT_KEY][s] : { w:0, t:0 };
     totalHits += row.w;
     totalBets += row.t;
   });
@@ -1418,7 +1443,7 @@ function updateKPI() {
   };
 
   const mktLabel = { ALL:'All Markets', ML:'Moneyline', RL:'Run Line', OU:'Over/Under' }[market];
-  const grLabel  = grade === 'ALL' ? 'All Grades' : 'Grade ' + grade;
+  const grLabel  = signal === 'ALL' ? 'All Signals' : signal + ' signal';
 
   set('kpi-games', totalBets > 0 ? totalBets.toLocaleString() : '—');
   setBadge('kpi-games-badge', 'neu', mktLabel + ' · ' + grLabel);
