@@ -670,10 +670,14 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
     eraGapLogit = (-aEraGap + hEraGap) * 0.06;
   }
 
-  // Seeded noise — deterministic per matchup
-  // Reduced r1 noise from ±0.45 → ±0.22 so EV driven by real signals, not variance
+  // Seeded noise — deterministic per matchup + date
+  // r1: ML win probability noise (matchup-only, intentionally stable)
+  // r2: OU market line — MUST include dateKey so line varies per game
+  //     Real OU lines change daily based on starting pitchers, weather etc.
+  //     Without dateKey, every Yankees vs Red Sox game all season would get
+  //     the exact same simulated line, making hit/miss comparisons wrong.
   let r1 = seedRand(g.away + g.home + "var1") * 2 - 1;
-  let r2 = seedRand(g.away + g.home + "var2") * 2 - 1;
+  let r2 = seedRand(g.away + g.home + (g.dateKey || '') + "ouline") * 2 - 1;
 
   // Model win probability via logistic regression
   let logit = (h_off + h_pitch + 0.08) - (a_off + a_pitch) + (r1 * 0.22) + eraGapLogit;
@@ -709,8 +713,10 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
     };
   }
 
-  // O/U line varies per game
-  mkt.ou = Math.round((8.5 + (r2 * 1.5)) * 2) / 2;
+  // O/U market line: unique per game (away + home + DATE in seed)
+  // Range ±1.1 runs around 8.25 baseline → rounds to 7.0–9.5 (real MLB distribution)
+  // BUG FIX: old seed had no date → same line for every game in the matchup all season
+  mkt.ou = Math.round((8.25 + (r2 * 1.1)) * 2) / 2;
 
   // Market implied probabilities (true odds, for edge display)
   let mktHomeImplied = amToProb(mkt.ml.h);
@@ -1210,7 +1216,11 @@ async function runBacktest() {
               <td><span class="hit-box ${rlHit?'hit-w':'hit-l'}">${rlHit?'HIT':'MISS'}</span></td>
               <td style="${rlProfC};font-weight:700">${rlProfit>=0?'+':''}${rlProfit.toFixed(2)}u</td>
 
-              <td>${mod.projOU.toFixed(1)} / ${mod.mkt.ou.toFixed(1)}</td>
+              <td>
+                <span style="color:var(--y);font-weight:700">${ouPick} ${mod.mkt.ou.toFixed(1)}</span>
+                <span style="font-size:9px;color:var(--tx3);margin-left:4px;">Mkt line</span><br>
+                <span style="font-size:9px;color:var(--tx3)">Proj: ${mod.projOU.toFixed(1)} &bull; Act: ${totalScore}</span>
+              </td>
               <td><span class="sig-box ${ouSig.c}">${ouSig.icon} ${ouSig.l}</span></td>
               <td><span class="hit-box ${ouHit?'hit-w':'hit-l'}">${ouHit?'HIT':'MISS'}</span></td>
               <td style="${ouProfC};font-weight:700">${ouProfit>=0?'+':''}${ouProfit.toFixed(2)}u</td>
@@ -1231,9 +1241,10 @@ async function runBacktest() {
     const thead = document.querySelector('#bt-body')?.closest('table')?.querySelector('thead tr');
     if (thead) {
       thead.innerHTML = `<th>Date</th><th>Game</th><th>Score</th><th>Winner</th>
-        <th>ML Pick</th><th>Model%</th><th>GR</th><th>ML</th><th>ML P/L</th>
-        <th>RL Pick</th><th>GR</th><th>RL</th><th>RL P/L</th>
-        <th>Proj/Line</th><th>GR</th><th>O/U</th><th>O/U P/L</th><th>Best EV</th>`;
+        <th>ML Pick</th><th>Model%</th><th>Signal</th><th>ML</th><th>ML P/L</th>
+        <th>RL Pick</th><th>Signal</th><th>RL</th><th>RL P/L</th>
+        <th>O/U Pick · Mkt Line</th><th>Signal</th><th>O/U vs Line</th><th>O/U P/L</th><th>Best EV</th>`;
+
     }
 
     renderCharts(pl, grHits, monthlyPL);
