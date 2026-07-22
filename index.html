@@ -1316,6 +1316,10 @@ function renderApp() {
     if(ouPick === 'UNDER') underCount++;
     totalProj += mod.projOU;
 
+    let pickProb = mod.evH > mod.evA ? mod.homeProb : mod.awayProb;
+    let pickLine = mod.evH > mod.evA ? (mkt.rl.hLine||'-1.5') : (mkt.rl.aLine||'+1.5');
+    let fairRLProb = pickLine.includes('-') ? (pickProb * 0.72) : (pickProb + (1 - pickProb) * 0.28);
+
     // PREDICTIONS UI
     let pCardHtml = `
       <div class="gc" id="pred-${g.away}-${g.home}">
@@ -1383,8 +1387,8 @@ function renderApp() {
           </div>
           <div class="pk">
             <div class="pt">RUN LINE</div>
-            <div class="pv">${!bestIsOU ? (mod.evH>mod.evA?g.home:g.away) : g.home} ${mod.evH>mod.evA ? (mkt.rl.hLine||'-1.5') : (mkt.rl.aLine||'+1.5')}</div>
-            <div class="or"><span class="mo">fair ${mod.evH>mod.evA ? (mkt.rl.hLine||'-1.5') : (mkt.rl.aLine||'+1.5')}</span> <span style="color:var(--tx3)">mkt ${getOddsStr(mod.evH>mod.evA ? (mkt.rl.hPrice||-110) : (mkt.rl.aPrice||-110))}</span></div>
+            <div class="pv">${!bestIsOU ? (mod.evH>mod.evA?g.home:g.away) : g.home} ${pickLine}</div>
+            <div class="or"><span class="mo">${getOddsStr(probToAmLine(fairRLProb))}</span> <span style="color:var(--tx3)">mkt ${getOddsStr(mod.evH>mod.evA ? (mkt.rl.hPrice||-110) : (mkt.rl.aPrice||-110))}</span></div>
             <div class="ev">model pick <span style="color:var(--tx3)">${(Math.max(mod.homeProb, mod.awayProb)*100).toFixed(1)}%</span></div>
           </div>
           <div class="pk ${bestIsOU ? 'best-pick' : ''}">
