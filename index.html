@@ -549,6 +549,16 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
   <!-- KPI TOOLBAR -->
   <div class="kpi-toolbar">
     <label>Filter by</label>
+    <select id="kpi-month" class="kpi-sel" onchange="updateKPI()">
+      <option value="ALL">All Months</option>
+      <option value="April">April</option>
+      <option value="May">May</option>
+      <option value="June">June</option>
+      <option value="July">July</option>
+      <option value="August">August</option>
+      <option value="September">September</option>
+      <option value="October">October</option>
+    </select>
     <select id="kpi-market" class="kpi-sel" onchange="updateKPI()">
       <option value="ALL">All Markets</option>
       <option value="ML">Moneyline</option>
@@ -1624,7 +1634,7 @@ async function runBacktest() {
             const _mlOpen = mod.mkt.ml.a, _mlClose = mod.mkt.ml.a;
             const _ou = mod.mkt.ou, _mlPickProb = mlPickProb;
 
-            html += `<tr class="bt-row-click" onclick="showLineMovement('${away}','${home}','${dStr}',${mod.mkt.ml.a},${mod.mkt.ml.h},${mod.mkt.ou},${mlPickProb.toFixed(3)},${awayScore},${homeScore})">
+            html += `<tr class="bt-row-click bt-row-data" data-month="${mStr}" data-ml="${mlSig.l}" data-rl="${rlSig.l}" data-ou="${ouSig.l}" data-ml-pl="${mlProfit}" data-rl-pl="${rlProfit}" data-ou-pl="${ouProfit}" data-ml-hit="${mlHit?1:0}" data-rl-hit="${rlHit?1:0}" data-ou-hit="${ouHit?1:0}" onclick="showLineMovement('${away}','${home}','${dStr}',${mod.mkt.ml.a},${mod.mkt.ml.h},${mod.mkt.ou},${mlPickProb.toFixed(3)},${awayScore},${homeScore})">
               <td style="color:var(--tx2)">${dStr}</td>
               <td style="font-weight:700">${away} @ ${home}</td>
               <td style="color:var(--tx2)">${awayScore}–${homeScore}</td>
@@ -1746,6 +1756,14 @@ function renderCharts(pl, grHits, monthlyPL) {
       }]
     },
     options: {
+      onClick: (e, elements) => {
+        if (elements.length > 0) {
+          const index = elements[0].index;
+          const labels = chartsObj.grChart.data.labels;
+          const el = document.getElementById('kpi-grade');
+          if (el) { el.value = labels[index]; updateKPI(); }
+        }
+      },
       responsive: true,
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
@@ -1805,6 +1823,14 @@ function renderCharts(pl, grHits, monthlyPL) {
       }]
     },
     options: {
+      onClick: (e, elements) => {
+        if (elements.length > 0) {
+          const index = elements[0].index;
+          const label = chartsObj.marketChart.data.labels[index];
+          const el = document.getElementById('kpi-market');
+          if (el) { el.value = label; updateKPI(); }
+        }
+      },
       responsive: true,
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
@@ -1842,21 +1868,56 @@ function updateGrFilter(val) {
 function updateKPI() {
   const marketEl = document.getElementById('kpi-market');
   const gradeEl  = document.getElementById('kpi-grade');
+  const monthEl  = document.getElementById('kpi-month');
+
   const market   = marketEl ? marketEl.value : 'ALL';
   const signal   = gradeEl  ? gradeEl.value  : 'ALL';
-  const gh       = currentGrHitsRaw;
-  const pl       = currentPlRaw;
+  const month    = monthEl  ? monthEl.value  : 'ALL';
 
-  if (!gh || !gh.ALL) return;
+  let totalBets = 0, totalHits = 0, rawUnits = 0;
+  
+  const rows = document.querySelectorAll('#bt-body tr.bt-row-data');
+  rows.forEach(tr => {
+    let show = true;
 
-  const SIG_KEYS = signal === 'ALL' ? ['PRIME','EDGE'] : [signal];
-  const MKT_KEY    = market === 'ALL' ? 'ALL' : market;
+    if (month !== 'ALL' && !tr.getAttribute('data-month').includes(month)) {
+      show = false;
+    }
 
-  let totalBets = 0, totalHits = 0;
-  SIG_KEYS.forEach(s => {
-    const row = (gh[MKT_KEY] && gh[MKT_KEY][s]) ? gh[MKT_KEY][s] : { w:0, t:0 };
-    totalHits += row.w;
-    totalBets += row.t;
+    let hasSignal = false;
+    let bCount = 0, hCount = 0, uCount = 0;
+
+    if (market === 'ALL') {
+      ['ml','rl','ou'].forEach(m => {
+        let sig = tr.getAttribute('data-' + m);
+        if (signal === 'ALL' ? (sig === 'PRIME' || sig === 'EDGE') : sig === signal) {
+          hasSignal = true;
+          bCount++;
+          hCount += parseInt(tr.getAttribute('data-' + m + '-hit'));
+          uCount += parseFloat(tr.getAttribute('data-' + m + '-pl'));
+        }
+      });
+    } else {
+      let m = market.toLowerCase();
+      let sig = tr.getAttribute('data-' + m);
+      if (signal === 'ALL' ? (sig === 'PRIME' || sig === 'EDGE') : sig === signal) {
+        hasSignal = true;
+        bCount++;
+        hCount += parseInt(tr.getAttribute('data-' + m + '-hit'));
+        uCount += parseFloat(tr.getAttribute('data-' + m + '-pl'));
+      }
+    }
+
+    if (!hasSignal) show = false;
+
+    if (show) {
+      tr.style.display = '';
+      totalBets += bCount;
+      totalHits += hCount;
+      rawUnits += uCount;
+    } else {
+      tr.style.display = 'none';
+    }
   });
 
   const totalMisses = totalBets - totalHits;
