@@ -8,17 +8,19 @@ export default async function handler(req, res) {
 
   // Book offsets vs DK baseline (real observed differences, avg across 2024-2025 samples)
   // [mlAwayDelta, mlHomeDelta, rlPriceDelta, ouLineDelta, ouPriceDelta]
+  // Book offsets vs ESPN BET baseline (real observed differences, avg across 2024-2025 samples)
+  // [mlAwayDelta, mlHomeDelta, rlPriceDelta, ouLineDelta, ouPriceDelta]
   const BOOK_OFFSETS = {
-    DraftKings: [0,    0,    0,    0.0,   0],
-    FanDuel:    [-2,  +2,   -1,   0.0,  +1],
-    BetMGM:     [+3,  -3,  +2,   +0.5,  0],
-    Caesars:    [+1,  -1,   0,    0.0,  -1],
-    BetRivers:  [-1,  +1,  -1,  -0.5,   0],
-    ESPNBet:    [+2,  -2,   0,    0.0,  +1],
-    Fanatics:   [-1,  +1,  +1,   0.0,   0],
-    bet365:     [+1,  -1,   0,  +0.5,  -1],
-    HardRock:   [0,    0,  -1,   0.0,   0],
-    PointsBet:  [+2,  -2,  +1,  -0.5,  +1],
+    ESPNBet:    [0,    0,    0,    0.0,   0],
+    DraftKings: [-2,  +2,   0,    0.0,  -1],
+    FanDuel:    [-4,  +4,   -1,   0.0,  0],
+    BetMGM:     [+1,  -1,  +2,   +0.5,  -1],
+    Caesars:    [-1,  +1,   0,    0.0,  -2],
+    BetRivers:  [-3,  +3,  -1,  -0.5,   -1],
+    Fanatics:   [-3,  +3,  +1,   0.0,   -1],
+    bet365:     [-1,  +1,   0,  +0.5,  -2],
+    HardRock:   [-2,  +2,  -1,   0.0,   -1],
+    PointsBet:  [0,    0,  +1,  -0.5,  0],
   };
 
   try {
@@ -63,7 +65,7 @@ export default async function handler(req, res) {
           away: awayTeam.split(' ').pop(),
           home: homeTeam.split(' ').pop(),
           books: {
-            DraftKings: {
+            ESPNBet: {
               ml: { h: hML, a: aML },
               rl: { hLine: hRL, hPrice: hRLP, aLine: aRL, aPrice: aRLP },
               ou: ouLine,
@@ -95,14 +97,14 @@ export default async function handler(req, res) {
 // ── Apply book offsets to populate all 10 books ───────────────────────────
 function applyBookOffsets(games, offsets) {
   return games.map(match => {
-    const dk = match.books.DraftKings;
+    const base = match.books.ESPNBet;
     Object.entries(offsets).forEach(([book, [mlA, mlH, rlPd, ouShift, ouPd]]) => {
-      if (book === 'DraftKings') return;
+      if (book === 'ESPNBet') return;
       match.books[book] = {
-        ml:      { a: dk.ml.a + mlA, h: dk.ml.h + mlH },
-        ou:      +(dk.ou + ouShift).toFixed(1),
-        ouPrice: { o: dk.ouPrice.o + ouPd, u: dk.ouPrice.u - ouPd },
-        rl:      { ...dk.rl, aPrice: dk.rl.aPrice + rlPd, hPrice: dk.rl.hPrice - rlPd },
+        ml:      { a: base.ml.a + mlA, h: base.ml.h + mlH },
+        ou:      +(base.ou + ouShift).toFixed(1),
+        ouPrice: { o: base.ouPrice.o + ouPd, u: base.ouPrice.u - ouPd },
+        rl:      { ...base.rl, aPrice: base.rl.aPrice + rlPd, hPrice: base.rl.hPrice - rlPd },
       };
     });
     return match;
