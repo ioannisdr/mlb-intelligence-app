@@ -214,24 +214,6 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 @media(max-width:900px){ .kpi-grid{grid-template-columns:repeat(3,1fr)} }
 @media(max-width:550px){ .kpi-grid{grid-template-columns:repeat(2,1fr)} }
 
-/* ── PUBLIC BETTING % BADGES ──────────────────────────────── */
-.pub-row {
-  display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;
-  padding:7px 10px; background:rgba(139,145,168,.07);
-  border:1px solid rgba(139,145,168,.15); border-radius:8px;
-}
-.pub-lbl { font-size:9px; color:var(--tx3); text-transform:uppercase; letter-spacing:.4px; align-self:center; white-space:nowrap; }
-.pub-pill {
-  display:inline-flex; align-items:center; gap:4px;
-  padding:3px 8px; border-radius:20px; font-size:9px; font-weight:700;
-  white-space:nowrap;
-}
-.pub-fav  { background:rgba(239,71,111,.12); color:var(--r); border:1px solid rgba(239,71,111,.28); }
-.pub-dog  { background:rgba(0,214,143,.10);  color:var(--g); border:1px solid rgba(0,214,143,.25); }
-.pub-mid  { background:rgba(139,145,168,.1); color:var(--tx2); border:1px solid rgba(139,145,168,.2); }
-.pub-bar  { height:3px; border-radius:2px; background:var(--bdr2); width:60px; overflow:hidden; flex-shrink:0; }
-.pub-bar-fill { height:100%; border-radius:2px; }
-
 /* ── LIVE ODDS MOVEMENT TAB ─────────────────────────────── */
 .odds-header {
   display:flex; align-items:center; justify-content:space-between;
@@ -1378,7 +1360,7 @@ function renderApp() {
           </div>
 
           <div class="weather-row" style="font-size:11px;line-height:1.6;">${mod.wStr}</div>
-          ${buildPubRow(g.away, g.home, mod)}
+
         </div>
 
         
@@ -2029,144 +2011,8 @@ function sw(id, el) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// PUBLIC BETTING % — fetch from /api/public-betting, fall back to simulation
-// ═══════════════════════════════════════════════════════════════════════════════
-let PUBLIC_BETTING = {};  // keyed by "away@home" → { ml:{away,home}, rl:{away,home}, ou:{over,under} }
 
-async function fetchPublicBetting() {
-  try {
-    const res = await fetch('/api/public-betting', { signal: AbortSignal.timeout(5000) });
-    const data = await res.json();
-    if (data.source === 'live' && data.games && data.games.length > 0) {
-      data.games.forEach(g => {
-        if (g.away && g.home) {
-          const awayShort = getTeamName(g.away);
-          const homeShort = getTeamName(g.home);
-          const key = `${awayShort}@${homeShort}`;
-          PUBLIC_BETTING[key] = {
-            ml: g.ml,
-            rl: g.rl,
-            ou: g.ou
-          };
-        }
-      });
-      return;
-    }
-  } catch (_) {}
-  // API returned no live data — generate realistic per-game simulated percentages
-  // Seeded so the same game always gets the same % within a session
-  PUBLIC_BETTING = {};  // filled on demand in getPubPct()
-}
 
-function getPubPct(away, home) {
-  const key = `${away}@${home}`;
-  if (PUBLIC_BETTING[key]) return PUBLIC_BETTING[key];
-  const today = formatDateStr(new Date());
-  // Generate BET% and MONEY% independently — sharp money = high $%, low ticket%
-  const s1 = seedRand(away + home + 'bet_ml' + today);
-  const s2 = seedRand(away + home + 'mon_ml' + today);
-  const s3 = seedRand(away + home + 'bet_rl' + today);
-  const s4 = seedRand(away + home + 'mon_rl' + today);
-  const s5 = seedRand(away + home + 'bet_ou' + today);
-  const s6 = seedRand(away + home + 'mon_ou' + today);
-
-  // Ticket % — public tends to bet favorites/overs (home ~55%)
-  const mlBetHome  = Math.round(32 + s1 * 48);
-  const rlBetHome  = Math.round(30 + s3 * 45);
-  const ouBetOver  = Math.round(38 + s5 * 38);   // public loves overs
-
-  // Money % — can diverge significantly from tickets (sharp action)
-  // Sometimes sharp side has 25% tickets but 85%+ of money
-  const sharpOnHome  = s2 > 0.72;  // 28% chance sharp money on home
-  const sharpOnAway  = s2 < 0.28;  // 28% chance sharp money on away
-  let mlMonHome;
-  if (sharpOnHome)      mlMonHome = Math.round(72 + s2 * 20);      // 72-92%
-  else if (sharpOnAway) mlMonHome = Math.round(8  + s2 * 20);      // 8-28%
-  else                  mlMonHome = Math.round(35 + s2 * 38);      // normal spread
-
-  const sharpOU = s6 > 0.75;
-  let ouMonOver;
-  if (sharpOU)  ouMonOver = Math.round(75 + s6 * 18);              // heavy over money
-  else          ouMonOver = Math.round(30 + s6 * 44);
-
-  const rlMonHome = Math.round(30 + s4 * 44);
-
-  const pub = {
-    ml: { awayBet: 100-mlBetHome, homeBet: mlBetHome,   awayMoney: 100-mlMonHome, homeMoney: mlMonHome },
-    rl: { awayBet: 100-rlBetHome, homeBet: rlBetHome,   awayMoney: 100-rlMonHome, homeMoney: rlMonHome },
-    ou: { overBet: ouBetOver,     underBet: 100-ouBetOver, overMoney: ouMonOver,  underMoney: 100-ouMonOver },
-  };
-  PUBLIC_BETTING[key] = pub;
-  return pub;
-}
-
-function moneyPillCls(pct) {
-  if (pct >= 80) return 'sharp';   // sharp money
-  if (pct >= 60) return 'heavy';   // heavy public
-  return 'normal';
-}
-
-function buildPubRow(away, home, mod) {
-  const pub = getPubPct(away, home);
-
-  // Detect sharp money signals: $% >> ticket% on a side
-  const mlAwaySharp = pub.ml.awayMoney >= 90;
-  const mlHomeSharp = pub.ml.homeMoney >= 90;
-  const ouOverSharp = pub.ou.overMoney  >= 90;
-  const ouUnderSharp= pub.ou.underMoney >= 90;
-  const anySharp = mlAwaySharp || mlHomeSharp || ouOverSharp || ouUnderSharp;
-
-  // Fade signal: model picks opposite of heavy public money
-  const modelFav   = mod.evH >= mod.evA ? home : away;
-  const pubMLFav   = pub.ml.homeMoney >= pub.ml.awayMoney ? home : away;
-  const fadeSignal = pubMLFav !== modelFav && Math.max(pub.ml.homeMoney, pub.ml.awayMoney) >= 65;
-
-  function mktBlock(lbl, leftLabel, leftBet, leftMoney, rightLabel, rightBet, rightMoney) {
-    const leftSharp  = leftMoney  >= 90;
-    const rightSharp = rightMoney >= 90;
-    return `
-      <div style="display:flex;flex-direction:column;gap:2px;min-width:140px">
-        <span class="pub-market-lbl">${lbl}</span>
-        <div style="display:flex;gap:4px;flex-wrap:wrap">
-          <div style="display:flex;flex-direction:column;gap:1px;align-items:flex-start">
-            <span style="font-size:8px;color:var(--tx3)">${leftLabel}</span>
-            <div style="display:flex;gap:2px">
-              <span class="pub-bet-pill">🎟 ${leftBet}%</span>
-              <span class="pub-money-pill ${leftSharp?'sharp':moneyPillCls(leftMoney)}">${leftSharp?'⚡':'$'} ${leftMoney}%</span>
-            </div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:1px;align-items:flex-start">
-            <span style="font-size:8px;color:var(--tx3)">${rightLabel}</span>
-            <div style="display:flex;gap:2px">
-              <span class="pub-bet-pill">🎟 ${rightBet}%</span>
-              <span class="pub-money-pill ${rightSharp?'sharp':moneyPillCls(rightMoney)}">${rightSharp?'⚡':'$'} ${rightMoney}%</span>
-            </div>
-          </div>
-        </div>
-      </div>`;
-  }
-
-  const sharpBadge = anySharp
-    ? `<span class="sharp-badge">⚡ Sharp Money Detected</span>`
-    : '';
-  const fadeBadge = fadeSignal && !anySharp
-    ? `<span style="font-size:8px;font-weight:700;background:rgba(255,209,0,.1);border:1px solid rgba(255,209,0,.25);color:#ffd100;padding:2px 6px;border-radius:8px;white-space:nowrap">⚠️ Fade?</span>`
-    : '';
-
-  return `
-    <div class="pub-row" style="flex-direction:column;gap:6px">
-      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-        <span class="pub-lbl">Public Betting</span>
-        <span style="font-size:8px;color:var(--tx3)">🎟 Tickets &nbsp;·&nbsp; ⚡/$ Money</span>
-        ${sharpBadge}${fadeBadge}
-      </div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap">
-        ${mktBlock('ML', away, pub.ml.awayBet, pub.ml.awayMoney, home, pub.ml.homeBet, pub.ml.homeMoney)}
-        ${mktBlock('RL', away, pub.rl.awayBet, pub.rl.awayMoney, home, pub.rl.homeBet, pub.rl.homeMoney)}
-        ${mktBlock('O/U', 'Over', pub.ou.overBet, pub.ou.overMoney, 'Under', pub.ou.underBet, pub.ou.underMoney)}
-      </div>
-    </div>`;
-}
 
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -2778,8 +2624,7 @@ function renderLiveFallback() {
 
 window.onload = () => { 
   fetchAllData(); 
-  fetchPublicBetting(); 
-  setInterval(fetchPublicBetting, 3600000); // 1 hour polling
+
 };
 
 </script>
