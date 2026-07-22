@@ -1320,6 +1320,9 @@ function renderApp() {
     let pickLine = mod.evH > mod.evA ? (mkt.rl.hLine||'-1.5') : (mkt.rl.aLine||'+1.5');
     let fairRLProb = pickLine.includes('-') ? (pickProb * 0.72) : (pickProb + (1 - pickProb) * 0.28);
 
+    let ouFairProb = (ouEV + 1) / 1.909;
+    let ouFairOdds = getOddsStr(probToAmLine(ouFairProb));
+
     // PREDICTIONS UI
     let pCardHtml = `
       <div class="gc" id="pred-${g.away}-${g.home}">
@@ -1394,7 +1397,7 @@ function renderApp() {
           <div class="pk ${bestIsOU ? 'best-pick' : ''}">
             <div class="pt">O/U ${mkt.ou} (PROJ ${mod.projOU.toFixed(1)})</div>
             <div class="pv" style="color:var(--y)">${ouPick} ${mkt.ou}</div>
-            <div class="or"><span class="mo">-110</span> <span style="color:var(--tx3)">mkt -110</span></div>
+            <div class="or"><span class="mo">${ouFairOdds}</span> <span style="color:var(--tx3)">mkt -110</span></div>
             <div class="ev">edge <span style="color:${bestIsOU?'var(--g)':'var(--tx3)'}">+${(ouEV*100).toFixed(1)}%</span></div>
             ${bestIsOU ? '<div class="best-star">★ Best</div>' : ''}
           </div>
