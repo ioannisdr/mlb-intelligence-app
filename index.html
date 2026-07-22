@@ -1388,9 +1388,9 @@ function renderApp() {
             <div class="ev">model pick <span style="color:var(--tx3)">${(Math.max(mod.homeProb, mod.awayProb)*100).toFixed(1)}%</span></div>
           </div>
           <div class="pk ${bestIsOU ? 'best-pick' : ''}">
-            <div class="pt">O/U ${mkt.ou}</div>
+            <div class="pt">O/U ${mkt.ou} (PROJ ${mod.projOU.toFixed(1)})</div>
             <div class="pv" style="color:var(--y)">${ouPick} ${mkt.ou}</div>
-            <div class="or"><span class="mo">fair ${mod.projOU.toFixed(1)}</span> <span style="color:var(--tx3)">mkt ${mkt.ou}</span></div>
+            <div class="or"><span class="mo">-110</span> <span style="color:var(--tx3)">mkt -110</span></div>
             <div class="ev">edge <span style="color:${bestIsOU?'var(--g)':'var(--tx3)'}">+${(ouEV*100).toFixed(1)}%</span></div>
             ${bestIsOU ? '<div class="best-star">★ Best</div>' : ''}
           </div>
