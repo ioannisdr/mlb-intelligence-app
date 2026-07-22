@@ -1528,7 +1528,7 @@ async function runBacktest() {
   try {
     const pastRes = await fetch(
       'https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=2026-03-20&endDate=' +
-      formatDateStr(new Date()) + '&gameType=R&sportId=1'
+      formatDateStr(new Date()) + '&gameType=R&hydrate=probablePitcher'
     ).then(r => r.json()).catch(() => null);
 
     if (!pastRes || !pastRes.dates || pastRes.dates.length === 0) {
@@ -1575,7 +1575,10 @@ async function runBacktest() {
 
       d.games
         .filter(g => g.gameType === 'R' &&
-          (g.status.abstractGameState === 'Final' || g.status.statusCode === 'F'))
+          (g.status.abstractGameState === 'Final' || 
+           g.status.statusCode === 'F' || 
+           g.status.statusCode === 'O' || 
+           g.status.statusCode === 'CR'))
         .forEach(g => {
           try {
             const away = getTeamName(g.teams.away.team.name);
@@ -1591,8 +1594,11 @@ async function runBacktest() {
             const totalScore = awayScore + homeScore;
             const winner     = homeScore > awayScore ? home : away;
 
+            const awayPName = g.teams.away.probablePitcher?.fullName || 'TBD';
+            const homePName = g.teams.home.probablePitcher?.fullName || 'TBD';
+
             // Use model-derived market (date-keyed noise for per-game variation)
-            const mockG = { away, home, awayP:'TBD', homeP:'TBD', dateKey: d.date };
+            const mockG = { away, home, awayP: awayPName, homeP: homePName, dateKey: d.date };
             const mod   = calculateModel(mockG, null, winner, totalScore);
 
             // ─ ML pick ───────────────────────────────────────────
