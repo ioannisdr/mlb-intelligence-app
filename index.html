@@ -1442,8 +1442,8 @@ function renderApp() {
           ${regInsight}
         </div>
         <div class="bb-right">
-          <div class="bb-odds-prob">${!bestIsOU ? getOddsStr(mlPickLine) : '-110'} <span style="font-size:11px;color:var(--tx2)">(Model: ${pickModelPct}%)</span></div>
-          <div class="bb-mkt">Mkt implied: ${pickMktImplied}%</div>
+          <div class="bb-odds-prob">${!bestIsOU ? getOddsStr(probToAmLine(mod.evH>mod.evA ? mod.homeProb : mod.awayProb)) : ouFairOdds} <span style="font-size:11px;color:var(--tx2)">(Model: ${pickModelPct}%)</span></div>
+          <div class="bb-mkt">mkt ${!bestIsOU ? getOddsStr(mlPickLine) : '-110'} (Implied: ${pickMktImplied}%)</div>
           <div class="bb-edge">Edge: ${edgeSign}${(pickEdge*100).toFixed(1)}%</div>
           <div class="bb-ev">EV: ${bestEV>=0?'+':''}${(bestEV*100).toFixed(1)}%</div>
         </div>
