@@ -577,7 +577,6 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
       <option value="ALL">All Signals</option>
       <option value="PRIME">🔥 PRIME only</option>
       <option value="EDGE">✅ EDGE only</option>
-      <option value="SKIP">⬜ SKIP only</option>
     </select>
     <div style="margin-left:auto;font-size:10px;color:var(--tx3);display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
       <span style="background:rgba(255,209,0,.1);border:1px solid rgba(255,209,0,.28);color:#ffd100;padding:3px 9px;border-radius:20px;font-weight:600;">
@@ -665,7 +664,6 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
             <option value="ALL">All Signals</option>
             <option value="PRIME">🔥 PRIME</option>
             <option value="EDGE">✅ EDGE</option>
-            <option value="SKIP">⬜ SKIP</option>
           </select>
           <select id="mo-mkt" onchange="updateMonthlyFilter()" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bdr2);border-radius:4px;padding:3px 5px;font-size:10px;outline:none;cursor:pointer;">
             <option value="ALL">All Markets</option>
@@ -1506,10 +1504,10 @@ async function runBacktest() {
     if (!pastRes || !pastRes.dates || pastRes.dates.length === 0) {
       btBody.innerHTML = '<tr><td colspan="16" class="loading" style="color:var(--y)">No completed games found for the 2026 season yet. Results will appear here once games are played.</td></tr>';
       renderCharts({ ALL:{}, ML:{}, RL:{}, OU:{} }, {
-        ALL:{'PRIME':{w:0,t:0},'EDGE':{w:0,t:0},'SKIP':{w:0,t:0}},
-        ML: {'PRIME':{w:0,t:0},'EDGE':{w:0,t:0},'SKIP':{w:0,t:0}},
-        RL: {'PRIME':{w:0,t:0},'EDGE':{w:0,t:0},'SKIP':{w:0,t:0}},
-        OU: {'PRIME':{w:0,t:0},'EDGE':{w:0,t:0},'SKIP':{w:0,t:0}}
+        ALL:{'PRIME':{w:0,t:0},'EDGE':{w:0,t:0}},
+        ML: {'PRIME':{w:0,t:0},'EDGE':{w:0,t:0}},
+        RL: {'PRIME':{w:0,t:0},'EDGE':{w:0,t:0}},
+        OU: {'PRIME':{w:0,t:0},'EDGE':{w:0,t:0}}
       }, { ALL:{ ALL:{} } });
       return;
     }
@@ -1519,7 +1517,7 @@ async function runBacktest() {
     let totalGames = 0;
 
     // monthlyPL[signal][market][monthName] = profit
-    const GRADES  = ['ALL', 'PRIME', 'EDGE', 'SKIP'];
+    const GRADES  = ['ALL', 'PRIME', 'EDGE'];
     const MARKETS = ['ALL', 'ML', 'RL', 'OU'];
     let monthlyPL = {};
     GRADES.forEach(gr  => { monthlyPL[gr]  = {}; MARKETS.forEach(mk => { monthlyPL[gr][mk]  = {}; }); });
@@ -1534,10 +1532,10 @@ async function runBacktest() {
     }
 
     let grHits = {
-       ALL: { 'PRIME':{w:0,t:0}, 'EDGE':{w:0,t:0}, 'SKIP':{w:0,t:0} },
-       ML:  { 'PRIME':{w:0,t:0}, 'EDGE':{w:0,t:0}, 'SKIP':{w:0,t:0} },
-       RL:  { 'PRIME':{w:0,t:0}, 'EDGE':{w:0,t:0}, 'SKIP':{w:0,t:0} },
-       OU:  { 'PRIME':{w:0,t:0}, 'EDGE':{w:0,t:0}, 'SKIP':{w:0,t:0} }
+       ALL: { 'PRIME':{w:0,t:0}, 'EDGE':{w:0,t:0} },
+       ML:  { 'PRIME':{w:0,t:0}, 'EDGE':{w:0,t:0} },
+       RL:  { 'PRIME':{w:0,t:0}, 'EDGE':{w:0,t:0} },
+       OU:  { 'PRIME':{w:0,t:0}, 'EDGE':{w:0,t:0} }
     };
 
     // Process all dates newest-first so the table shows most recent at top
@@ -1577,11 +1575,13 @@ async function runBacktest() {
             const payoutLine = mlPick === home ? mod.mkt.ml.h : mod.mkt.ml.a;
             const decOdds    = payoutLine > 0 ? (payoutLine/100)+1 : (100/Math.abs(payoutLine))+1;
             const mlProfit   = mlHit ? (decOdds - 1) : -1;
-            pl.ALL[mlPick] += mlProfit;
-            pl.ML[mlPick]  += mlProfit;
-            addMonthly(mlSig.l, 'ML', mStr, mlProfit);
-            grHits.ALL[mlSig.l].t++; grHits.ML[mlSig.l].t++;
-            if (mlHit) { grHits.ALL[mlSig.l].w++; grHits.ML[mlSig.l].w++; }
+            if (mlSig.l !== 'SKIP') {
+               pl.ALL[mlPick] += mlProfit;
+               pl.ML[mlPick]  += mlProfit;
+               addMonthly(mlSig.l, 'ML', mStr, mlProfit);
+               grHits.ALL[mlSig.l].t++; grHits.ML[mlSig.l].t++;
+               if (mlHit) { grHits.ALL[mlSig.l].w++; grHits.ML[mlSig.l].w++; }
+            }
 
             // ─ RL pick ─────────────────────────────────────────────────
             // RL signal: based on ML pick probability (mlPickProb >= 0.62 = PRIME)
@@ -1592,11 +1592,13 @@ async function runBacktest() {
 
             const rlSig = getSignal('RL', { mlPickProb });
 
-            pl.ALL[rlPick] += rlProfit;
-            pl.RL[rlPick]  += rlProfit;
-            addMonthly(rlSig.l, 'RL', mStr, rlProfit);
-            grHits.ALL[rlSig.l].t++; grHits.RL[rlSig.l].t++;
-            if (rlHit) { grHits.ALL[rlSig.l].w++; grHits.RL[rlSig.l].w++; }
+            if (rlSig.l !== 'SKIP') {
+               pl.ALL[rlPick] += rlProfit;
+               pl.RL[rlPick]  += rlProfit;
+               addMonthly(rlSig.l, 'RL', mStr, rlProfit);
+               grHits.ALL[rlSig.l].t++; grHits.RL[rlSig.l].t++;
+               if (rlHit) { grHits.ALL[rlSig.l].w++; grHits.RL[rlSig.l].w++; }
+            }
 
             // ─ O/U pick ─────────────────────────────────────────────────
             const ouPick   = mod.projOU > mod.mkt.ou ? 'OVER' : 'UNDER';
@@ -1609,11 +1611,13 @@ async function runBacktest() {
             const ouSig  = getSignal('OU', { ouAbsDiff });
             const ouHit  = ouPick === 'OVER' ? totalScore > mod.mkt.ou : totalScore < mod.mkt.ou;
             const ouProfit = ouHit ? 0.909 : -1;
-            pl.ALL[home] += ouProfit;
-            pl.OU[home]  += ouProfit;
-            addMonthly(ouSig.l, 'OU', mStr, ouProfit);
-            grHits.ALL[ouSig.l].t++; grHits.OU[ouSig.l].t++;
-            if (ouHit) { grHits.ALL[ouSig.l].w++; grHits.OU[ouSig.l].w++; }
+            if (ouSig.l !== 'SKIP') {
+               pl.ALL[home] += ouProfit;
+               pl.OU[home]  += ouProfit;
+               addMonthly(ouSig.l, 'OU', mStr, ouProfit);
+               grHits.ALL[ouSig.l].t++; grHits.OU[ouSig.l].t++;
+               if (ouHit) { grHits.ALL[ouSig.l].w++; grHits.OU[ouSig.l].w++; }
+            }
 
             // Best EV label for row
             const bestSig = mlEV > ouEV ? mlSig : ouSig;
@@ -1639,13 +1643,13 @@ async function runBacktest() {
               <td style="font-weight:700">${mlPick} ${isDog ? '<span class="dog-tag">DOG</span>' : ''}</td>
               <td style="color:var(--b)">${(Math.max(mod.homeProb,mod.awayProb)*100).toFixed(0)}% <span style="font-size:9px;color:var(--tx3)">(model)</span></td>
               <td><span class="sig-box ${mlSig.c}">${mlSig.icon} ${mlSig.l}</span></td>
-              <td><span class="hit-box ${mlHit?'hit-w':'hit-l'}">${mlHit?'HIT':'MISS'}</span></td>
-              <td style="${mlProfC};font-weight:700">${mlProfit>=0?'+':''}${mlProfit.toFixed(2)}u</td>
+              <td>${mlSig.l === 'SKIP' ? `<span class="sig-box sig-skip">⬜ SKIP</span>` : `<span class="hit-box ${mlHit?'hit-w':'hit-l'}">${mlHit?'HIT':'MISS'}</span>`}</td>
+              <td style="${mlSig.l === 'SKIP' ? 'color:var(--tx3)' : mlProfC};font-weight:700">${mlSig.l === 'SKIP' ? '—' : `${mlProfit>=0?'+':''}${mlProfit.toFixed(2)}u`}</td>
 
               <td style="font-weight:700">${rlPick} -1.5</td>
               <td><span class="sig-box ${rlSig.c}">${rlSig.icon} ${rlSig.l}</span></td>
-              <td><span class="hit-box ${rlHit?'hit-w':'hit-l'}">${rlHit?'HIT':'MISS'}</span></td>
-              <td style="${rlProfC};font-weight:700">${rlProfit>=0?'+':''}${rlProfit.toFixed(2)}u</td>
+              <td>${rlSig.l === 'SKIP' ? `<span class="sig-box sig-skip">⬜ SKIP</span>` : `<span class="hit-box ${rlHit?'hit-w':'hit-l'}">${rlHit?'HIT':'MISS'}</span>`}</td>
+              <td style="${rlSig.l === 'SKIP' ? 'color:var(--tx3)' : rlProfC};font-weight:700">${rlSig.l === 'SKIP' ? '—' : `${rlProfit>=0?'+':''}${rlProfit.toFixed(2)}u`}</td>
 
               <td>
                 <span style="color:var(--y);font-weight:700">${ouPick} ${mod.mkt.ou.toFixed(1)}</span>
@@ -1653,8 +1657,8 @@ async function runBacktest() {
                 <span style="font-size:9px;color:var(--tx3)">Proj: ${mod.projOU.toFixed(1)} &bull; Act: ${totalScore}</span>
               </td>
               <td><span class="sig-box ${ouSig.c}">${ouSig.icon} ${ouSig.l}</span></td>
-              <td><span class="hit-box ${ouHit?'hit-w':'hit-l'}">${ouHit?'HIT':'MISS'}</span></td>
-              <td style="${ouProfC};font-weight:700">${ouProfit>=0?'+':''}${ouProfit.toFixed(2)}u</td>
+              <td>${ouSig.l === 'SKIP' ? `<span class="sig-box sig-skip">⬜ SKIP</span>` : `<span class="hit-box ${ouHit?'hit-w':'hit-l'}">${ouHit?'HIT':'MISS'}</span>`}</td>
+              <td style="${ouSig.l === 'SKIP' ? 'color:var(--tx3)' : ouProfC};font-weight:700">${ouSig.l === 'SKIP' ? '—' : `${ouProfit>=0?'+':''}${ouProfit.toFixed(2)}u`}</td>
 
               <td>${bestEVStr}</td>
             </tr>`;
@@ -1734,8 +1738,8 @@ function renderCharts(pl, grHits, monthlyPL) {
     }
   });
 
-  const SIG_LABELS = ['PRIME', 'EDGE', 'SKIP'];
-  const SIG_COLORS = ['#ffd100', '#00d68f', '#555d78'];
+  const SIG_LABELS = ['PRIME', 'EDGE'];
+  const SIG_COLORS = ['#ffd100', '#00d68f'];
   let hitRates = SIG_LABELS.map(s => {
     return grHits.ALL[s]?.t > 0 ? (grHits.ALL[s].w / grHits.ALL[s].t * 100).toFixed(1) : 0;
   });
@@ -1836,7 +1840,7 @@ function updatePlFilter(val) {
 }
 
 function updateGrFilter(val) {
-  const SIG_LABELS = ['PRIME', 'EDGE', 'SKIP'];
+  const SIG_LABELS = ['PRIME', 'EDGE'];
   let hitRates = SIG_LABELS.map(s => {
     const mkt = currentGrHits[val] || currentGrHits['ALL'];
     return mkt[s]?.t > 0 ? (mkt[s].w / mkt[s].t * 100).toFixed(1) : 0;
@@ -1856,7 +1860,7 @@ function updateKPI() {
 
   if (!gh || !gh.ALL) return;
 
-  const SIG_KEYS = signal === 'ALL' ? ['PRIME','EDGE','SKIP'] : [signal];
+  const SIG_KEYS = signal === 'ALL' ? ['PRIME','EDGE'] : [signal];
   const MKT_KEY    = market === 'ALL' ? 'ALL' : market;
 
   let totalBets = 0, totalHits = 0;
