@@ -22,13 +22,23 @@ export default async function handler(req, res) {
   };
 
   // ── Strategy 1: DraftKings public event API ────────────────────────────────
+  let dkEventGroupId = 84240;
+  try {
+     const egRes = await fetch('https://sportsbook.draftkings.com/sites/US-SB/api/v5/eventgroups?sportId=9', {
+        headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
+        signal: AbortSignal.timeout(4000)
+     });
+     if (egRes.ok) {
+        const egData = await egRes.json();
+        const mlbGroup = egData?.eventGroups?.find(eg => eg.name === 'MLB');
+        if (mlbGroup) dkEventGroupId = mlbGroup.eventGroupId;
+     }
+  } catch(e) {}
+  
   const DK_URLS = [
-    // Primary: Game lines (Moneyline, Run Line, Total Runs)
-    'https://sportsbook.draftkings.com//sites/US-SB/api/v5/eventgroups/84240/categories/460/subcategories/4536?format=json',
-    // Backup subcategory
-    'https://sportsbook.draftkings.com//sites/US-SB/api/v5/eventgroups/84240/categories/587/subcategories/5096?format=json',
-    // Featured events
-    'https://sportsbook.draftkings.com//sites/US-SB/api/v5/eventgroups/84240?format=json',
+    `https://sportsbook.draftkings.com//sites/US-SB/api/v5/eventgroups/${dkEventGroupId}/categories/460/subcategories/4536?format=json`,
+    `https://sportsbook.draftkings.com//sites/US-SB/api/v5/eventgroups/${dkEventGroupId}/categories/587/subcategories/5096?format=json`,
+    `https://sportsbook.draftkings.com//sites/US-SB/api/v5/eventgroups/${dkEventGroupId}?format=json`,
   ];
 
   for (const DK_URL of DK_URLS) {

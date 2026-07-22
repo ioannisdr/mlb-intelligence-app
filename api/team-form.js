@@ -32,7 +32,10 @@ export default async function handler(req, res) {
       if (data.dates) {
         for (const d of data.dates) {
           for (const g of (d.games || [])) {
+            // Must be final and NOT postponed/cancelled
             if (g.status?.abstractGameState !== 'Final') continue;
+            if (g.status?.detailedState === 'Postponed' || g.status?.detailedState === 'Cancelled') continue;
+            
             const isHome = g.teams.home.team.id === teamId;
             const myScore  = isHome ? (g.teams.home.score ?? 0) : (g.teams.away.score ?? 0);
             const oppScore = isHome ? (g.teams.away.score ?? 0) : (g.teams.home.score ?? 0);

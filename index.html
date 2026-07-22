@@ -1124,14 +1124,10 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
     let mktAwayProbVig = Math.min(0.82, (1 - mktHomeRaw) * 1.0225);
     mkt = {
       ml: { h: probToAmLine(mktHomeProbVig), a: probToAmLine(mktAwayProbVig) },
-      rl: { a: '+1.5', h: '-1.5' }, ou: 8.5
+      rl: { a: '+1.5', h: '-1.5' }, 
+      ou: Math.round((8.25 + (r2 * 1.1)) * 2) / 2
     };
   }
-
-  // O/U market line: unique per game (away + home + DATE in seed)
-  // Range ±1.1 runs around 8.25 baseline → rounds to 7.0–9.5 (real MLB distribution)
-  // BUG FIX: old seed had no date → same line for every game in the matchup all season
-  mkt.ou = Math.round((8.25 + (r2 * 1.1)) * 2) / 2;
 
   // Market implied probabilities (true odds, for edge display)
   let mktHomeImplied = amToProb(mkt.ml.h);
