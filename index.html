@@ -888,8 +888,9 @@ async function fetchAllData() {
 
     // ── Odds ──────────────────────────────────────────────────────────────
     ODDS = {};
-    if (Array.isArray(oddsRes)) {
-      oddsRes.forEach(o => { ODDS[o.home] = o.books || o; });
+    const oddsArr = oddsRes?.games || oddsRes || [];
+    if (Array.isArray(oddsArr)) {
+      oddsArr.forEach(o => { ODDS[o.home] = o.books || o; });
     }
 
     // ── Pitcher stats ─────────────────────────────────────────────────────
@@ -916,11 +917,33 @@ async function fetchAllData() {
     WX    = {}; // will be populated by Open-Meteo calls below
 
     const homesNeedingWeather = new Set();
+    const teamIdsToFetch = new Set();
+
+    if (scheduleRes.dates && scheduleRes.dates[0]) {
+      scheduleRes.dates[0].games.filter(g => g.gameType === 'R').forEach(g => {
+        teamIdsToFetch.add(g.teams.away.team.id);
+        teamIdsToFetch.add(g.teams.home.team.id);
+      });
+    }
+
+    let realTeamForms = {};
+    if (teamIdsToFetch.size > 0) {
+      try {
+        const formRes = await fetch(`/api/team-form?teams=${[...teamIdsToFetch].join(',')}`);
+        if (formRes.ok) {
+           realTeamForms = await formRes.json();
+        }
+      } catch (e) {
+         console.error('Failed to fetch team forms', e);
+      }
+    }
 
     if (scheduleRes.dates && scheduleRes.dates[0]) {
       scheduleRes.dates[0].games.filter(g => g.gameType === 'R').forEach(g => {
         const away = getTeamName(g.teams.away.team.name);
         const home = getTeamName(g.teams.home.team.name);
+        const awayId = g.teams.away.team.id;
+        const homeId = g.teams.home.team.id;
 
         const awayP = g.teams.away.probablePitcher?.fullName || 'TBD';
         const homeP = g.teams.home.probablePitcher?.fullName || 'TBD';
@@ -932,9 +955,6 @@ async function fetchAllData() {
         let awayLineupWoba = null, homeLineupWoba = null;
         const lin = g.lineups;
         if (lin) {
-          // lineups object has homePlayers / awayPlayers arrays
-          // We don't have per-player wOBA in schedule hydration,
-          // so use team wOBA as proxy (enhanced when boxscore is available)
           awayLineupWoba = S[away]?.woba || null;
           homeLineupWoba = S[home]?.woba || null;
         }
@@ -947,15 +967,22 @@ async function fetchAllData() {
           homesNeedingWeather.add(home);
         }
 
+        const getForm = (id, seedStr) => {
+          if (realTeamForms[id] && realTeamForms[id].length > 0) {
+            return realTeamForms[id].map(game => game.won ? 'W' : 'L');
+          }
+          return generateForm(seedStr);
+        };
+
         TODAY.push({
           t: new Date(g.gameDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           away, home, awayP, homeP,
-          awayForm: generateForm(away + home + 'A'),
-          homeForm: generateForm(away + home + 'H'),
+          awayForm: getForm(awayId, away + home + 'A'),
+          homeForm: getForm(homeId, away + home + 'H'),
           awayLineupWoba, homeLineupWoba,
-          awayId: g.teams.away.team.id,   // MLB team ID — used for recent games popup
-          homeId: g.teams.home.team.id,
-          gamePk: g.gamePk,               // used for live scores
+          awayId,
+          homeId,
+          gamePk: g.gamePk,
         });
       });
     }
@@ -2011,14 +2038,15 @@ async function fetchPublicBetting() {
     const res = await fetch('/api/public-betting', { signal: AbortSignal.timeout(5000) });
     const data = await res.json();
     if (data.source === 'live' && data.games && data.games.length > 0) {
-      // Parse live data — map by team name fragments
       data.games.forEach(g => {
-        if (g.team) {
-          const key = g.team.toLowerCase();
+        if (g.away && g.home) {
+          const awayShort = getTeamName(g.away);
+          const homeShort = getTeamName(g.home);
+          const key = `${awayShort}@${homeShort}`;
           PUBLIC_BETTING[key] = {
-            mlPct: g.mlPct || 50,
-            rlPct: g.rlPct || 50,
-            ouPct: g.ouPct || 50,
+            ml: g.ml,
+            rl: g.rl,
+            ou: g.ou
           };
         }
       });
@@ -2748,7 +2776,11 @@ function renderLiveFallback() {
   el.innerHTML = html;
 }
 
-window.onload = () => { fetchAllData(); fetchPublicBetting(); };
+window.onload = () => { 
+  fetchAllData(); 
+  fetchPublicBetting(); 
+  setInterval(fetchPublicBetting, 3600000); // 1 hour polling
+};
 
 </script>
 </body>
