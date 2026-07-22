@@ -488,9 +488,12 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
   <div style="overflow-x:auto;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--R);padding:10px;">
     <table class="bt-main-t">
       <thead><tr>
-        <th>Date</th><th>Game</th><th>Score</th><th>Winner</th><th>ML Pick</th><th>Model%</th><th>ML GR</th><th>ML</th>
-        <th>RL Pick</th><th>RL GR</th><th>RL</th><th>Proj</th><th>Line</th><th>O/U GR</th><th>O/U</th><th>Best EV</th>
+        <th>Date</th><th>Game</th><th>Score</th><th>Winner</th>
+        <th>ML Pick</th><th>Model%</th><th>Signal</th><th>ML</th><th>ML P/L</th>
+        <th>RL Pick</th><th>Signal</th><th>RL</th><th>RL P/L</th>
+        <th>O/U Pick · Mkt Line</th><th>Signal</th><th>O/U vs Line</th><th>O/U P/L</th><th>Best EV</th>
       </tr></thead>
+
       <tbody id="bt-body"></tbody>
     </table>
   </div>
@@ -1776,27 +1779,35 @@ function getPubPct(away, home) {
   return pub;
 }
 
-function pubPillHtml(label, pct, favorable) {
-  const cls = pct >= 60 ? 'pub-fav' : pct <= 40 ? 'pub-dog' : 'pub-mid';
-  const barColor = pct >= 60 ? '#ef476f' : pct <= 40 ? '#00d68f' : '#8b91a8';
-  return `
-    <span class="pub-pill ${cls}">
-      <span>${label}</span>
-      <span class="pub-bar"><div class="pub-bar-fill" style="width:${pct}%;background:${barColor}"></div></span>
-      <strong>${pct}%</strong>
-    </span>`;
+
+function pubPillHtml(label, pct) {
+  const cls = pct >= 65 ? 'pub-fav' : pct <= 35 ? 'pub-dog' : 'pub-mid';
+  const barColor = pct >= 65 ? '#ef476f' : pct <= 35 ? '#00d68f' : '#8b91a8';
+  return `<span class="pub-pill ${cls}">
+    ${label}: <span class="pub-bar"><div class="pub-bar-fill" style="width:${pct}%;background:${barColor}"></div></span>
+    <strong>${pct}%</strong>
+  </span>`;
 }
 
 function buildPubRow(away, home, mod) {
   const pub = getPubPct(away, home);
-  const mlPick = mod.evH >= mod.evA ? home : away;
-  const ouPick = mod.projOU > mod.mkt.ou ? 'Over' : 'Under';
+  // Determine which side public favors (and whether model disagrees = fade opportunity)
+  const pubMLFav  = pub.ml.home >= pub.ml.away ? home : away;
+  const modelFav  = mod.evH >= mod.evA ? home : away;
+  const fadeSignal = pubMLFav !== modelFav && Math.max(pub.ml.home, pub.ml.away) >= 65;
+  const fadeHtml = fadeSignal
+    ? `<span style="background:rgba(255,209,0,.12);border:1px solid rgba(255,209,0,.3);color:#ffd100;font-size:8px;font-weight:800;padding:2px 6px;border-radius:10px;margin-left:4px">⚠️ Fade public?</span>`
+    : '';
   return `
     <div class="pub-row">
-      <span class="pub-lbl">Public Action</span>
-      ${pubPillHtml(`ML: ${away} ${pub.ml.away}% · ${home} ${pub.ml.home}%`, pub.ml.home, mlPick === home)}
-      ${pubPillHtml(`RL: ${pub.rl.home}% on ${home}`, pub.rl.home, mlPick === home)}
-      ${pubPillHtml(`O/U: ${pub.ou.over}% OVER · ${pub.ou.under}% UNDER`, pub.ou.over, ouPick === 'Over')}
+      <span class="pub-lbl">Public %</span>
+      <span style="font-size:9px;color:var(--tx3);white-space:nowrap">ML</span>
+      ${pubPillHtml(away, pub.ml.away)}
+      ${pubPillHtml(home, pub.ml.home)}
+      <span style="font-size:9px;color:var(--tx3);margin-left:4px;white-space:nowrap">O/U</span>
+      ${pubPillHtml('Over', pub.ou.over)}
+      ${pubPillHtml('Under', pub.ou.under)}
+      ${fadeHtml}
     </div>`;
 }
 
