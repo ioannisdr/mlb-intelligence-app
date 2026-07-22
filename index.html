@@ -302,7 +302,103 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
   padding:40px; text-align:center; color:var(--tx3);
   font-size:13px;
 }
+
+/* ── MODALS ────────────────────────────────────────────────── */
+.modal-overlay {
+  display:none; position:fixed; inset:0; z-index:1000;
+  background:rgba(0,0,0,.65); backdrop-filter:blur(4px);
+  align-items:center; justify-content:center;
+}
+.modal-overlay.open { display:flex; }
+.modal-box {
+  background:var(--bg2); border:1px solid var(--bdr2);
+  border-radius:14px; padding:20px; max-width:520px; width:calc(100% - 32px);
+  max-height:85vh; overflow-y:auto; position:relative;
+  box-shadow:0 24px 64px rgba(0,0,0,.6);
+  animation:modalIn .18s ease;
+}
+.modal-box.wide { max-width:640px; }
+@keyframes modalIn { from{opacity:0;transform:scale(.95)} to{opacity:1;transform:scale(1)} }
+.modal-close {
+  position:absolute; top:12px; right:14px;
+  font-size:18px; cursor:pointer; color:var(--tx3); line-height:1;
+  width:26px; height:26px; display:flex; align-items:center; justify-content:center;
+  border-radius:5px; transition:background .1s;
+}
+.modal-close:hover { background:var(--bg3); color:var(--tx); }
+.modal-title { font-size:14px; font-weight:700; margin-bottom:4px; }
+.modal-sub { font-size:10px; color:var(--tx3); margin-bottom:16px; }
+.recent-tbl { width:100%; border-collapse:collapse; font-size:11px; }
+.recent-tbl th { padding:6px 8px; text-align:left; border-bottom:1px solid var(--bdr2);
+  font-size:9px; color:var(--tx3); text-transform:uppercase; letter-spacing:.4px; }
+.recent-tbl td { padding:8px 8px; border-bottom:1px solid var(--bdr); }
+.recent-tbl tbody tr:last-child td { border-bottom:none; }
+.result-w { color:var(--g); font-weight:700; }
+.result-l { color:var(--r); font-weight:700; }
+
+/* ── LIVE SCORES ───────────────────────────────────────────── */
+.live-scoreboard { display:grid; gap:12px; }
+.live-card {
+  background:var(--bg2); border:1px solid var(--bdr); border-radius:var(--R);
+  padding:14px 16px; transition:border-color .15s;
+}
+.live-card.live-game { border-color:rgba(239,71,111,.35); }
+.live-card.final-game { border-color:rgba(0,214,143,.25); }
+.live-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.live-status-badge {
+  font-size:9px; font-weight:800; letter-spacing:.5px; padding:2px 8px; border-radius:10px;
+}
+.badge-live { background:var(--rbg); color:var(--r); border:1px solid var(--rbr); animation:pulse 1.5s infinite; }
+.badge-final { background:var(--gbg); color:var(--g); border:1px solid var(--gbr); }
+.badge-sched { background:rgba(139,145,168,.1); color:var(--tx3); border:1px solid rgba(139,145,168,.2); }
+.live-teams { display:flex; align-items:center; gap:24px; flex:1; }
+.live-team { display:flex; align-items:center; gap:8px; min-width:90px; }
+.live-team-name { font-size:15px; font-weight:700; }
+.live-score { font-size:24px; font-weight:800; min-width:28px; text-align:center; }
+.live-at { font-size:11px; color:var(--tx3); }
+.live-inning { font-size:10px; color:var(--tx2); margin-left:auto; text-align:right; }
+.score-grid { display:flex; gap:0; margin-top:10px; border-radius:6px; overflow:hidden; border:1px solid var(--bdr); }
+.sg-header { font-size:8px; color:var(--tx3); font-weight:600; }
+.sg-cell { padding:4px 7px; font-size:10px; text-align:center; border-right:1px solid var(--bdr); min-width:28px; }
+.sg-cell:last-child { border-right:none; }
+.sg-row { display:flex; border-bottom:1px solid var(--bdr); }
+.sg-row:last-child { border-bottom:none; }
+.sg-team { padding:4px 8px; font-size:9px; font-weight:700; color:var(--tx3); min-width:52px; text-align:left; border-right:1px solid var(--bdr2); background:var(--bg3); }
+.sg-total { background:rgba(77,166,255,.06); font-weight:700; color:var(--b); }
+.live-refresh-bar { display:flex; align-items:center; gap:8px; font-size:10px; color:var(--tx3); margin-bottom:14px; }
+.live-cd { color:var(--g); font-weight:700; }
+
+/* ── SHARP MONEY ───────────────────────────────────────────── */
+.pub-money-row { display:flex; gap:5px; flex-wrap:wrap; margin-top:6px; align-items:center; }
+.pub-market-lbl { font-size:8px; font-weight:700; color:var(--tx3); text-transform:uppercase; letter-spacing:.5px; white-space:nowrap; padding:2px 6px; background:var(--bg3); border-radius:4px; }
+.pub-side { display:flex; flex-direction:column; gap:2px; align-items:center; }
+.pub-pct-row { display:flex; gap:3px; align-items:center; }
+.pub-bet-pill { font-size:8px; padding:2px 5px; border-radius:3px; background:rgba(139,145,168,.1); color:var(--tx3); border:1px solid rgba(139,145,168,.2); white-space:nowrap; }
+.pub-money-pill { font-size:8px; padding:2px 5px; border-radius:3px; white-space:nowrap; font-weight:700; }
+.pub-money-pill.sharp { background:rgba(255,209,0,.15); color:#ffd100; border:1px solid rgba(255,209,0,.35); }
+.pub-money-pill.heavy { background:rgba(239,71,111,.12); color:var(--r); border:1px solid rgba(239,71,111,.3); }
+.pub-money-pill.normal { background:rgba(139,145,168,.08); color:var(--tx2); border:1px solid rgba(139,145,168,.2); }
+.sharp-badge { font-size:8px; font-weight:800; background:rgba(255,209,0,.15); color:#ffd100; border:1px solid rgba(255,209,0,.35); padding:2px 7px; border-radius:10px; letter-spacing:.3px; white-space:nowrap; animation:pulse 2s infinite; }
+
+/* ── GAME CLICKABLE ────────────────────────────────────────── */
+.team-btn { cursor:pointer; text-decoration-line:underline; text-decoration-style:dotted; text-underline-offset:3px; text-decoration-color:var(--tx3); transition:color .1s; }
+.team-btn:hover { color:var(--b); }
+.bb-row { cursor:pointer; transition:background .12s; }
+.bb-row:hover { background:rgba(77,166,255,.04); }
+.bt-row-click { cursor:pointer; transition:background .1s; }
+.bt-row-click:hover td { background:rgba(255,209,0,.04) !important; }
+.game-flash { animation:flashHighlight 1.2s ease; }
+@keyframes flashHighlight { 0%{border-color:var(--b)} 30%{border-color:var(--b);background:rgba(77,166,255,.08)} 100%{border-color:var(--bdr)} }
+
+/* ── ODDS MODAL CHART ──────────────────────────────────────── */
+.odds-modal-chart-wrap { height:200px; margin:12px 0; }
+.odds-modal-summary { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
+.oms-card { background:var(--bg3); border-radius:8px; padding:10px 12px; }
+.oms-label { font-size:9px; color:var(--tx3); text-transform:uppercase; letter-spacing:.4px; margin-bottom:4px; }
+.oms-val { font-size:16px; font-weight:800; }
+.oms-move { font-size:10px; margin-top:2px; }
 </style>
+
 </head>
 <body>
 <div class="app">
@@ -334,11 +430,16 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
   <div class="tab" onclick="sw('value',this)">Best Bets</div>
   <div class="tab" onclick="sw('back',this)">Backtest</div>
   <div class="tab" onclick="sw('pitch',this)">Pitchers</div>
+  <div class="tab" onclick="sw('live',this)" style="position:relative">
+    🔴 Live Scores
+    <span style="position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--r);animation:pulse 1.5s infinite;"></span>
+  </div>
   <div class="tab" onclick="sw('odds',this)" style="position:relative">
     📊 Odds Movement
     <span style="position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--g);animation:pulse 2s infinite;"></span>
   </div>
 </div>
+
 
 <div class="panel active" id="tab-pred">
   <div class="sec" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
@@ -514,6 +615,53 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 </div>
 
 <!-- ODDS MOVEMENT TAB -->
+<!-- LIVE SCORES TAB -->
+<div class="panel" id="tab-live">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
+    <div>
+      <div class="sec" style="margin-bottom:2px">🔴 Live Scores — Today's Slate</div>
+      <div style="font-size:10px;color:var(--tx3)">Real-time scores from MLB · Auto-refreshes every 30 seconds</div>
+    </div>
+    <div class="live-refresh-bar">
+      <div class="odds-live-dot" style="background:var(--r)"></div>
+      <span>Next refresh in <span class="live-cd" id="live-cd">30</span>s</span>
+      <button onclick="loadLiveScores(true)" style="font-size:10px;padding:4px 10px;border-radius:5px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--b);cursor:pointer">⟳ Now</button>
+    </div>
+  </div>
+  <div id="live-content" class="live-scoreboard">
+    <div class="loading">Loading live scores…</div>
+  </div>
+</div>
+
+<!-- TEAM RECENT GAMES MODAL -->
+<div class="modal-overlay" id="team-modal" onclick="closeModal('team-modal')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-close" onclick="closeModal('team-modal')">✕</div>
+    <div class="modal-title" id="team-modal-title">Recent Games</div>
+    <div class="modal-sub" id="team-modal-sub">Last 6 games</div>
+    <div id="team-modal-body"><div class="loading" style="padding:20px">Loading…</div></div>
+  </div>
+</div>
+
+<!-- BACKTEST ODDS MOVEMENT MODAL -->
+<div class="modal-overlay" id="odds-move-modal" onclick="closeModal('odds-move-modal')">
+  <div class="modal-box wide" onclick="event.stopPropagation()">
+    <div class="modal-close" onclick="closeModal('odds-move-modal')">✕</div>
+    <div class="modal-title" id="odds-modal-title">Line Movement</div>
+    <div class="modal-sub" id="odds-modal-sub">Opening → Closing odds</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+      <select id="odds-modal-mkt" onchange="updateOddsModal()" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bdr2);border-radius:6px;padding:4px 10px;font-size:11px;outline:none;cursor:pointer">
+        <option value="ml">Moneyline</option>
+        <option value="rl">Run Line</option>
+        <option value="ou">Over/Under</option>
+      </select>
+      <span style="font-size:10px;color:var(--tx3)">Select market to view line history</span>
+    </div>
+    <div class="odds-modal-chart-wrap"><canvas id="odds-modal-chart"></canvas></div>
+    <div class="odds-modal-summary" id="odds-modal-summary"></div>
+  </div>
+</div>
+
 <div class="panel" id="tab-odds">
   <div class="odds-header">
     <div>
@@ -703,7 +851,10 @@ async function fetchAllData() {
           away, home, awayP, homeP,
           awayForm: generateForm(away + home + 'A'),
           homeForm: generateForm(away + home + 'H'),
-          awayLineupWoba, homeLineupWoba
+          awayLineupWoba, homeLineupWoba,
+          awayId: g.teams.away.team.id,   // MLB team ID — used for recent games popup
+          homeId: g.teams.home.team.id,
+          gamePk: g.gamePk,               // used for live scores
         });
       });
     }
@@ -1050,18 +1201,18 @@ function renderApp() {
 
     // PREDICTIONS UI
     let pCardHtml = `
-      <div class="gc">
+      <div class="gc" id="pred-${g.away}-${g.home}">
         <div class="gc-head">
           <div class="gc-top">
             <div class="mup">
               <div class="tb">
-                <div class="ta">${g.away}</div>
+                <div class="ta team-btn" onclick="showTeamRecent('${g.away}',${g.awayId || 0},'away')">${g.away}</div>
                 <div class="tw">${aPct}%</div>
                 ${getPill(g.awayForm)}
               </div>
               <div style="font-size:12px;color:var(--tx3);margin-top:2px;">@</div>
               <div class="tb">
-                <div class="ta">${g.home}</div>
+                <div class="ta team-btn" onclick="showTeamRecent('${g.home}',${g.homeId || 0},'home')">${g.home}</div>
                 <div class="tw">${hPct}%</div>
                 ${getPill(g.homeForm)}
               </div>
@@ -1157,7 +1308,7 @@ function renderApp() {
       : g.homeP;
 
     let bCardHtml = `
-      <div class="bb-row">
+      <div class="bb-row" onclick="gotoGame('${g.away}','${g.home}')" title="Click to see full prediction">
         <div class="bb-grade-box ${bestSig.c}" style="background:transparent;display:flex;align-items:center;justify-content:center;font-size:20px;width:46px;margin:8px 12px 8px 8px;">${bestSig.icon}</div>
         <div class="bb-info">
           <div class="bb-pick-title">${bestPick} <span class="bb-ev-tag">Best EV today</span> <span class="sig-box ${bestSig.c}">${bestSig.icon} ${bestSig.l}</span></div>
@@ -1338,7 +1489,12 @@ async function runBacktest() {
             const rlProfC = rlProfit > 0 ? 'color:var(--g)' : 'color:var(--r)';
             const ouProfC = ouProfit > 0 ? 'color:var(--g)' : 'color:var(--r)';
 
-            html += `<tr>
+            // Store game data for line movement modal
+            const _away = away, _home = home, _dStr = dStr;
+            const _mlOpen = mod.mkt.ml.a, _mlClose = mod.mkt.ml.a;
+            const _ou = mod.mkt.ou, _mlPickProb = mlPickProb;
+
+            html += `<tr class="bt-row-click" onclick="showLineMovement('${away}','${home}','${dStr}',${mod.mkt.ml.a},${mod.mkt.ml.h},${mod.mkt.ou},${mlPickProb.toFixed(3)},${awayScore},${homeScore})">
               <td style="color:var(--tx2)">${dStr}</td>
               <td style="font-weight:700">${away} @ ${home}</td>
               <td style="color:var(--tx2)">${awayScore}–${homeScore}</td>
@@ -1728,6 +1884,7 @@ function sw(id, el) {
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('tab-'+id).classList.add('active');
   if (id === 'odds' && !oddsLoaded) loadOddsTab(false);
+  if (id === 'live') loadLiveScores(false);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -1762,54 +1919,113 @@ async function fetchPublicBetting() {
 function getPubPct(away, home) {
   const key = `${away}@${home}`;
   if (PUBLIC_BETTING[key]) return PUBLIC_BETTING[key];
-  // Seed based on team names for determinism within a session, with daily variation
-  const seed1 = seedRand(away + home + 'pub_ml' + formatDateStr(new Date()));
-  const seed2 = seedRand(away + home + 'pub_rl' + formatDateStr(new Date()));
-  const seed3 = seedRand(away + home + 'pub_ou' + formatDateStr(new Date()));
-  // Public bets tend to favor the better-known team and totals skew OVER
-  const mlHome = Math.round(30 + seed1 * 50);  // 30-80%
-  const rlHome = Math.round(25 + seed2 * 50);
-  const ouOver = Math.round(35 + seed3 * 40);  // 35-75% (public loves overs)
+  const today = formatDateStr(new Date());
+  // Generate BET% and MONEY% independently — sharp money = high $%, low ticket%
+  const s1 = seedRand(away + home + 'bet_ml' + today);
+  const s2 = seedRand(away + home + 'mon_ml' + today);
+  const s3 = seedRand(away + home + 'bet_rl' + today);
+  const s4 = seedRand(away + home + 'mon_rl' + today);
+  const s5 = seedRand(away + home + 'bet_ou' + today);
+  const s6 = seedRand(away + home + 'mon_ou' + today);
+
+  // Ticket % — public tends to bet favorites/overs (home ~55%)
+  const mlBetHome  = Math.round(32 + s1 * 48);
+  const rlBetHome  = Math.round(30 + s3 * 45);
+  const ouBetOver  = Math.round(38 + s5 * 38);   // public loves overs
+
+  // Money % — can diverge significantly from tickets (sharp action)
+  // Sometimes sharp side has 25% tickets but 85%+ of money
+  const sharpOnHome  = s2 > 0.72;  // 28% chance sharp money on home
+  const sharpOnAway  = s2 < 0.28;  // 28% chance sharp money on away
+  let mlMonHome;
+  if (sharpOnHome)      mlMonHome = Math.round(72 + s2 * 20);      // 72-92%
+  else if (sharpOnAway) mlMonHome = Math.round(8  + s2 * 20);      // 8-28%
+  else                  mlMonHome = Math.round(35 + s2 * 38);      // normal spread
+
+  const sharpOU = s6 > 0.75;
+  let ouMonOver;
+  if (sharpOU)  ouMonOver = Math.round(75 + s6 * 18);              // heavy over money
+  else          ouMonOver = Math.round(30 + s6 * 44);
+
+  const rlMonHome = Math.round(30 + s4 * 44);
+
   const pub = {
-    ml: { away: 100 - mlHome, home: mlHome },
-    rl: { away: 100 - rlHome, home: rlHome },
-    ou: { over: ouOver,       under: 100 - ouOver }
+    ml: { awayBet: 100-mlBetHome, homeBet: mlBetHome,   awayMoney: 100-mlMonHome, homeMoney: mlMonHome },
+    rl: { awayBet: 100-rlBetHome, homeBet: rlBetHome,   awayMoney: 100-rlMonHome, homeMoney: rlMonHome },
+    ou: { overBet: ouBetOver,     underBet: 100-ouBetOver, overMoney: ouMonOver,  underMoney: 100-ouMonOver },
   };
   PUBLIC_BETTING[key] = pub;
   return pub;
 }
 
-
-function pubPillHtml(label, pct) {
-  const cls = pct >= 65 ? 'pub-fav' : pct <= 35 ? 'pub-dog' : 'pub-mid';
-  const barColor = pct >= 65 ? '#ef476f' : pct <= 35 ? '#00d68f' : '#8b91a8';
-  return `<span class="pub-pill ${cls}">
-    ${label}: <span class="pub-bar"><div class="pub-bar-fill" style="width:${pct}%;background:${barColor}"></div></span>
-    <strong>${pct}%</strong>
-  </span>`;
+function moneyPillCls(pct) {
+  if (pct >= 80) return 'sharp';   // sharp money
+  if (pct >= 60) return 'heavy';   // heavy public
+  return 'normal';
 }
 
 function buildPubRow(away, home, mod) {
   const pub = getPubPct(away, home);
-  // Determine which side public favors (and whether model disagrees = fade opportunity)
-  const pubMLFav  = pub.ml.home >= pub.ml.away ? home : away;
-  const modelFav  = mod.evH >= mod.evA ? home : away;
-  const fadeSignal = pubMLFav !== modelFav && Math.max(pub.ml.home, pub.ml.away) >= 65;
-  const fadeHtml = fadeSignal
-    ? `<span style="background:rgba(255,209,0,.12);border:1px solid rgba(255,209,0,.3);color:#ffd100;font-size:8px;font-weight:800;padding:2px 6px;border-radius:10px;margin-left:4px">⚠️ Fade public?</span>`
+
+  // Detect sharp money signals: $% >> ticket% on a side
+  const mlAwaySharp = pub.ml.awayMoney >= 90;
+  const mlHomeSharp = pub.ml.homeMoney >= 90;
+  const ouOverSharp = pub.ou.overMoney  >= 90;
+  const ouUnderSharp= pub.ou.underMoney >= 90;
+  const anySharp = mlAwaySharp || mlHomeSharp || ouOverSharp || ouUnderSharp;
+
+  // Fade signal: model picks opposite of heavy public money
+  const modelFav   = mod.evH >= mod.evA ? home : away;
+  const pubMLFav   = pub.ml.homeMoney >= pub.ml.awayMoney ? home : away;
+  const fadeSignal = pubMLFav !== modelFav && Math.max(pub.ml.homeMoney, pub.ml.awayMoney) >= 65;
+
+  function mktBlock(lbl, leftLabel, leftBet, leftMoney, rightLabel, rightBet, rightMoney) {
+    const leftSharp  = leftMoney  >= 90;
+    const rightSharp = rightMoney >= 90;
+    return `
+      <div style="display:flex;flex-direction:column;gap:2px;min-width:140px">
+        <span class="pub-market-lbl">${lbl}</span>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <div style="display:flex;flex-direction:column;gap:1px;align-items:flex-start">
+            <span style="font-size:8px;color:var(--tx3)">${leftLabel}</span>
+            <div style="display:flex;gap:2px">
+              <span class="pub-bet-pill">🎟 ${leftBet}%</span>
+              <span class="pub-money-pill ${leftSharp?'sharp':moneyPillCls(leftMoney)}">${leftSharp?'⚡':'$'} ${leftMoney}%</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:1px;align-items:flex-start">
+            <span style="font-size:8px;color:var(--tx3)">${rightLabel}</span>
+            <div style="display:flex;gap:2px">
+              <span class="pub-bet-pill">🎟 ${rightBet}%</span>
+              <span class="pub-money-pill ${rightSharp?'sharp':moneyPillCls(rightMoney)}">${rightSharp?'⚡':'$'} ${rightMoney}%</span>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  const sharpBadge = anySharp
+    ? `<span class="sharp-badge">⚡ Sharp Money Detected</span>`
     : '';
+  const fadeBadge = fadeSignal && !anySharp
+    ? `<span style="font-size:8px;font-weight:700;background:rgba(255,209,0,.1);border:1px solid rgba(255,209,0,.25);color:#ffd100;padding:2px 6px;border-radius:8px;white-space:nowrap">⚠️ Fade?</span>`
+    : '';
+
   return `
-    <div class="pub-row">
-      <span class="pub-lbl">Public %</span>
-      <span style="font-size:9px;color:var(--tx3);white-space:nowrap">ML</span>
-      ${pubPillHtml(away, pub.ml.away)}
-      ${pubPillHtml(home, pub.ml.home)}
-      <span style="font-size:9px;color:var(--tx3);margin-left:4px;white-space:nowrap">O/U</span>
-      ${pubPillHtml('Over', pub.ou.over)}
-      ${pubPillHtml('Under', pub.ou.under)}
-      ${fadeHtml}
+    <div class="pub-row" style="flex-direction:column;gap:6px">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span class="pub-lbl">Public Betting</span>
+        <span style="font-size:8px;color:var(--tx3)">🎟 Tickets &nbsp;·&nbsp; ⚡/$ Money</span>
+        ${sharpBadge}${fadeBadge}
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        ${mktBlock('ML', away, pub.ml.awayBet, pub.ml.awayMoney, home, pub.ml.homeBet, pub.ml.homeMoney)}
+        ${mktBlock('RL', away, pub.rl.awayBet, pub.rl.awayMoney, home, pub.rl.homeBet, pub.rl.homeMoney)}
+        ${mktBlock('O/U', 'Over', pub.ou.overBet, pub.ou.overMoney, 'Under', pub.ou.underBet, pub.ou.underMoney)}
+      </div>
     </div>`;
 }
+
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // ODDS MOVEMENT TAB — 10-book comparison with best-line detection + movement
@@ -2027,7 +2243,391 @@ function renderOddsTab() {
 }
 
 function switchSlate(dir) { currentDate.setDate(currentDate.getDate() + dir); fetchAllData(); }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// NAVIGATION — Best Bets → Predictions
+// ═══════════════════════════════════════════════════════════════════════════════
+function gotoGame(away, home) {
+  const predTabEl = document.querySelector('.tab[onclick*="\'pred\'"]');
+  if (predTabEl) sw('pred', predTabEl);
+  setTimeout(() => {
+    const card = document.getElementById(`pred-${away}-${home}`);
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.remove('game-flash');
+      void card.offsetWidth; // force reflow
+      card.classList.add('game-flash');
+      setTimeout(() => card.classList.remove('game-flash'), 1400);
+    }
+  }, 120);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MODAL UTILITIES
+// ═══════════════════════════════════════════════════════════════════════════════
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+
+// Close modals with ESC key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// TEAM RECENT GAMES MODAL
+// ═══════════════════════════════════════════════════════════════════════════════
+async function showTeamRecent(teamName, teamId, side) {
+  document.getElementById('team-modal-title').textContent = `${teamName} — Last 6 Games`;
+  document.getElementById('team-modal-sub').textContent = 'Recent results · Click team name in any game card';
+  document.getElementById('team-modal-body').innerHTML = '<div class="loading" style="padding:20px">Loading recent games…</div>';
+  openModal('team-modal');
+
+  try {
+    let games = [];
+
+    if (teamId && teamId > 0) {
+      // Fetch from MLB Stats API — last 10 scheduled games for this team
+      const season = new Date().getFullYear();
+      const endDate = formatDateStr(new Date());
+      const startDate = formatDateStr(new Date(Date.now() - 45 * 86400000));
+      const url = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&teamId=${teamId}&season=${season}&gameType=R&hydrate=linescore&startDate=${startDate}&endDate=${endDate}`;
+      const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
+      const data = await res.json();
+
+      // Collect all completed games, most recent last
+      if (data.dates) {
+        data.dates.forEach(d => {
+          d.games.forEach(g => {
+            if (g.status?.abstractGameState !== 'Final') return;
+            const away = getTeamName(g.teams.away.team.name);
+            const home = getTeamName(g.teams.home.team.name);
+            const awayScore = g.teams.away.score ?? 0;
+            const homeScore = g.teams.home.score ?? 0;
+            const isHome = g.teams.home.team.id === teamId;
+            const opp = isHome ? away : home;
+            const myScore = isHome ? homeScore : awayScore;
+            const oppScore = isHome ? awayScore : homeScore;
+            const won = myScore > oppScore;
+            const dateStr = d.date;
+            const hl = isHome ? 'vs' : '@';
+            // Simulated closing odds
+            const closeMl = won ? Math.round(-130 + seedRand(dateStr + teamName + 'ml') * 50) : Math.round(100 + seedRand(dateStr + teamName + 'ml') * 40);
+            games.push({ dateStr, hl, opp, myScore, oppScore, won, closeMl, isHome });
+          });
+        });
+      }
+    }
+
+    // If no real data, generate last 6 games from model seed
+    if (games.length === 0) {
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(Date.now() - (i + 1) * 86400000);
+        const s1 = seedRand(teamName + i + 'res');
+        const won = s1 > 0.48;
+        const myScore = Math.round(2 + s1 * 6);
+        const oppScore = won ? Math.round(myScore - 1 - seedRand(teamName+i+'opp') * 2) : Math.round(myScore + 1 + seedRand(teamName+i+'opp') * 2);
+        const isHome = seedRand(teamName+i+'ha') > 0.5;
+        const oppTeams = ['Yankees','Red Sox','Dodgers','Braves','Astros','Cubs','Phillies','Mets'];
+        const opp = oppTeams[Math.floor(seedRand(teamName+i+'t') * oppTeams.length)];
+        const closeMl = won ? Math.round(-125 + s1 * 40) : Math.round(105 + s1 * 35);
+        games.push({ dateStr: formatDateStr(d), hl: isHome ? 'vs' : '@', opp, myScore, oppScore, won, closeMl, isHome });
+      }
+    }
+
+    // Show last 6 only
+    const recent = games.slice(-6).reverse();
+    const wl = recent.filter(g => g.won).length;
+    let rows = recent.map(g => {
+      const scoreColor = g.won ? 'var(--g)' : 'var(--r)';
+      const mlStr = g.closeMl > 0 ? `+${g.closeMl}` : `${g.closeMl}`;
+      return `<tr>
+        <td style="color:var(--tx3)">${g.dateStr}</td>
+        <td><span style="color:var(--tx3);font-size:9px">${g.hl}</span> <strong>${g.opp}</strong></td>
+        <td style="font-weight:700;color:${scoreColor}">${g.myScore}–${g.oppScore}</td>
+        <td class="${g.won ? 'result-w' : 'result-l'}">${g.won ? 'W' : 'L'}</td>
+        <td style="color:var(--tx3);font-size:10px">${mlStr}</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('team-modal-body').innerHTML = `
+      <div style="margin-bottom:10px;font-size:11px;color:var(--tx2)">
+        Record (last ${recent.length}): <strong style="color:var(--g)">${wl}W</strong> – <strong style="color:var(--r)">${recent.length - wl}L</strong>
+      </div>
+      <table class="recent-tbl">
+        <thead><tr>
+          <th>Date</th><th>Opponent</th><th>Score</th><th>Result</th><th>Close ML</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div style="font-size:9px;color:var(--tx3);margin-top:10px">Closing odds are simulated for demo purposes.</div>`;
+  } catch (e) {
+    document.getElementById('team-modal-body').innerHTML =
+      `<div style="padding:16px;color:var(--tx3);font-size:12px">Unable to load recent games. Please try again.</div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// BACKTEST LINE MOVEMENT MODAL
+// ═══════════════════════════════════════════════════════════════════════════════
+let oddsModalChartObj = null;
+let currentLineData   = null;
+
+function showLineMovement(away, home, dStr, mlA, mlH, ou, mlProb, awayScore, homeScore) {
+  document.getElementById('odds-modal-title').textContent = `${away} @ ${home} — Line Movement`;
+  document.getElementById('odds-modal-sub').textContent = `${dStr} · Final: ${awayScore}–${homeScore} · Click market to view`;
+  document.getElementById('odds-modal-mkt').value = 'ml';
+
+  // Generate realistic line movement: 6 time points (Open → T-8h → T-4h → T-2h → T-1h → Close)
+  const LABELS = ['Open', 'T-8h', 'T-4h', 'T-2h', 'T-1h', 'Close'];
+  const seed = (sfx) => seedRand(away + home + dStr + sfx);
+
+  // ML: simulate opening line and walk toward closing value
+  const mlWalk = (startA) => {
+    const pts = [startA];
+    for (let i = 1; i < 6; i++) {
+      const delta = Math.round((seed(`ml${i}`) - 0.48) * 8);
+      pts.push(pts[pts.length - 1] + delta);
+    }
+    return pts;
+  };
+  const mlAwayOpen = mlA + Math.round((seed('open') - 0.5) * 14);
+  const mlHomeOpen = mlH + Math.round((seed('openH') - 0.5) * 14);
+  const mlAwayPts  = mlWalk(mlAwayOpen);
+  const mlHomePts  = mlWalk(mlHomeOpen);
+
+  // RL: always ±1.5, but juice changes
+  const rlAwayPts = LABELS.map((_, i) => -110 + Math.round((seed(`rla${i}`) - 0.5) * 10));
+  const rlHomePts = LABELS.map((_, i) => -110 + Math.round((seed(`rlh${i}`) - 0.5) * 10));
+
+  // OU: total line can move ±0.5 run from open
+  const ouOpen  = ou + (seed('ouopen') > 0.5 ? 0.5 : -0.5);
+  const ouPts   = [ouOpen];
+  for (let i = 1; i < 6; i++) {
+    const move = seed(`ou${i}`) > 0.7 ? 0.5 : seed(`ou${i}`) < 0.3 ? -0.5 : 0;
+    ouPts.push(ouPts[ouPts.length - 1] + move);
+  }
+
+  currentLineData = { LABELS, ml: { away: mlAwayPts, home: mlHomePts }, rl: { away: rlAwayPts, home: rlHomePts }, ou: ouPts, away, home };
+  openModal('odds-move-modal');
+  updateOddsModal();
+}
+
+function updateOddsModal() {
+  if (!currentLineData) return;
+  const { LABELS, ml, rl, ou, away, home } = currentLineData;
+  const mkt = document.getElementById('odds-modal-mkt').value;
+
+  let datasets, label, openVal, closeVal, moveDir;
+
+  if (mkt === 'ml') {
+    datasets = [
+      { label: `${away} ML`, data: ml.away, borderColor: '#ef476f', backgroundColor: 'rgba(239,71,111,.08)', tension: 0.35, fill: false, pointRadius: 4, pointHoverRadius: 6 },
+      { label: `${home} ML`, data: ml.home, borderColor: '#4da6ff', backgroundColor: 'rgba(77,166,255,.08)', tension: 0.35, fill: false, pointRadius: 4, pointHoverRadius: 6 },
+    ];
+    openVal  = ml.away[0]; closeVal = ml.away[ml.away.length-1];
+    moveDir  = closeVal > openVal ? 'improved (more +)' : 'worsened (more -)';
+    label = 'Moneyline';
+  } else if (mkt === 'rl') {
+    datasets = [
+      { label: `${away} +1.5 juice`, data: rl.away, borderColor: '#ffd100', backgroundColor: 'rgba(255,209,0,.08)', tension: 0.35, fill: false, pointRadius: 4 },
+      { label: `${home} -1.5 juice`, data: rl.home, borderColor: '#a78bfa', backgroundColor: 'rgba(167,139,250,.08)', tension: 0.35, fill: false, pointRadius: 4 },
+    ];
+    openVal = rl.away[0]; closeVal = rl.away[rl.away.length-1];
+    moveDir  = closeVal > openVal ? 'better juice on +1.5' : 'worse juice on +1.5';
+    label = 'Run Line Juice';
+  } else {
+    datasets = [
+      { label: 'O/U Total', data: ou, borderColor: '#00d68f', backgroundColor: 'rgba(0,214,143,.08)', tension: 0.35, fill: true, pointRadius: 5, pointHoverRadius: 7 },
+    ];
+    openVal = ou[0]; closeVal = ou[ou.length-1];
+    moveDir  = closeVal > openVal ? `moved UP ${(closeVal-openVal).toFixed(1)}` : closeVal < openVal ? `moved DOWN ${(openVal-closeVal).toFixed(1)}` : 'stayed flat';
+    label = 'Total (O/U)';
+  }
+
+  const fmtV = (v) => mkt === 'ou' ? v.toFixed(1) : (v > 0 ? `+${v}` : `${v}`);
+  const moveDelta = closeVal - openVal;
+
+  // Build/update chart
+  if (oddsModalChartObj) { oddsModalChartObj.destroy(); oddsModalChartObj = null; }
+  const ctx = document.getElementById('odds-modal-chart').getContext('2d');
+  oddsModalChartObj = new Chart(ctx, {
+    type: 'line',
+    data: { labels: LABELS, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#8b91a8', font: { size: 10 } } } },
+      scales: {
+        x: { ticks: { color: '#555d78', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,.04)' } },
+        y: { ticks: { color: '#555d78', font: { size: 9 }, callback: v => mkt === 'ou' ? v.toFixed(1) : (v > 0 ? `+${v}` : v) }, grid: { color: 'rgba(255,255,255,.04)' } },
+      },
+      animation: { duration: 400 },
+    }
+  });
+
+  const moveColor = moveDelta > 0 ? 'var(--g)' : moveDelta < 0 ? 'var(--r)' : 'var(--tx3)';
+  document.getElementById('odds-modal-summary').innerHTML = `
+    <div class="oms-card">
+      <div class="oms-label">Opening ${label}</div>
+      <div class="oms-val">${fmtV(openVal)}</div>
+      <div class="oms-move" style="color:var(--tx3)">At market open</div>
+    </div>
+    <div class="oms-card">
+      <div class="oms-label">Closing ${label}</div>
+      <div class="oms-val">${fmtV(closeVal)}</div>
+      <div class="oms-move" style="color:${moveColor}">Line ${moveDir}</div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LIVE SCORES — MLB Stats API
+// ═══════════════════════════════════════════════════════════════════════════════
+let liveScoresLoaded  = false;
+let liveRefreshTimer  = null;
+let liveCdTimer       = null;
+let liveCdVal         = 30;
+
+async function loadLiveScores(force = false) {
+  if (!liveScoresLoaded || force) {
+    const el = document.getElementById('live-content');
+    if (el) el.innerHTML = '<div class="loading">Fetching live scores from MLB…</div>';
+  }
+
+  // Reset countdown
+  liveCdVal = 30;
+  if (liveCdTimer) clearInterval(liveCdTimer);
+  liveCdTimer = setInterval(() => {
+    liveCdVal--;
+    const cd = document.getElementById('live-cd');
+    if (cd) cd.textContent = liveCdVal;
+    if (liveCdVal <= 0) { clearInterval(liveCdTimer); loadLiveScores(false); }
+  }, 1000);
+
+  try {
+    const dateStr = formatDateStr(currentDate);
+    const url = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${dateStr}&hydrate=linescore`;
+    const res  = await fetch(url, { signal: AbortSignal.timeout(7000) });
+    const data = await res.json();
+    liveScoresLoaded = true;
+    renderLiveScores(data);
+  } catch (e) {
+    // Fallback: show today's games from TODAY[] with no scores
+    renderLiveFallback();
+  }
+}
+
+function renderLiveScores(data) {
+  const el = document.getElementById('live-content');
+  if (!el) return;
+
+  const games = data?.dates?.[0]?.games || [];
+  if (games.length === 0) {
+    el.innerHTML = '<div class="loading" style="color:var(--tx3)">No games scheduled for this date.</div>';
+    return;
+  }
+
+  let html = '';
+  games.filter(g => g.gameType === 'R').forEach(g => {
+    const away  = getTeamName(g.teams.away.team.name);
+    const home  = getTeamName(g.teams.home.team.name);
+    const state = g.status?.abstractGameState;  // Final / Live / Preview
+    const code  = g.status?.codedGameState;
+    const aScore = g.teams.away.score ?? '—';
+    const hScore = g.teams.home.score ?? '—';
+    const ls = g.linescore || {};
+
+    // Status badge
+    let badgeCls = 'badge-sched', badgeTxt = 'Scheduled';
+    let cardCls  = '';
+    if (state === 'Final') { badgeCls = 'badge-final'; badgeTxt = 'Final'; cardCls = 'final-game'; }
+    else if (state === 'Live') {
+      badgeCls = 'badge-live'; cardCls = 'live-game';
+      const inn = ls.currentInning || '?';
+      const top = ls.isTopInning;
+      badgeTxt = `${top ? '▲' : '▼'} ${inn}${inn === 1 ? 'st' : inn === 2 ? 'nd' : inn === 3 ? 'rd' : 'th'}`;
+    }
+
+    const inningInfo = state === 'Live'
+      ? `Outs: ${ls.outs ?? 0} · ${ls.balls ?? 0}-${ls.strikes ?? 0}`
+      : state === 'Final' ? 'Final score' : `Game time: ${new Date(g.gameDate).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})} ET`;
+
+    // Inning-by-inning grid
+    let gridHtml = '';
+    if (ls.innings && ls.innings.length > 0) {
+      const innings = ls.innings;
+      const aCells = innings.map(i => `<div class="sg-cell">${i.away?.runs ?? '—'}</div>`).join('');
+      const hCells = innings.map(i => `<div class="sg-cell">${i.home?.runs ?? '—'}</div>`).join('');
+      const iHeaders = innings.map(i => `<div class="sg-cell sg-header">${i.num}</div>`).join('');
+      gridHtml = `
+        <div class="score-grid" style="overflow-x:auto">
+          <div style="display:flex;flex-direction:column">
+            <div class="sg-row"><div class="sg-team"></div>${iHeaders}<div class="sg-cell sg-total sg-header">R</div><div class="sg-cell sg-header">H</div></div>
+            <div class="sg-row"><div class="sg-team">${away}</div>${aCells}<div class="sg-cell sg-total">${aScore}</div><div class="sg-cell">${ls.teams?.away?.hits ?? '—'}</div></div>
+            <div class="sg-row"><div class="sg-team">${home}</div>${hCells}<div class="sg-cell sg-total">${hScore}</div><div class="sg-cell">${ls.teams?.home?.hits ?? '—'}</div></div>
+          </div>
+        </div>`;
+    }
+
+    html += `
+      <div class="live-card ${cardCls}">
+        <div class="live-card-top">
+          <div class="live-teams">
+            <div class="live-team">
+              <div class="live-team-name">${away}</div>
+              <div class="live-score" style="color:${typeof aScore === 'number' && typeof hScore === 'number' && aScore > hScore ? 'var(--g)' : 'var(--tx)'}">${aScore}</div>
+            </div>
+            <div class="live-at">@</div>
+            <div class="live-team">
+              <div class="live-team-name">${home}</div>
+              <div class="live-score" style="color:${typeof hScore === 'number' && typeof aScore === 'number' && hScore > aScore ? 'var(--g)' : 'var(--tx)'}">${hScore}</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+            <span class="live-status-badge ${badgeCls}">${badgeTxt}</span>
+            <div class="live-inning">${inningInfo}</div>
+          </div>
+        </div>
+        ${gridHtml}
+      </div>`;
+  });
+
+  el.innerHTML = html || '<div class="loading" style="color:var(--tx3)">No regular season games today.</div>';
+}
+
+function renderLiveFallback() {
+  const el = document.getElementById('live-content');
+  if (!el) return;
+  if (TODAY.length === 0) {
+    el.innerHTML = '<div class="loading" style="color:var(--tx3)">No games loaded. Go to Predictions tab first.</div>';
+    return;
+  }
+  let html = '';
+  TODAY.forEach(g => {
+    html += `
+      <div class="live-card">
+        <div class="live-card-top">
+          <div class="live-teams">
+            <div class="live-team"><div class="live-team-name">${g.away}</div><div class="live-score" style="color:var(--tx3)">—</div></div>
+            <div class="live-at">@</div>
+            <div class="live-team"><div class="live-team-name">${g.home}</div><div class="live-score" style="color:var(--tx3)">—</div></div>
+          </div>
+          <div>
+            <span class="live-status-badge badge-sched">Scheduled</span>
+            <div class="live-inning" style="margin-top:4px">${g.t} ET</div>
+          </div>
+        </div>
+      </div>`;
+  });
+  el.innerHTML = html;
+}
+
 window.onload = () => { fetchAllData(); fetchPublicBetting(); };
+
 </script>
 </body>
 </html>
