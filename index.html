@@ -1377,20 +1377,20 @@ function renderApp() {
           <div class="pk ${!bestIsOU && bestEV>0 ? 'best-pick' : ''}">
             <div class="pt">MONEYLINE</div>
             <div class="pv">${!bestIsOU ? bestPick : (mod.evH>mod.evA?g.home+' ML':g.away+' ML')}</div>
-            <div class="or"><span class="mo">${!bestIsOU ? getOddsStr(mlPickLine) : getOddsStr(mod.evH>mod.evA?mkt.ml.h:mkt.ml.a)}</span> <span style="color:var(--tx3)">mkt ${getOddsStr(mod.evH>mod.evA?mkt.ml.h:mkt.ml.a)}</span></div>
-            <div class="ev">edge <span style="color:${!bestIsOU && bestEV>0?'var(--g)':'var(--tx3)'}">${!bestIsOU ? '+'+(bestEV*100).toFixed(1) : '+'+(Math.max(mod.evH, mod.evA)*100).toFixed(1)}%</span></div>
+            <div class="or"><span class="mo">${getOddsStr(probToAmLine(mod.evH>mod.evA ? mod.homeProb : mod.awayProb))}</span> <span style="color:var(--tx3)">mkt ${getOddsStr(mod.evH>mod.evA ? mkt.ml.h : mkt.ml.a)}</span></div>
+            <div class="ev">edge <span style="color:${!bestIsOU && bestEV>0?'var(--g)':'var(--tx3)'}">+${(Math.max(mod.evH, mod.evA)*100).toFixed(1)}%</span></div>
             ${!bestIsOU && bestEV>0 ? '<div class="best-star">★ Best</div>' : ''}
           </div>
           <div class="pk">
             <div class="pt">RUN LINE</div>
-            <div class="pv">${!bestIsOU ? (mod.evH>mod.evA?g.home:g.away) : g.home} -1.5</div>
-            <div class="or"><span class="mo">+115</span> <span style="color:var(--tx3)">mkt -110</span></div>
-            <div class="ev">edge <span style="color:var(--tx3)">-3.5%</span></div>
+            <div class="pv">${!bestIsOU ? (mod.evH>mod.evA?g.home:g.away) : g.home} ${mod.evH>mod.evA ? (mkt.rl.hLine||'-1.5') : (mkt.rl.aLine||'+1.5')}</div>
+            <div class="or"><span class="mo">fair ${mod.evH>mod.evA ? (mkt.rl.hLine||'-1.5') : (mkt.rl.aLine||'+1.5')}</span> <span style="color:var(--tx3)">mkt ${getOddsStr(mod.evH>mod.evA ? (mkt.rl.hPrice||-110) : (mkt.rl.aPrice||-110))}</span></div>
+            <div class="ev">model pick <span style="color:var(--tx3)">${(Math.max(mod.homeProb, mod.awayProb)*100).toFixed(1)}%</span></div>
           </div>
           <div class="pk ${bestIsOU ? 'best-pick' : ''}">
-            <div class="pt">O/U ${mkt.ou} (PROJ ${mod.projOU.toFixed(1)})</div>
+            <div class="pt">O/U ${mkt.ou}</div>
             <div class="pv" style="color:var(--y)">${ouPick} ${mkt.ou}</div>
-            <div class="or"><span class="mo">-110</span> <span style="color:var(--tx3)">mkt -110</span></div>
+            <div class="or"><span class="mo">fair ${mod.projOU.toFixed(1)}</span> <span style="color:var(--tx3)">mkt ${mkt.ou}</span></div>
             <div class="ev">edge <span style="color:${bestIsOU?'var(--g)':'var(--tx3)'}">+${(ouEV*100).toFixed(1)}%</span></div>
             ${bestIsOU ? '<div class="best-star">★ Best</div>' : ''}
           </div>
