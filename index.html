@@ -1088,26 +1088,85 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   let a_off = as.woba * 5.0;
   let h_off = hs.woba * 5.0;
 
-  // ─ ERA−xERA Market Mispricing Signal ─────────────────────────────────
-  // ERA - xERA gap tells us how the MARKET may be mispricing a pitcher:
-  //   ERA < xERA  (gap < 0): pitcher has been LUCKY → market overvalues them
-  //                           → opposing team is better than market implies
-  //   ERA > xERA  (gap > 0): pitcher has been UNLUCKY → market undervalues them
-  //                           → this team is better than market implies
-  // Only meaningful when FanGraphs pitcher data is available (not TBD).
-  // Magnitude: each 1.0 ERA gap ≈ ±0.06 logit (≈ ±1.5% win prob shift)
-  // Cap at ±2.0 runs to prevent extreme outliers dominating.
+  // ─ ADVANCED STATCAST REGRESSION MODEL ─────────────────────────────────
+  function calculateRegression(p) {
+    if (!p || p.name === 'TBD') return { score: 0, text: null };
+    
+    let era = parseFloat(p.era || p.xera || 4.20);
+    let xera = parseFloat(p.xera || 4.20);
+    let xfip = parseFloat(p.xFIP || p.fip || 4.20);
+    let babip = parseFloat(p.babip || 0.295);
+    let woba = parseFloat(p.woba || 0.315);
+    let xwoba = parseFloat(p.xwoba || 0.315);
+    let hardhit = parseFloat(p.hardhit || 38.0);
+    let barrel = parseFloat(p.barrel || 7.0);
+
+    let score = 0;
+    let negReasons = [];
+    let posReasons = [];
+
+    // 1. Expected Value Gaps
+    let eraGap = era - ((xera + xfip) / 2); 
+    score += Math.max(-2.0, Math.min(2.0, eraGap)); 
+    
+    let wobaGap = woba - xwoba; 
+    score += Math.max(-1.5, Math.min(1.5, wobaGap * 20));
+
+    // 2. Luck Indicators
+    let babipGap = babip - 0.295;
+    score += Math.max(-1.0, Math.min(1.0, babipGap * 15));
+
+    // 3. Quality of Contact Penalties (Negative Regression Anchors)
+    if (hardhit > 45.0) {
+      score -= 0.6; 
+      negReasons.push(`Extreme HardHit (${hardhit.toFixed(1)}%)`);
+    } else if (hardhit < 30.0) {
+      score += 0.4;
+      posReasons.push(`Elite Weak Contact`);
+    }
+
+    if (barrel > 10.0) {
+      score -= 0.6; 
+      negReasons.push(`High Barrels (${barrel.toFixed(1)}%)`);
+    } else if (barrel < 5.0) {
+      score += 0.4;
+    }
+
+    if (wobaGap < -0.025) negReasons.push(`Lucky wOBA`);
+    if (wobaGap > 0.025) posReasons.push(`Unlucky wOBA`);
+    if (eraGap < -0.5) negReasons.push(`Outperforming xERA/xFIP`);
+    if (eraGap > 0.5) posReasons.push(`Underperforming xERA/xFIP`);
+    if (babip < 0.260) negReasons.push(`Lucky BABIP (${babip.toFixed(3)})`);
+    if (babip > 0.330) posReasons.push(`Unlucky BABIP (${babip.toFixed(3)})`);
+
+    let isLucky = score < -1.0;
+    let isUnlucky = score > 1.0;
+    
+    let text = null;
+    let name = p.name ? p.name.split(' ').pop() : 'Pitcher';
+    if (isLucky) {
+       text = { type: 'neg', text: `\u21D3 ${name}: Negative Regression Risk (${negReasons.slice(0, 2).join(', ') || 'Lucky Run Prevention'})` };
+    } else if (isUnlucky) {
+       text = { type: 'pos', text: `\u21D1 ${name}: Positive Bounce-back (${posReasons.slice(0, 2).join(', ') || 'Unlucky Outcomes'})` };
+    }
+
+    return { score: Math.max(-3.0, Math.min(3.0, score)), text };
+  }
+
   const hasPitcherData = g.awayP !== 'TBD' && g.homeP !== 'TBD' &&
                          P[g.awayP]?.era !== undefined && P[g.homeP]?.era !== undefined;
 
   let eraGapLogit = 0;
-  let aEraGap = 0, hEraGap = 0;
+  let regA = null, regH = null;
   if (hasPitcherData) {
-    aEraGap = Math.max(-2.5, Math.min(2.5, (ap.era || ap.xera) - ap.xera)); // ap.era-ap.xera
-    hEraGap = Math.max(-2.5, Math.min(2.5, (hp.era || hp.xera) - hp.xera)); // hp.era-hp.xera
-    // negative aEraGap = away pitcher lucky → boost home (add to logit)
-    // positive hEraGap = home pitcher unlucky → boost home (add to logit)
-    eraGapLogit = (-aEraGap + hEraGap) * 0.06;
+    let aReg = calculateRegression(ap);
+    let hReg = calculateRegression(hp);
+    regA = aReg.text;
+    regH = hReg.text;
+    
+    // negative aReg.score = away pitcher lucky → boost home (add to logit)
+    // positive hReg.score = home pitcher unlucky → boost home (add to logit)
+    eraGapLogit = (-aReg.score + hReg.score) * 0.05;
   }
 
   // Seeded noise — deterministic per matchup + date
@@ -1215,20 +1274,9 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
     wStr = `🌡️ ${wxH.temp || 72}°F · ${wLabel} · ${sky} · ${pfLabel(pf)}`;
   }
 
-  // Build regression descriptors for display in UI
-  function regLabel(gap, pitcherName) {
-    if (Math.abs(gap) < 0.40) return null; // not significant
-    const lucky   = gap < 0; // ERA < xERA = lucky
-    const mag     = Math.abs(gap).toFixed(2);
-    if (lucky) return { type:'neg', text:`📉 ${pitcherName}: ERA ${mag} below xERA — LUCKY, regression risk` };
-    else       return { type:'pos', text:`📈 ${pitcherName}: ERA ${mag} above xERA — UNLUCKY, bounce-back candidate` };
-  }
-  const regA = hasPitcherData ? regLabel(aEraGap, g.awayP.split(' ').pop()) : null;
-  const regH = hasPitcherData ? regLabel(hEraGap, g.homeP.split(' ').pop()) : null;
-
   return { homeProb, awayProb, evH, evA, edgeH, edgeA, projOU, wStr, hp, ap, mkt,
            homeDog, awayDog, mktHomeImplied, mktAwayImplied, pf, wxH,
-           regA, regH, aEraGap, hEraGap, eraGapLogit };
+           regA, regH, eraGapLogit };
 }
 
 function getGrade(ev) {

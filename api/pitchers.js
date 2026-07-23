@@ -86,7 +86,7 @@ export default async function handler(req, res) {
     try {
       const svUrl = 'https://baseballsavant.mlb.com/leaderboard/custom?' +
         'year=2026&type=pitcher&filter=&sort=4&sortDir=asc&min=20&selections=' +
-        'p_era,p_k_percent,p_bb_percent,xera,xfip,babip&chart=false&x=xera&y=xera' +
+        'p_era,p_k_percent,p_bb_percent,xera,xfip,babip,woba,xwoba,hard_hit_percent,barrel_batted_rate&chart=false&x=xera&y=xera' +
         '&r=no&chartType=beeswarm&csv=true';
       const svRes = await fetch(svUrl, {
         headers: { 'User-Agent': 'Mozilla/5.0', 'Accept': 'text/csv' }
@@ -138,10 +138,16 @@ export default async function handler(req, res) {
         const bbpct = parseFloat(get(row, 'p_bb_percent')) || 7.5;
         const babip = parseFloat(get(row, 'babip')) || 0.292;
 
+        const woba    = parseFloat(get(row, 'woba')) || 0.315;
+        const xwoba   = parseFloat(get(row, 'xwoba')) || 0.315;
+        const hardhit = parseFloat(get(row, 'hard_hit_percent')) || 38.0;
+        const barrel  = parseFloat(get(row, 'barrel_batted_rate')) || 7.0;
+
         const team = pTeamMap[name] || 'UNK';
 
         pitchers[name] = {
           era, xera, fip: xfip, xFIP: xfip, babip, kpct, bbpct, swstr: 11.0,
+          woba, xwoba, hardhit, barrel,
           ip: 0, team, hand: 'RHP',
           tier: xera < 3.0 ? 'Elite' : xera < 3.8 ? 'Strong' : 'Mid',
           score: ((4.50 - xera) * 1.5).toFixed(2),
