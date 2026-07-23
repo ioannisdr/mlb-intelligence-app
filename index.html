@@ -1000,6 +1000,7 @@ async function fetchAllData() {
         TODAY.push({
           t: new Date(g.gameDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           gameDate: g.gameDate,
+          status: g.status.abstractGameState,
           away, home, awayP, homeP,
           awayForm: getForm(awayId, away + home + 'A'),
           homeForm: getForm(homeId, away + home + 'H'),
@@ -1331,6 +1332,8 @@ function renderApp() {
     let mod = calculateModel(g);
     let mkt = mod.mkt;
     let hasStarted = new Date() >= new Date(g.gameDate);
+    let isFinal = g.status === 'Final';
+    let predictionsLocked = hasStarted && !isFinal;
 
     let hPct = (mod.homeProb * 100).toFixed(0);
     let aPct = (mod.awayProb * 100).toFixed(0);
@@ -1357,7 +1360,7 @@ function renderApp() {
     const ouSigVal = getSignal('OU', { ouAbsDiff: Math.abs(mod.projOU - mkt.ou) });
     const bestSig = !bestIsOU ? mlSig : ouSigVal;
 
-    if (!hasStarted) {
+    if (!predictionsLocked) {
       upcomingGames++;
       if(bestSig.v === 3) primeCount++;
       if(isDog && !bestIsOU) dogCount++;
@@ -1419,7 +1422,7 @@ function renderApp() {
 
         </div>
 
-        ${hasStarted ? `
+        ${predictionsLocked ? `
           <div style="text-align:center; padding: 24px 0; background:rgba(255,255,255,0.02); border-top:1px solid var(--bdr2);">
             <div style="font-size: 20px; margin-bottom: 6px;">⏳</div>
             <div style="font-weight: 700; font-size: 13px; margin-bottom: 4px; color:var(--tx)">GAME IN PROGRESS</div>
