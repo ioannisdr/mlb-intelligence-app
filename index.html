@@ -1392,6 +1392,15 @@ function renderApp() {
     let isFinal = g.status === 'Final';
     let predictionsLocked = hasStarted && !isFinal;
 
+    // Explicitly cache the ML Pick logic so Backtest can clone it directly 
+    if (mod.evH > 0 || mod.evA > 0) {
+      g.liveMlPick = mod.evH >= mod.evA ? g.home : g.away;
+      g.liveMlEV   = mod.evH >= mod.evA ? mod.evH : mod.evA;
+    } else {
+      g.liveMlPick = mod.homeProb >= mod.awayProb ? g.home : g.away;
+      g.liveMlEV   = g.liveMlPick === g.home ? mod.evH : mod.evA;
+    }
+
     let hPct = (mod.homeProb * 100).toFixed(0);
     let aPct = (mod.awayProb * 100).toFixed(0);
 
@@ -1688,13 +1697,22 @@ async function runBacktest() {
 
             // ─ ML pick ───────────────────────────────────────────
             let mlPick;
-            if (mod.evH > 0 || mod.evA > 0) {
+            let mlEV;
+            const liveGame = TODAY.find(tg => tg.home === home && tg.away === away);
+            
+            if (liveGame && liveGame.liveMlPick) {
+              // 100% perfect agreement with Live Predictions tab
+              mlPick = liveGame.liveMlPick;
+              mlEV = liveGame.liveMlEV;
+            } else if (mod.evH > 0 || mod.evA > 0) {
               mlPick = mod.evH >= mod.evA ? home : away;
+              mlEV = mod.evH >= mod.evA ? mod.evH : mod.evA;
             } else {
               mlPick = mod.homeProb >= mod.awayProb ? home : away;
+              mlEV = mlPick === home ? mod.evH : mod.evA;
             }
+
             const isDog    = mlPick === home ? mod.homeDog : mod.awayDog;
-            const mlEV     = mlPick === home ? mod.evH : mod.evA;
             const mlSig    = getSignal('ML', { ev: mlEV });
             const mlHit    = mlPick === winner;
 
