@@ -1538,8 +1538,7 @@ async function runBacktest() {
         ALL:{'PRIME':{w:0,t:0},'EDGE':{w:0,t:0}},
         ML: {'PRIME':{w:0,t:0},'EDGE':{w:0,t:0}},
         RL: {'PRIME':{w:0,t:0},'EDGE':{w:0,t:0}},
-        OU: {'PRIME':{w:0,t:0},'EDGE':{w:0,t:0}}
-      }, { ALL:{ ALL:{} } });
+      }, { ALL:{ ALL:{} } }, { ML: 0, RL: 0, OU: 0 });
       return;
     }
 
@@ -1725,7 +1724,7 @@ async function runBacktest() {
 
     }
 
-    renderCharts(pl, grHits, monthlyPL);
+    renderCharts(pl, grHits, monthlyPL, totalProfits);
 
   } catch (err) {
     console.error('runBacktest error:', err);
@@ -1738,13 +1737,15 @@ let currentPlData = {};
 let currentMonthlyPL = {};
 let currentGrHitsRaw = {}; // full grHits object — keyed [market][grade]
 let currentPlRaw     = {}; // full pl object — keyed [market][team]
+let currentTotalProfits = { ML: 0, RL: 0, OU: 0 };
 
-function renderCharts(pl, grHits, monthlyPL) {
+function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 0 }) {
   currentGrHits    = grHits;
   currentPlData    = pl;
   currentMonthlyPL = monthlyPL;
   currentGrHitsRaw = grHits;
   currentPlRaw     = pl;
+  currentTotalProfits = totalProfits;
   if (chartsObj.plChart) chartsObj.plChart.destroy();
   if (chartsObj.grChart) chartsObj.grChart.destroy();
   if (chartsObj.monthlyChart) chartsObj.monthlyChart.destroy();
@@ -1848,9 +1849,9 @@ function renderCharts(pl, grHits, monthlyPL) {
   });
 
   let mktLabels = ['Moneyline', 'Run Line', 'Over/Under'];
-  let totalML = totalProfits.ML;
-  let totalRL = totalProfits.RL;
-  let totalOU = totalProfits.OU;
+  let totalML = currentTotalProfits.ML;
+  let totalRL = currentTotalProfits.RL;
+  let totalOU = currentTotalProfits.OU;
   let mktVals = [totalML, totalRL, totalOU];
   let mktColors = mktVals.map(v => v >= 0 ? '#00d68f' : '#ef476f');
 
