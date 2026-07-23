@@ -1603,9 +1603,14 @@ async function runBacktest() {
             const mod   = calculateModel(mockG, null, winner, totalScore);
 
             // ─ ML pick ───────────────────────────────────────────
-            const mlPick   = mod.evH >= mod.evA ? home : away;
+            let mlPick;
+            if (mod.evH > 0 || mod.evA > 0) {
+              mlPick = mod.evH >= mod.evA ? home : away;
+            } else {
+              mlPick = mod.homeProb >= mod.awayProb ? home : away;
+            }
             const isDog    = mlPick === home ? mod.homeDog : mod.awayDog;
-            const mlEV     = Math.max(mod.evH, mod.evA);
+            const mlEV     = mlPick === home ? mod.evH : mod.evA;
             const mlSig    = getSignal('ML', { ev: mlEV });
             const mlHit    = mlPick === winner;
 
@@ -1682,7 +1687,7 @@ async function runBacktest() {
               <td style="font-weight:700">${away} @ ${home}</td>
               <td style="color:var(--tx2)">${awayScore}–${homeScore}</td>
               <td style="font-weight:700;color:${mlHit&&mlPick===winner?'var(--g)':'var(--tx)'}">${winner}</td>
-              <td style="font-weight:700">${mlPick} ${isDog ? '<span class="dog-tag">DOG</span>' : ''}</td>
+              <td style="font-weight:700">${mlPick} ${(isDog && mlSig.l !== 'SKIP') ? '<span class="dog-tag">DOG</span>' : ''}</td>
               <td style="color:var(--b)">${(Math.max(mod.homeProb,mod.awayProb)*100).toFixed(0)}% <span style="font-size:9px;color:var(--tx3)">(model)</span></td>
               <td><span class="sig-box ${mlSig.c}">${mlSig.icon} ${mlSig.l}</span></td>
               <td>${mlSig.l === 'SKIP' ? `<span class="sig-box sig-skip">⬜ SKIP</span>` : `<span class="hit-box ${mlHit?'hit-w':'hit-l'}">${mlHit?'HIT':'MISS'}</span>`}</td>
