@@ -1419,38 +1419,46 @@ function renderApp() {
 
         </div>
 
-        
-        <div class="gc-best-banner">
-          <span style="color:var(--tx3)">★ BEST BET</span>
-          <span style="font-size:13px;color:var(--tx)">${bestPick}</span>
-          <span style="color:var(--b)">${!bestIsOU ? getOddsStr(mlPickLine) : '-110'}</span>
-          <span class="sig-box ${bestSig.c}">${bestSig.icon} ${bestSig.l}</span>
-          <span style="color:var(--g)">+${(bestEV*100).toFixed(1)}% EV</span>
-          <span style="margin-left:auto;color:var(--tx3);font-weight:400">No H2H data · ${P[g.awayP]?.hand || 'RHP'} vs ${P[g.homeP]?.hand || 'RHP'}</span>
-        </div>
+        ${hasStarted ? `
+          <div style="text-align:center; padding: 24px 0; background:rgba(255,255,255,0.02); border-top:1px solid var(--bdr2);">
+            <div style="font-size: 20px; margin-bottom: 6px;">⏳</div>
+            <div style="font-weight: 700; font-size: 13px; margin-bottom: 4px; color:var(--tx)">GAME IN PROGRESS</div>
+            <div style="font-size: 11px; color:var(--tx3);">Pre-game predictions are locked.</div>
+            <div style="font-size: 11px; color:var(--tx3); margin-top: 4px;">Check <b style="color:var(--tx)">Live Scores</b> for real-time updates.</div>
+          </div>
+        ` : `
+          <div class="gc-best-banner">
+            <span style="color:var(--tx3)">★ BEST BET</span>
+            <span style="font-size:13px;color:var(--tx)">${bestPick}</span>
+            <span style="color:var(--b)">${!bestIsOU ? getOddsStr(mlPickLine) : '-110'}</span>
+            <span class="sig-box ${bestSig.c}">${bestSig.icon} ${bestSig.l}</span>
+            <span style="color:var(--g)">+${(bestEV*100).toFixed(1)}% EV</span>
+            <span style="margin-left:auto;color:var(--tx3);font-weight:400">No H2H data · ${P[g.awayP]?.hand || 'RHP'} vs ${P[g.homeP]?.hand || 'RHP'}</span>
+          </div>
 
-        <div class="picks">
-          <div class="pk ${!bestIsOU && bestEV>0 ? 'best-pick' : ''}">
-            <div class="pt">MONEYLINE</div>
-            <div class="pv">${!bestIsOU ? bestPick : (mod.evH>mod.evA?g.home+' ML':g.away+' ML')}</div>
-            <div class="or"><span class="mo">${getOddsStr(probToAmLine(mod.evH>mod.evA ? mod.homeProb : mod.awayProb))}</span> <span style="color:var(--tx3)">mkt ${getOddsStr(mod.evH>mod.evA ? mkt.ml.h : mkt.ml.a)}</span></div>
-            <div class="ev">edge <span style="color:${!bestIsOU && bestEV>0?'var(--g)':'var(--tx3)'}">+${(Math.max(mod.evH, mod.evA)*100).toFixed(1)}%</span></div>
-            ${!bestIsOU && bestEV>0 ? '<div class="best-star">★ Best</div>' : ''}
+          <div class="picks">
+            <div class="pk ${!bestIsOU && bestEV>0 ? 'best-pick' : ''}">
+              <div class="pt">MONEYLINE</div>
+              <div class="pv">${!bestIsOU ? bestPick : (mod.evH>mod.evA?g.home+' ML':g.away+' ML')}</div>
+              <div class="or"><span class="mo">${getOddsStr(probToAmLine(mod.evH>mod.evA ? mod.homeProb : mod.awayProb))}</span> <span style="color:var(--tx3)">mkt ${getOddsStr(mod.evH>mod.evA ? mkt.ml.h : mkt.ml.a)}</span></div>
+              <div class="ev">edge <span style="color:${!bestIsOU && bestEV>0?'var(--g)':'var(--tx3)'}">+${(Math.max(mod.evH, mod.evA)*100).toFixed(1)}%</span></div>
+              ${!bestIsOU && bestEV>0 ? '<div class="best-star">★ Best</div>' : ''}
+            </div>
+            <div class="pk">
+              <div class="pt">RUN LINE</div>
+              <div class="pv">${!bestIsOU ? (mod.evH>mod.evA?g.home:g.away) : g.home} ${pickLine}</div>
+              <div class="or"><span class="mo">${getOddsStr(probToAmLine(fairRLProb))}</span> <span style="color:var(--tx3)">mkt ${getOddsStr(mod.evH>mod.evA ? (mkt.rl.hPrice||-110) : (mkt.rl.aPrice||-110))}</span></div>
+              <div class="ev">model pick <span style="color:var(--tx3)">${(Math.max(mod.homeProb, mod.awayProb)*100).toFixed(1)}%</span></div>
+            </div>
+            <div class="pk ${bestIsOU ? 'best-pick' : ''}">
+              <div class="pt">O/U ${mkt.ou} (PROJ ${mod.projOU.toFixed(1)})</div>
+              <div class="pv" style="color:var(--y)">${ouPick} ${mkt.ou}</div>
+              <div class="or"><span class="mo">${ouFairOdds}</span> <span style="color:var(--tx3)">mkt -110</span></div>
+              <div class="ev">edge <span style="color:${bestIsOU?'var(--g)':'var(--tx3)'}">+${(ouEV*100).toFixed(1)}%</span></div>
+              ${bestIsOU ? '<div class="best-star">★ Best</div>' : ''}
+            </div>
           </div>
-          <div class="pk">
-            <div class="pt">RUN LINE</div>
-            <div class="pv">${!bestIsOU ? (mod.evH>mod.evA?g.home:g.away) : g.home} ${pickLine}</div>
-            <div class="or"><span class="mo">${getOddsStr(probToAmLine(fairRLProb))}</span> <span style="color:var(--tx3)">mkt ${getOddsStr(mod.evH>mod.evA ? (mkt.rl.hPrice||-110) : (mkt.rl.aPrice||-110))}</span></div>
-            <div class="ev">model pick <span style="color:var(--tx3)">${(Math.max(mod.homeProb, mod.awayProb)*100).toFixed(1)}%</span></div>
-          </div>
-          <div class="pk ${bestIsOU ? 'best-pick' : ''}">
-            <div class="pt">O/U ${mkt.ou} (PROJ ${mod.projOU.toFixed(1)})</div>
-            <div class="pv" style="color:var(--y)">${ouPick} ${mkt.ou}</div>
-            <div class="or"><span class="mo">${ouFairOdds}</span> <span style="color:var(--tx3)">mkt -110</span></div>
-            <div class="ev">edge <span style="color:${bestIsOU?'var(--g)':'var(--tx3)'}">+${(ouEV*100).toFixed(1)}%</span></div>
-            ${bestIsOU ? '<div class="best-star">★ Best</div>' : ''}
-          </div>
-        </div>
+        `}
       </div>
     `;
     gList.innerHTML += pCardHtml;
