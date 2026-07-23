@@ -1666,7 +1666,16 @@ async function runBacktest() {
 
             // Use model-derived market (date-keyed noise for per-game variation)
             const mockG = { away, home, awayP: awayPName, homeP: homePName, dateKey: d.date };
-            const mod   = calculateModel(mockG, null, winner, totalScore);
+            
+            // If this game is part of the active TODAY slate, we MUST use real odds 
+            // so the backtest exactly matches the Live Predictions tab.
+            let realMkt = null;
+            const isTodaySlate = TODAY.some(tg => tg.home === home && tg.away === away);
+            if (isTodaySlate && ODDS[home] && ODDS[home][currentBook]) {
+               realMkt = ODDS[home][currentBook];
+            }
+
+            const mod   = calculateModel(mockG, realMkt, winner, totalScore);
 
             // ─ ML pick ───────────────────────────────────────────
             let mlPick;
