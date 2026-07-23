@@ -2136,10 +2136,10 @@ let oddsLoaded = false;
 let oddsRefreshTimer = null;
 
 const BOOK_META = {
-  DraftKings:  { icon: '🟢', color: '#00d68f' },
-  FanDuel:     { icon: '🔵', color: '#4da6ff' },
-  BetMGM:      { icon: '🟠', color: '#ffa500' },
-  Caesars:     { icon: '👑', color: '#a78bfa' },
+  DraftKings:  { icon: '👑', color: '#00d68f' },
+  FanDuel:     { icon: '🛡️', color: '#4da6ff' },
+  BetMGM:      { icon: '🦁', color: '#ffa500' },
+  Caesars:     { icon: '🏛️', color: '#a78bfa' },
   BetRivers:   { icon: '🌊', color: '#4da6ff' },
   ESPNBet:     { icon: '🏈', color: '#ef476f' },
   Fanatics:    { icon: '🦅', color: '#00d68f' },
@@ -2170,7 +2170,9 @@ async function loadOddsTab(forceRefresh = false) {
     if (oddsData.length > 0) {
       oddsData.forEach(g => {
         const key = `${g.away}@${g.home}`;
-        oddsSnapshot[key] = JSON.parse(JSON.stringify(g.books || {}));
+        if (!oddsSnapshot[key]) {
+          oddsSnapshot[key] = JSON.parse(JSON.stringify(g.books || {}));
+        }
       });
     }
 
@@ -2206,11 +2208,14 @@ function buildSimulatedOdds() {
       ouPrice: { o: -110, u: -110 },
       rl: { aLine: '+1.5', aPrice: -110, hLine: '-1.5', hPrice: -110 },
     };
-    // Offsets per book [mlA, mlH, rlPd, ouShift, ouPd]
+    // Dynamic wiggle so simulated odds shift naturally on refresh (-2 to +2)
+    const wg = () => Math.floor(Math.random() * 5) - 2;
     const offsets = {
-      DraftKings: [0,0,0,0,0], FanDuel:[-2,+2,-1,0,+1], BetMGM:[+3,-3,+2,+0.5,0],
-      Caesars:[+1,-1,0,0,-1], BetRivers:[-1,+1,-1,-0.5,0], ESPNBet:[+2,-2,0,0,+1],
-      Fanatics:[-1,+1,+1,0,0], bet365:[+1,-1,0,+0.5,-1], HardRock:[0,0,-1,0,0], PointsBet:[+2,-2,+1,-0.5,+1]
+      DraftKings: [wg(),wg(),wg(),0,wg()], FanDuel:     [wg(),wg(),wg(),0,wg()],
+      BetMGM:     [wg(),wg(),wg(),0,wg()], Caesars:     [wg(),wg(),wg(),0,wg()],
+      BetRivers:  [wg(),wg(),wg(),0,wg()], ESPNBet:     [wg(),wg(),wg(),0,wg()],
+      Fanatics:   [wg(),wg(),wg(),0,wg()], bet365:      [wg(),wg(),wg(),0,wg()],
+      HardRock:   [wg(),wg(),wg(),0,wg()], PointsBet:   [wg(),wg(),wg(),0,wg()]
     };
     const books = {};
     Object.entries(offsets).forEach(([book, [mlA, mlH, rlPd, ouShift, ouPd]]) => {

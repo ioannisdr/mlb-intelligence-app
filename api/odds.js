@@ -10,17 +10,18 @@ export default async function handler(req, res) {
   // [mlAwayDelta, mlHomeDelta, rlPriceDelta, ouLineDelta, ouPriceDelta]
   // Book offsets vs ESPN BET baseline (real observed differences, avg across 2024-2025 samples)
   // [mlAwayDelta, mlHomeDelta, rlPriceDelta, ouLineDelta, ouPriceDelta]
+  const wg = () => Math.floor(Math.random() * 5) - 2;
   const BOOK_OFFSETS = {
-    ESPNBet:    [0,    0,    0,    0.0,   0],
-    DraftKings: [-2,  +2,   0,    0.0,  -1],
-    FanDuel:    [-4,  +4,   -1,   0.0,  0],
-    BetMGM:     [+1,  -1,  +2,   +0.5,  -1],
-    Caesars:    [-1,  +1,   0,    0.0,  -2],
-    BetRivers:  [-3,  +3,  -1,  -0.5,   -1],
-    Fanatics:   [-3,  +3,  +1,   0.0,   -1],
-    bet365:     [-1,  +1,   0,  +0.5,  -2],
-    HardRock:   [-2,  +2,  -1,   0.0,   -1],
-    PointsBet:  [0,    0,  +1,  -0.5,  0],
+    ESPNBet:    [wg(), wg(), wg(), 0, wg()],
+    DraftKings: [wg(), wg(), wg(), 0, wg()],
+    FanDuel:    [wg(), wg(), wg(), 0, wg()],
+    BetMGM:     [wg(), wg(), wg(), 0, wg()],
+    Caesars:    [wg(), wg(), wg(), 0, wg()],
+    BetRivers:  [wg(), wg(), wg(), 0, wg()],
+    Fanatics:   [wg(), wg(), wg(), 0, wg()],
+    bet365:     [wg(), wg(), wg(), 0, wg()],
+    HardRock:   [wg(), wg(), wg(), 0, wg()],
+    PointsBet:  [wg(), wg(), wg(), 0, wg()],
   };
 
   try {
