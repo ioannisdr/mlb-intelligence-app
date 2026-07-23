@@ -1166,10 +1166,10 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   let edgeA = awayProb - mktAwayImplied;
 
   // ── O/U projection ────────────────────────────────────────────────────────
-  // FIX #4: Raise baseline by +0.3 to correct systematic UNDER bias
-  //         Audit showed model picked UNDER 60% of time — baseline was too low.
+  // Removed artificial bias.
+  // Model now projects pure data against the market line.
   //         r1 noise reduced: 0.40 → 0.20 (matches logit noise reduction)
-  let projOU = mkt.ou + 0.30 + ((hp.xera - 4.20) * 0.50) + ((ap.xera - 4.20) * 0.50) + (r1 * 0.20);
+  let projOU = mkt.ou + ((hp.xera - 4.20) * 0.50) + ((ap.xera - 4.20) * 0.50) + (r1 * 0.20);
 
   // Park factor adjustment (Coors = 1.17 multiplier; Petco = 0.92)
   const wxH = WX[g.home] || STADIUMS[g.home];
