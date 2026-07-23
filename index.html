@@ -916,6 +916,15 @@ async function fetchAllData() {
       oddsArr.forEach(o => { ODDS[o.home] = o.books || o; });
     }
 
+    // Cache odds in localStorage to remember closing lines for finished games (since ESPN drops them)
+    try {
+      let cachedOdds = JSON.parse(localStorage.getItem('cachedOdds') || '{}');
+      if (Object.keys(cachedOdds).length > 50) cachedOdds = {}; // Prevent unbounded growth
+      Object.keys(ODDS).forEach(k => { cachedOdds[k] = ODDS[k]; });
+      localStorage.setItem('cachedOdds', JSON.stringify(cachedOdds));
+      ODDS = { ...cachedOdds, ...ODDS };
+    } catch(e) {}
+
     // ── Pitcher stats ─────────────────────────────────────────────────────
     P = pitcherRes || {};
     Object.keys(P).forEach(k => {
