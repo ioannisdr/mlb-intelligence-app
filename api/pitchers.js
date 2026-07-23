@@ -101,6 +101,28 @@ export default async function handler(req, res) {
         return i >= 0 ? row[i]?.replace(/"/g, '').trim() : '';
       };
 
+      const mlbTeams = {
+        133: 'Athletics', 134: 'Pirates', 135: 'Padres', 136: 'Mariners', 137: 'Giants',
+        138: 'Cardinals', 139: 'Rays', 140: 'Rangers', 141: 'Blue Jays', 142: 'Twins',
+        143: 'Phillies', 144: 'Braves', 145: 'White Sox', 146: 'Marlins', 147: 'Yankees',
+        158: 'Brewers', 108: 'Angels', 109: 'Diamondbacks', 110: 'Orioles', 111: 'Red Sox',
+        112: 'Cubs', 113: 'Reds', 114: 'Guardians', 115: 'Rockies', 116: 'Tigers',
+        117: 'Astros', 118: 'Royals', 119: 'Dodgers', 120: 'Nationals', 121: 'Mets'
+      };
+      
+      let pTeamMap = {};
+      try {
+        const pRes = await fetch('https://statsapi.mlb.com/api/v1/sports/1/players');
+        if (pRes.ok) {
+          const pData = await pRes.json();
+          pData.people.forEach(p => {
+            if (p.currentTeam && mlbTeams[p.currentTeam.id]) {
+              pTeamMap[p.fullName] = mlbTeams[p.currentTeam.id];
+            }
+          });
+        }
+      } catch(e) {}
+
       const pitchers = {};
       lines.slice(1).forEach(line => {
         const row = line.split(',');
@@ -116,9 +138,11 @@ export default async function handler(req, res) {
         const bbpct = parseFloat(get(row, 'p_bb_percent')) || 7.5;
         const babip = parseFloat(get(row, 'babip')) || 0.292;
 
+        const team = pTeamMap[name] || 'UNK';
+
         pitchers[name] = {
           era, xera, fip: xfip, xFIP: xfip, babip, kpct, bbpct, swstr: 11.0,
-          ip: 0, team: 'UNK', hand: 'RHP',
+          ip: 0, team, hand: 'RHP',
           tier: xera < 3.0 ? 'Elite' : xera < 3.8 ? 'Strong' : 'Mid',
           score: ((4.50 - xera) * 1.5).toFixed(2),
           name

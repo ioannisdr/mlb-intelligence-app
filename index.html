@@ -2068,6 +2068,14 @@ function renderPitchers() {
   let cardHtml  = '';
   let tbodyHtml = '';
 
+  const todayStarters = new Set();
+  if (typeof TODAY !== 'undefined') {
+    TODAY.forEach(g => {
+      if (g.awayP && g.awayP !== 'TBD') todayStarters.add(g.awayP);
+      if (g.homeP && g.homeP !== 'TBD') todayStarters.add(g.homeP);
+    });
+  }
+
   pArr.forEach(p => {
     const era    = parseFloat(p.era)    || parseFloat(p.xera) || 4.20;
     const xera   = parseFloat(p.xera)  || 4.20;
@@ -2089,29 +2097,31 @@ function renderPitchers() {
       : '—';
     const tClass = p.tier === 'Elite' ? 't-elite' : p.tier === 'Strong' ? 't-strong' : 't-mid';
 
-    cardHtml += `
-      <div class="pc">
-        <div class="pc-hdr">
-          <div>
-            <div class="pc-title"><span class="pc-dot">●</span> ${p.name}</div>
-            <div class="pc-sub">${p.team || 'UNK'} · ${p.hand || 'RHP'} · ${ip > 0 ? ip + ' IP' : 'No IP data'}</div>
+    if (todayStarters.has(p.name)) {
+      cardHtml += `
+        <div class="pc">
+          <div class="pc-hdr">
+            <div>
+              <div class="pc-title"><span class="pc-dot">●</span> ${p.name}</div>
+              <div class="pc-sub">${p.team || 'UNK'} · ${p.hand || 'RHP'} · ${ip > 0 ? ip + ' IP' : 'No IP data'}</div>
+            </div>
+            <div class="pc-score-box">
+              <div class="pc-score">${score >= 0 ? '+' + score : score}</div>
+              <div class="pc-score-lbl">model score</div>
+              <div class="pc-score-diff">ERA ${parseFloat(diff) >= 0 ? '+' : ''}${diff} vs xERA</div>
+              <div class="pc-score-diff">BABIP ${parseFloat(babipDiff) >= 0 ? '+' : ''}${babipDiff} vs .300</div>
+            </div>
           </div>
-          <div class="pc-score-box">
-            <div class="pc-score">${score >= 0 ? '+' + score : score}</div>
-            <div class="pc-score-lbl">model score</div>
-            <div class="pc-score-diff">ERA ${parseFloat(diff) >= 0 ? '+' : ''}${diff} vs xERA</div>
-            <div class="pc-score-diff">BABIP ${parseFloat(babipDiff) >= 0 ? '+' : ''}${babipDiff} vs .300</div>
+          <div class="pc-grid">
+            <div class="pc-stat"><div class="pc-v ${xera < 3 ? 'c-g' : xera > 5 ? 'c-r' : ''}">${xera.toFixed(2)}</div><div class="pc-l">xERA</div></div>
+            <div class="pc-stat"><div class="pc-v ${xFIP < 3 ? 'c-g' : xFIP > 5 ? 'c-r' : ''}">${xFIP.toFixed(2)}</div><div class="pc-l">xFIP</div></div>
+            <div class="pc-stat"><div class="pc-v ${kpct > 28 ? 'c-g' : kpct < 15 ? 'c-r' : ''}">${kpct.toFixed(1)}%</div><div class="pc-l">K%</div></div>
+            <div class="pc-stat"><div class="pc-v ${bbpct < 5 ? 'c-g' : bbpct > 10 ? 'c-r' : ''}">${bbpct.toFixed(1)}%</div><div class="pc-l">BB%</div></div>
+            <div class="pc-stat"><div class="pc-v ${babip < 0.270 ? 'c-r' : babip > 0.310 ? 'c-g' : ''}">${babip.toFixed(3).replace('0.', '.')}</div><div class="pc-l">BABIP</div></div>
+            <div class="pc-stat"><div class="pc-v ${swstr > 13 ? 'c-g' : swstr < 8 ? 'c-r' : ''}">${swstr.toFixed(1)}%</div><div class="pc-l">SwStr%</div></div>
           </div>
-        </div>
-        <div class="pc-grid">
-          <div class="pc-stat"><div class="pc-v ${xera < 3 ? 'c-g' : xera > 5 ? 'c-r' : ''}">${xera.toFixed(2)}</div><div class="pc-l">xERA</div></div>
-          <div class="pc-stat"><div class="pc-v ${xFIP < 3 ? 'c-g' : xFIP > 5 ? 'c-r' : ''}">${xFIP.toFixed(2)}</div><div class="pc-l">xFIP</div></div>
-          <div class="pc-stat"><div class="pc-v ${kpct > 28 ? 'c-g' : kpct < 15 ? 'c-r' : ''}">${kpct.toFixed(1)}%</div><div class="pc-l">K%</div></div>
-          <div class="pc-stat"><div class="pc-v ${bbpct < 5 ? 'c-g' : bbpct > 10 ? 'c-r' : ''}">${bbpct.toFixed(1)}%</div><div class="pc-l">BB%</div></div>
-          <div class="pc-stat"><div class="pc-v ${babip < 0.270 ? 'c-r' : babip > 0.310 ? 'c-g' : ''}">${babip.toFixed(3).replace('0.', '.')}</div><div class="pc-l">BABIP</div></div>
-          <div class="pc-stat"><div class="pc-v ${swstr > 13 ? 'c-g' : swstr < 8 ? 'c-r' : ''}">${swstr.toFixed(1)}%</div><div class="pc-l">SwStr%</div></div>
-        </div>
-      </div>`;
+        </div>`;
+    }
 
     tbodyHtml += `
       <tr>
