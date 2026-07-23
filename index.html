@@ -1544,7 +1544,8 @@ async function runBacktest() {
     }
 
     let html = '';
-    let pl = { ALL: {}, ML: {}, RL: {}, OU: {} };
+    let totalProfits = { ML: 0, RL: 0, OU: 0 };
+    let pl = { ALL:{}, ML:{}, RL:{}, OU:{} };
     let totalGames = 0;
 
     // monthlyPL[signal][market][monthName] = profit
@@ -1615,6 +1616,7 @@ async function runBacktest() {
             if (mlSig.l !== 'SKIP') {
                pl.ALL[mlPick] += mlProfit;
                pl.ML[mlPick]  += mlProfit;
+               totalProfits.ML += mlProfit;
                addMonthly(mlSig.l, 'ML', mStr, mlProfit);
                grHits.ALL[mlSig.l].t++; grHits.ML[mlSig.l].t++;
                if (mlHit) { grHits.ALL[mlSig.l].w++; grHits.ML[mlSig.l].w++; }
@@ -1632,6 +1634,7 @@ async function runBacktest() {
             if (rlSig.l !== 'SKIP') {
                pl.ALL[rlPick] += rlProfit;
                pl.RL[rlPick]  += rlProfit;
+               totalProfits.RL += rlProfit;
                addMonthly(rlSig.l, 'RL', mStr, rlProfit);
                grHits.ALL[rlSig.l].t++; grHits.RL[rlSig.l].t++;
                if (rlHit) { grHits.ALL[rlSig.l].w++; grHits.RL[rlSig.l].w++; }
@@ -1651,6 +1654,9 @@ async function runBacktest() {
             if (ouSig.l !== 'SKIP') {
                pl.ALL[home] += ouProfit;
                pl.OU[home]  += ouProfit;
+               pl.ALL[away] += ouProfit;
+               pl.OU[away]  += ouProfit;
+               totalProfits.OU += ouProfit;
                addMonthly(ouSig.l, 'OU', mStr, ouProfit);
                grHits.ALL[ouSig.l].t++; grHits.OU[ouSig.l].t++;
                if (ouHit) { grHits.ALL[ouSig.l].w++; grHits.OU[ouSig.l].w++; }
@@ -1842,9 +1848,9 @@ function renderCharts(pl, grHits, monthlyPL) {
   });
 
   let mktLabels = ['Moneyline', 'Run Line', 'Over/Under'];
-  let totalML = Object.values(pl.ML).reduce((a,b)=>a+b, 0);
-  let totalRL = Object.values(pl.RL).reduce((a,b)=>a+b, 0);
-  let totalOU = Object.values(pl.OU).reduce((a,b)=>a+b, 0);
+  let totalML = totalProfits.ML;
+  let totalRL = totalProfits.RL;
+  let totalOU = totalProfits.OU;
   let mktVals = [totalML, totalRL, totalOU];
   let mktColors = mktVals.map(v => v >= 0 ? '#00d68f' : '#ef476f');
 
