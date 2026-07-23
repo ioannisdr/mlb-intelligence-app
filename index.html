@@ -998,6 +998,7 @@ async function fetchAllData() {
 
         TODAY.push({
           t: new Date(g.gameDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          gameDate: g.gameDate,
           away, home, awayP, homeP,
           awayForm: getForm(awayId, away + home + 'A'),
           homeForm: getForm(homeId, away + home + 'H'),
@@ -1321,12 +1322,14 @@ function renderApp() {
   let dogCount = 0;
   let underCount = 0;
   let totalProj = 0;
+  let upcomingGames = 0;
 
   let bestBetsArr = [];
 
   TODAY.forEach(g => {
     let mod = calculateModel(g);
     let mkt = mod.mkt;
+    let hasStarted = new Date() >= new Date(g.gameDate);
 
     let hPct = (mod.homeProb * 100).toFixed(0);
     let aPct = (mod.awayProb * 100).toFixed(0);
@@ -1353,10 +1356,13 @@ function renderApp() {
     const ouSigVal = getSignal('OU', { ouAbsDiff: Math.abs(mod.projOU - mkt.ou) });
     const bestSig = !bestIsOU ? mlSig : ouSigVal;
 
-    if(bestSig.v === 3) primeCount++;
-    if(isDog && !bestIsOU) dogCount++;
-    if(ouPick === 'UNDER') underCount++;
-    totalProj += mod.projOU;
+    if (!hasStarted) {
+      upcomingGames++;
+      if(bestSig.v === 3) primeCount++;
+      if(isDog && !bestIsOU) dogCount++;
+      if(ouPick === 'UNDER') underCount++;
+      totalProj += mod.projOU;
+    }
 
     let pickProb = mod.evH > mod.evA ? mod.homeProb : mod.awayProb;
     let pickLine = mod.evH > mod.evA ? (mkt.rl.hLine||'-1.5') : (mkt.rl.aLine||'+1.5');
@@ -1517,8 +1523,8 @@ function renderApp() {
     <div class="pred-box"><div class="lbl">GAMES</div><div class="val">${TODAY.length}</div><div class="sub">${new Date().toLocaleString('en-US',{month:'short',day:'numeric'})}</div></div>
     <div class="pred-box"><div class="lbl">PRIME PICKS</div><div class="val">${primeCount}</div><div class="sub">best bets</div></div>
     <div class="pred-box"><div class="lbl">DOG PICKS</div><div class="val">${dogCount}</div><div class="sub">ML underdog</div></div>
-    <div class="pred-box"><div class="lbl">UNDERS</div><div class="val">${underCount}</div><div class="sub">of ${TODAY.length}</div></div>
-    <div class="pred-box"><div class="lbl">AVG PROJ</div><div class="val">${(totalProj/TODAY.length || 0).toFixed(1)}</div><div class="sub">runs/game</div></div>
+    <div class="pred-box"><div class="lbl">UNDERS</div><div class="val">${underCount}</div><div class="sub">of ${upcomingGames}</div></div>
+    <div class="pred-box"><div class="lbl">AVG PROJ</div><div class="val">${(totalProj/upcomingGames || 0).toFixed(1)}</div><div class="sub">runs/game</div></div>
   `;
 }
 
