@@ -469,7 +469,8 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
       <option value="Bovada">Bovada</option>
     </select>
     <span id="live-status" style="font-size:10px;color:var(--tx2)">Connecting...</span>
-    <button onclick="fetchAllData()" style="font-size:9px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--b);cursor:pointer">🔄 Refresh</button>
+    <span style="font-size:9px;color:var(--tx3);margin-left:4px;">Auto-updates every 60s</span>
+    <button onclick="fetchAllData()" style="font-size:9px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--b);cursor:pointer">↻ Refresh</button>
   </div>
 </div>
 
@@ -2738,6 +2739,12 @@ window.addEventListener('scroll', () => {
 
 window.onload = () => { 
   fetchAllData(); 
+  setInterval(() => {
+    const today = new Date();
+    if (currentDate.getDate() === today.getDate() && currentDate.getMonth() === today.getMonth() && currentDate.getFullYear() === today.getFullYear()) {
+      fetchAllData();
+    }
+  }, 60000);
 };
 
 </script>
