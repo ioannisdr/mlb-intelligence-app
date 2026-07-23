@@ -730,7 +730,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
   <div style="overflow-x:auto;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--R);padding:10px;">
     <table class="bt-t" id="pitch-table">
       <thead><tr>
-        <th>Pitcher</th><th>Team</th><th>Hand</th><th>Tier</th><th>ERA</th><th>xERA</th><th>xFIP</th><th>BABIP</th><th>K%</th><th>BB%</th><th>SwStr%</th><th>IP</th><th>Score</th><th>ERA-xERA</th><th>BABIP FLAG</th>
+        <th>Pitcher</th><th>Team</th><th>Hand</th><th>Tier</th><th>ERA</th><th>xERA</th><th>xFIP</th><th>BABIP</th><th>K%</th><th>BB%</th><th>SwStr%</th><th>IP</th><th>Score</th><th>ERA-xERA</th><th>REGRESSION FLAG</th>
       </tr></thead>
       <tbody id="pitch-tbody"></tbody>
     </table>
@@ -1077,6 +1077,71 @@ function probToAmLine(p) {
   return Math.round((1 - p) / p * 100 / 5) * 5;
 }
 
+// ─ ADVANCED STATCAST REGRESSION MODEL ─────────────────────────────────
+function calculateRegression(p) {
+  if (!p || p.name === 'TBD') return { score: 0, text: null };
+  
+  let era = parseFloat(p.era || p.xera || 4.20);
+  let xera = parseFloat(p.xera || 4.20);
+  let xfip = parseFloat(p.xFIP || p.fip || 4.20);
+  let babip = parseFloat(p.babip || 0.295);
+  let woba = parseFloat(p.woba || 0.315);
+  let xwoba = parseFloat(p.xwoba || 0.315);
+  let hardhit = parseFloat(p.hardhit || 38.0);
+  let barrel = parseFloat(p.barrel || 7.0);
+
+  let score = 0;
+  let negReasons = [];
+  let posReasons = [];
+
+  // 1. Expected Value Gaps
+  let eraGap = era - ((xera + xfip) / 2); 
+  score += Math.max(-2.0, Math.min(2.0, eraGap)); 
+  
+  let wobaGap = woba - xwoba; 
+  score += Math.max(-1.5, Math.min(1.5, wobaGap * 20));
+
+  // 2. Luck Indicators
+  let babipGap = babip - 0.295;
+  score += Math.max(-1.0, Math.min(1.0, babipGap * 15));
+
+  // 3. Quality of Contact Penalties (Negative Regression Anchors)
+  if (hardhit > 45.0) {
+    score -= 0.6; 
+    negReasons.push(`Extreme HardHit (${hardhit.toFixed(1)}%)`);
+  } else if (hardhit < 30.0) {
+    score += 0.4;
+    posReasons.push(`Elite Weak Contact`);
+  }
+
+  if (barrel > 10.0) {
+    score -= 0.6; 
+    negReasons.push(`High Barrels (${barrel.toFixed(1)}%)`);
+  } else if (barrel < 5.0) {
+    score += 0.4;
+  }
+
+  if (wobaGap < -0.025) negReasons.push(`Lucky wOBA`);
+  if (wobaGap > 0.025) posReasons.push(`Unlucky wOBA`);
+  if (eraGap < -0.5) negReasons.push(`Outperforming xERA/xFIP`);
+  if (eraGap > 0.5) posReasons.push(`Underperforming xERA/xFIP`);
+  if (babip < 0.260) negReasons.push(`Lucky BABIP (${babip.toFixed(3)})`);
+  if (babip > 0.330) posReasons.push(`Unlucky BABIP (${babip.toFixed(3)})`);
+
+  let isLucky = score < -1.0;
+  let isUnlucky = score > 1.0;
+  
+  let text = null;
+  let name = p.name ? p.name.split(' ').pop() : 'Pitcher';
+  if (isLucky) {
+     text = { type: 'neg', text: `\u21D3 ${name}: Negative Regression Risk (${negReasons.slice(0, 2).join(', ') || 'Lucky Run Prevention'})` };
+  } else if (isUnlucky) {
+     text = { type: 'pos', text: `\u21D1 ${name}: Positive Bounce-back (${posReasons.slice(0, 2).join(', ') || 'Unlucky Outcomes'})` };
+  }
+
+  return { score: Math.max(-3.0, Math.min(3.0, score)), text };
+}
+
 function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTotal = null) {
   let ap = P[g.awayP] || { xera: 4.2, kpct: 22, fip: 4.3 };
   let hp = P[g.homeP] || { xera: 4.2, kpct: 22, fip: 4.3 };
@@ -1087,71 +1152,6 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   let h_pitch = hp.xera * -0.20;
   let a_off = as.woba * 5.0;
   let h_off = hs.woba * 5.0;
-
-  // ─ ADVANCED STATCAST REGRESSION MODEL ─────────────────────────────────
-  function calculateRegression(p) {
-    if (!p || p.name === 'TBD') return { score: 0, text: null };
-    
-    let era = parseFloat(p.era || p.xera || 4.20);
-    let xera = parseFloat(p.xera || 4.20);
-    let xfip = parseFloat(p.xFIP || p.fip || 4.20);
-    let babip = parseFloat(p.babip || 0.295);
-    let woba = parseFloat(p.woba || 0.315);
-    let xwoba = parseFloat(p.xwoba || 0.315);
-    let hardhit = parseFloat(p.hardhit || 38.0);
-    let barrel = parseFloat(p.barrel || 7.0);
-
-    let score = 0;
-    let negReasons = [];
-    let posReasons = [];
-
-    // 1. Expected Value Gaps
-    let eraGap = era - ((xera + xfip) / 2); 
-    score += Math.max(-2.0, Math.min(2.0, eraGap)); 
-    
-    let wobaGap = woba - xwoba; 
-    score += Math.max(-1.5, Math.min(1.5, wobaGap * 20));
-
-    // 2. Luck Indicators
-    let babipGap = babip - 0.295;
-    score += Math.max(-1.0, Math.min(1.0, babipGap * 15));
-
-    // 3. Quality of Contact Penalties (Negative Regression Anchors)
-    if (hardhit > 45.0) {
-      score -= 0.6; 
-      negReasons.push(`Extreme HardHit (${hardhit.toFixed(1)}%)`);
-    } else if (hardhit < 30.0) {
-      score += 0.4;
-      posReasons.push(`Elite Weak Contact`);
-    }
-
-    if (barrel > 10.0) {
-      score -= 0.6; 
-      negReasons.push(`High Barrels (${barrel.toFixed(1)}%)`);
-    } else if (barrel < 5.0) {
-      score += 0.4;
-    }
-
-    if (wobaGap < -0.025) negReasons.push(`Lucky wOBA`);
-    if (wobaGap > 0.025) posReasons.push(`Unlucky wOBA`);
-    if (eraGap < -0.5) negReasons.push(`Outperforming xERA/xFIP`);
-    if (eraGap > 0.5) posReasons.push(`Underperforming xERA/xFIP`);
-    if (babip < 0.260) negReasons.push(`Lucky BABIP (${babip.toFixed(3)})`);
-    if (babip > 0.330) posReasons.push(`Unlucky BABIP (${babip.toFixed(3)})`);
-
-    let isLucky = score < -1.0;
-    let isUnlucky = score > 1.0;
-    
-    let text = null;
-    let name = p.name ? p.name.split(' ').pop() : 'Pitcher';
-    if (isLucky) {
-       text = { type: 'neg', text: `\u21D3 ${name}: Negative Regression Risk (${negReasons.slice(0, 2).join(', ') || 'Lucky Run Prevention'})` };
-    } else if (isUnlucky) {
-       text = { type: 'pos', text: `\u21D1 ${name}: Positive Bounce-back (${posReasons.slice(0, 2).join(', ') || 'Unlucky Outcomes'})` };
-    }
-
-    return { score: Math.max(-3.0, Math.min(3.0, score)), text };
-  }
 
   const hasPitcherData = g.awayP !== 'TBD' && g.homeP !== 'TBD' &&
                          P[g.awayP]?.era !== undefined && P[g.homeP]?.era !== undefined;
@@ -2138,11 +2138,11 @@ function renderPitchers() {
     const diff    = (era - xera).toFixed(2);
     const diffC   = parseFloat(diff) > 0 ? 'c-g' : 'c-r'; // lucky if ERA > xERA (regression coming)
     const babipDiff = (babip - 0.300).toFixed(3);
-    const bFlag   = babip < 0.270
-      ? '<span class="b-flag c-r">⇓⇓ Lucky (regression risk)</span>'
-      : babip > 0.310
-      ? '<span class="b-flag c-g">⇑ Unlucky (bounce-back candidate)</span>'
-      : '—';
+    const reg = calculateRegression(p);
+    let bFlag = '—';
+    if (reg.text) {
+      bFlag = `<span class="reg-badge reg-${reg.text.type}" style="font-size:10px">${reg.text.text}</span>`;
+    }
     const tClass = p.tier === 'Elite' ? 't-elite' : p.tier === 'Strong' ? 't-strong' : 't-mid';
 
     if (todayStarters.has(p.name)) {
