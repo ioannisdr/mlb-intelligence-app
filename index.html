@@ -1207,11 +1207,16 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   } else if (ODDS[g.home] && ODDS[g.home][currentBook]) {
     mkt = JSON.parse(JSON.stringify(ODDS[g.home][currentBook]));
   } else {
-    // Simulate realistic market: market is usually within ±5% of true prob
-    // but adds bookmaker vig (~4.5% juice split across both sides)
+    // Simulate realistic market: Vegas bases opening lines on public perception (Raw ERA) rather than advanced xERA
+    let public_a_pitch = (ap.era || 4.20) * -0.22;
+    let public_h_pitch = (hp.era || 4.20) * -0.22;
+    let public_logit = (h_off + public_h_pitch + 0.08) - (a_off + public_a_pitch);
+    let publicHomeProb = 1 / (1 + Math.exp(-public_logit));
+    
     let noiseSeed = seedRand(g.away + g.home + (g.dateKey || '') + "mktNoise");
-    let noise = (noiseSeed * 0.10) - 0.05; // market noise ±5%
-    let mktHomeRaw = Math.max(0.28, Math.min(0.76, homeProb + noise));
+    let noise = (noiseSeed * 0.08) - 0.04; // market noise +/- 4%
+    let mktHomeRaw = Math.max(0.25, Math.min(0.75, publicHomeProb + noise));
+    
     // Apply vig: inflate both implied probs by ~2.25% each
     let mktHomeProbVig = Math.min(0.82, mktHomeRaw * 1.0225);
     let mktAwayProbVig = Math.min(0.82, (1 - mktHomeRaw) * 1.0225);
