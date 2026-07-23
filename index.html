@@ -896,7 +896,7 @@ async function fetchAllData() {
   try {
     // Phase 1: fetch all API data in parallel
     const [pitcherRes, teamRes, stadiumRes, scheduleRes, oddsRes] = await Promise.all([
-      fetch('/api/pitchers').then(r => r.json()).catch(() => ({})),
+      fetch('/api/pitchers?v=2').then(r => r.json()).catch(() => ({})),
       fetch('/api/teams').then(r => r.json()).catch(() => ({})),
       fetch('/api/weather').then(r => r.json()).catch(() => ({})), // returns stadium metadata
       fetch(`/api/schedule?date=${formatDateStr(currentDate)}`).then(r => r.json()).catch(() => ({ dates: [] })),
