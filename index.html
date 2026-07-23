@@ -1712,7 +1712,8 @@ async function runBacktest() {
               mlEV = mlPick === home ? mod.evH : mod.evA;
             }
 
-            const isDog    = mlPick === home ? mod.homeDog : mod.awayDog;
+            const isRealOdds = !!(ODDS[home] && ODDS[home][currentBook]);
+            const isDog    = isRealOdds ? (mlPick === home ? mod.homeDog : mod.awayDog) : false;
             const mlSig    = getSignal('ML', { ev: mlEV });
             const mlHit    = mlPick === winner;
 
