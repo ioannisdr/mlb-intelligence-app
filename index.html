@@ -445,6 +445,55 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
   transform: translateY(-2px);
   border-color: var(--b);
 }
+
+/* ── FOOTER & FAQ STYLES ───────────────────────────────── */
+.app-footer {
+  margin-top: 40px;
+  padding: 30px 20px;
+  background: var(--bg2);
+  border-top: 1px solid var(--bdr);
+  border-radius: var(--R);
+}
+.footer-inner {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+@media (max-width: 768px) {
+  .footer-inner { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) {
+  .footer-inner { grid-template-columns: 1fr; }
+}
+.footer-logo { font-size: 15px; font-weight: 800; color: var(--tx); margin-bottom: 6px; }
+.footer-desc { font-size: 11px; color: var(--tx3); line-height: 1.5; margin: 0; }
+.footer-col-title { font-size: 10px; font-weight: 700; color: var(--tx3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+.footer-col a { display: block; font-size: 11px; color: var(--tx2); text-decoration: none; margin-bottom: 6px; transition: color 0.15s; }
+.footer-col a:hover { color: var(--b); }
+.footer-bottom { border-top: 1px solid var(--bdr); padding-top: 15px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--tx3); flex-wrap: wrap; gap: 10px; }
+
+/* FAQ Accordions */
+.faq-sec-title { font-size: 12px; font-weight: 700; color: var(--b); margin: 16px 0 8px 0; border-bottom: 1px solid var(--bdr2); padding-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.faq-item { background: var(--bg3); border: 1px solid var(--bdr2); border-radius: 8px; margin-bottom: 8px; overflow: hidden; }
+.faq-q { padding: 12px 14px; font-size: 12px; font-weight: 700; color: var(--tx); cursor: pointer; display: flex; justify-content: space-between; align-items: center; user-select: none; }
+.faq-q:hover { background: rgba(255,255,255,0.03); }
+.faq-a { padding: 0 14px 12px 14px; font-size: 11px; color: var(--tx2); line-height: 1.6; display: none; border-top: 1px dashed var(--bdr2); margin-top: 4px; padding-top: 10px; }
+.faq-item.open .faq-a { display: block; }
+.faq-item.open .faq-icon { transform: rotate(180deg); }
+.faq-icon { font-size: 10px; color: var(--tx3); transition: transform 0.2s ease; }
+.policy-box { background: rgba(239,71,111,0.08); border: 1px solid rgba(239,71,111,0.25); border-radius: 8px; padding: 10px 12px; margin: 10px 0; font-size: 11px; color: var(--tx); }
+.policy-title { color: var(--r); font-weight: 700; margin-bottom: 4px; font-size: 11px; }
+
+/* Contact Form */
+.contact-form { display: grid; gap: 10px; margin-top: 10px; }
+.form-grp { display: flex; flex-direction: column; gap: 4px; }
+.form-grp label { font-size: 10px; font-weight: 600; color: var(--tx3); text-transform: uppercase; }
+.form-input, .form-select, .form-textarea { background: var(--bg3); border: 1px solid var(--bdr2); border-radius: 6px; padding: 8px 10px; font-size: 11px; color: var(--tx); outline: none; font-family: inherit; }
+.form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--b); }
+.form-textarea { min-height: 80px; resize: vertical; }
+.form-btn { background: linear-gradient(135deg,#4da6ff,#a78bfa); color: #fff; font-weight: 700; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: opacity 0.15s; }
+.form-btn:hover { opacity: 0.9; }
 </style>
 
 </head>
@@ -460,6 +509,8 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
+    <button onclick="openModal('faq-modal')" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx);cursor:pointer;font-weight:600">❓ FAQ & Guide</button>
+    <button onclick="openModal('contact-modal')" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx);cursor:pointer;font-weight:600">✉️ Contact</button>
     <select id="book-select" onchange="changeBook(this.value)" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bdr2);border-radius:4px;padding:3px 6px;font-size:10px;outline:none;cursor:pointer;">
       <option value="DraftKings">DraftKings</option>
       <option value="FanDuel">FanDuel</option>
@@ -753,6 +804,215 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
   </div>
   <div id="live-content" class="live-scoreboard">
     <div class="loading">Loading live scores…</div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="app-footer">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="footer-logo">⚾ MLB Intelligence</div>
+      <p class="footer-desc">Statcast-powered analytics, ERA regression models, and real-time sportsbook market edge detection.</p>
+    </div>
+    <div class="footer-links">
+      <div class="footer-col">
+        <div class="footer-col-title">Platform</div>
+        <a href="javascript:void(0)" onclick="openModal('faq-modal')">FAQ & Platform Guide</a>
+        <a href="javascript:void(0)" onclick="openModal('contact-modal')">Contact Us</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Legal & Policy</div>
+        <a href="javascript:void(0)" onclick="openModal('terms-modal')">Terms of Use</a>
+        <a href="javascript:void(0)" onclick="openModal('privacy-modal')">Privacy Policy</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Membership Policy</div>
+        <div style="font-size:11px;color:var(--tx3);line-height:1.5">
+          <strong>Strict Policy:</strong> All subscription memberships are final. <span style="color:var(--y);font-weight:700">No Free Trial</span> and <span style="color:var(--r);font-weight:700">No Refunds</span>.
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2026 MLB Betting Intelligence. All rights reserved.</div>
+    <div style="font-size:10px;color:var(--tx3)">18+ / 21+ Responsible Gaming. Not guaranteed financial advice.</div>
+  </div>
+</footer>
+
+<!-- FAQ & KNOWLEDGE BASE MODAL -->
+<div class="modal-overlay" id="faq-modal" onclick="closeModal('faq-modal')">
+  <div class="modal-box wide" onclick="event.stopPropagation()">
+    <div class="modal-close" onclick="closeModal('faq-modal')">✕</div>
+    <div class="modal-title">FAQ & Platform Knowledge Base</div>
+    <div class="modal-sub">Everything you need to know about subscriptions, predictive signals, EV, and CLV</div>
+
+    <div class="faq-sec-title">💳 Subscription & Membership Policy</div>
+    
+    <div class="policy-box">
+      <div class="policy-title">⚠️ Membership Terms & Conditions:</div>
+      <strong>Strict Subscription Policy:</strong> Membership provides instant, complete access to live predictive edges, proprietary Statcast regression algorithms, and historical backtest data. For this reason, <strong>NO FREE TRIALS</strong> and <strong>NO REFUNDS</strong> are provided on any membership tier under any circumstances. All sales are final upon purchase.
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Why is there no free trial? <span class="faq-icon">▼</span></div>
+      <div class="faq-a">
+        Because MLB Intelligence provides immediate, actionable sports betting edges, proprietary probabilities, and live market mispricings, offering a free trial would allow users to exploit live betting edges without contributing to platform maintenance. To maintain model integrity and protect paying subscribers, access requires an active membership.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">Can I get a refund if I change my mind? <span class="faq-icon">▼</span></div>
+      <div class="faq-a">
+        <strong>No.</strong> All subscriptions are non-refundable. Once access is granted to our real-time odds engines, Statcast calculations, and daily signal feeds, digital access cannot be returned. You may cancel your subscription at any time to prevent future renewal charges.
+      </div>
+    </div>
+
+    <div class="faq-sec-title">📈 How the Platform Works & Strategy</div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">How does MLB Intelligence calculate true win probabilities? <span class="faq-icon">▼</span></div>
+      <div class="faq-a">
+        Our proprietary quantitative engine evaluates pitcher quality using expected metrics (xERA, xFIP, BABIP, K%, BB%, SwStr%) instead of surface ERA. It combines team offensive wOBA, home/away split factors, ballpark run environments, and game-day weather (wind, temperature, air density) to calculate an un-biased mathematical win probability for every matchup.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">How should I use this platform to bet advantageously? <span class="faq-icon">▼</span></div>
+      <div class="faq-a">
+        Successful sports betting is not about guessing winners; it is about finding <strong>mispriced market lines</strong>. Compare our model's probability against sportsbook implied odds. Focus strictly on <strong>🔥 PRIME</strong> and <strong>⚡ EDGE</strong> picks where our expected value (EV) exceeds the market price. Always practice strict bankroll management (e.g., 1 unit per bet).
+      </div>
+    </div>
+
+    <div class="faq-sec-title">🧠 Betting Concepts: EV, CLV & Signals</div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">What is EV (Expected Value) and why does it matter? <span class="faq-icon">▼</span></div>
+      <div class="faq-a">
+        <strong>Expected Value (EV)</strong> measures the theoretical profit or loss per bet over a large sample size.<br><br>
+        <code>EV = (Model Win Probability × Sportsbook Payout) - (Loss Probability × Wager)</code><br><br>
+        A bet with <strong>+EV</strong> means the sportsbook is offering higher odds than the true mathematical probability of the event occurring. Placing only +EV bets guarantees long-term statistical profitability regardless of short-term variance.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">What is CLV (Closing Line Value)? <span class="faq-icon">▼</span></div>
+      <div class="faq-a">
+        <strong>Closing Line Value (CLV)</strong> compares the odds you placed against the final line right before first pitch. If you bet Braves at +125 and the line closes at +105, you achieved positive CLV. Beating the closing line consistently is the gold standard indicator of sharp, profitable long-term sports betting.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">What do PRIME, EDGE, and SKIP signals mean? <span class="faq-icon">▼</span></div>
+      <div class="faq-a">
+        • <strong>🔥 PRIME:</strong> Top-tier mathematical advantage (historically 57%+ hit rate on ML, EV +3.5% to +8.6%). High-confidence sweet spot.<br>
+        • <strong>⚡ EDGE:</strong> Positive expected value (+1.0% to +3.5% EV). Solid value spot worth tracking.<br>
+        • <strong>⬜ SKIP:</strong> No mathematical edge detected or line is tight. The model strongly advises passing on this market.
+      </div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="toggleFaq(this)">What is Edge %? <span class="faq-icon">▼</span></div>
+      <div class="faq-a">
+        <strong>Edge %</strong> is the difference between our model's win probability and the sportsbook's implied probability. For example, if our model projects a team at 56.0% (implied odds -127) and DraftKings prices them at +100 (50.0% implied), your mathematical edge is <strong>+6.0%</strong>.
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- TERMS OF USE MODAL -->
+<div class="modal-overlay" id="terms-modal" onclick="closeModal('terms-modal')">
+  <div class="modal-box wide" onclick="event.stopPropagation()">
+    <div class="modal-close" onclick="closeModal('terms-modal')">✕</div>
+    <div class="modal-title">Terms of Use</div>
+    <div class="modal-sub">Last updated: July 2026</div>
+
+    <div style="font-size:11px;color:var(--tx2);line-height:1.7;display:grid;gap:12px">
+      <p>Welcome to <strong>MLB Betting Intelligence</strong>. By accessing or using our platform, website, software, or subscription services, you agree to be bound by these Terms of Use.</p>
+
+      <div style="background:var(--bg3);border-left:3px solid var(--r);padding:10px 12px;border-radius:0 6px 6px 0">
+        <strong style="color:var(--r)">1. STRICT SUBSCRIPTION POLICY (NO FREE TRIAL / NO REFUNDS)</strong><br>
+        All membership plans, digital passes, and subscriptions are sold on a strict <strong>NO FREE TRIAL</strong> and <strong>NO REFUND</strong> basis. All payments are final and non-refundable immediately upon purchase. Digital access to live algorithms and real-time signals cannot be returned.
+      </div>
+
+      <p><strong>2. Educational & Analytical Purpose Only</strong><br>
+      MLB Intelligence provides quantitative statistical models, algorithms, and analytical projections for educational and informational purposes only. Nothing on this platform constitutes financial, investment, or legal advice. Sports betting involves substantial risk of loss.</p>
+
+      <p><strong>3. User Eligibility & Age Restrictions</strong><br>
+      You must be at least 18 years of age (or 21 years of age depending on your local legal jurisdiction) to use this service. You are solely responsible for verifying the legality of sports betting in your jurisdiction.</p>
+
+      <p><strong>4. Intellectual Property & License</strong><br>
+      All algorithms, predictive data, Statcast regression scores, code, and UI elements are proprietary intellectual property. Unauthorized scraping, copying, reselling, or redistribution of predictions is strictly prohibited.</p>
+
+      <p><strong>5. Limitation of Liability</strong><br>
+      MLB Intelligence and its developers shall not be held liable for any financial losses, betting losses, or damages incurred as a result of using model predictions, signals, or historical backtest outputs.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PRIVACY POLICY MODAL -->
+<div class="modal-overlay" id="privacy-modal" onclick="closeModal('privacy-modal')">
+  <div class="modal-box wide" onclick="event.stopPropagation()">
+    <div class="modal-close" onclick="closeModal('privacy-modal')">✕</div>
+    <div class="modal-title">Privacy Policy</div>
+    <div class="modal-sub">How we protect and manage your data</div>
+
+    <div style="font-size:11px;color:var(--tx2);line-height:1.7;display:grid;gap:12px">
+      <p>At <strong>MLB Betting Intelligence</strong>, we prioritize user privacy and transparency. This Privacy Policy outlines how data is handled across our web application.</p>
+
+      <p><strong>1. Information We Collect</strong><br>
+      We do not collect sensitive personal identification information. We may process standard non-identifying telemetry (such as browser type, time zone, and language) to ensure proper API data rendering.</p>
+
+      <p><strong>2. Local Storage Usage</strong><br>
+      Our platform utilizes browser <code>localStorage</code> to store user preferences (such as selected sportsbook, odds display settings, and temporary closing line caches) directly on your device. We do not sell or track this local data across third-party networks.</p>
+
+      <p><strong>3. Third-Party Data Providers</strong><br>
+      Our application fetches real-time sports data and weather metrics via public and partner APIs (including MLB Stats API, ESPN Scoreboard, and Open-Meteo). No personal user information is transmitted to these data providers.</p>
+
+      <p><strong>4. Data Security</strong><br>
+      We implement industry-standard encryption protocols (HTTPS/SSL) across all server communication and hosting infrastructure (Vercel Edge Network) to protect application integrity.</p>
+
+      <p><strong>5. Contacting Us</strong><br>
+      If you have any questions regarding this Privacy Policy, please reach out via our Contact Us modal or email us directly at <code>support@mlb-intelligence.app</code>.</p>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACT US MODAL -->
+<div class="modal-overlay" id="contact-modal" onclick="closeModal('contact-modal')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-close" onclick="closeModal('contact-modal')">✕</div>
+    <div class="modal-title">Contact Support</div>
+    <div class="modal-sub">Have questions or feedback? Send us a message below.</div>
+
+    <form class="contact-form" onsubmit="handleContactSubmit(event)">
+      <div class="form-grp">
+        <label>Your Name</label>
+        <input type="text" class="form-input" id="cf-name" placeholder="John Doe" required />
+      </div>
+      <div class="form-grp">
+        <label>Email Address</label>
+        <input type="email" class="form-input" id="cf-email" placeholder="john@example.com" required />
+      </div>
+      <div class="form-grp">
+        <label>Topic / Subject</label>
+        <select class="form-select" id="cf-topic">
+          <option value="subscription">Subscription & Membership Inquiry</option>
+          <option value="model">Model & Algorithm Question</option>
+          <option value="bug">Report a Bug / Issue</option>
+          <option value="general">General Support</option>
+        </select>
+      </div>
+      <div class="form-grp">
+        <label>Message</label>
+        <textarea class="form-textarea" id="cf-msg" placeholder="How can we help you?" required></textarea>
+      </div>
+      <button type="submit" class="form-btn">Send Message ✉️</button>
+    </form>
+    
+    <div style="margin-top:14px;font-size:10px;color:var(--tx3);text-align:center">
+      Direct Email: <a href="mailto:support@mlb-intelligence.app" style="color:var(--b);text-decoration:none">support@mlb-intelligence.app</a>
+    </div>
   </div>
 </div>
 
@@ -2875,6 +3135,19 @@ window.addEventListener('scroll', () => {
     btn.classList.remove('visible');
   }
 });
+
+function toggleFaq(el) {
+  const item = el.closest('.faq-item');
+  item.classList.toggle('open');
+}
+
+function handleContactSubmit(e) {
+  e.preventDefault();
+  const name = document.getElementById('cf-name').value;
+  alert(`Thank you, ${name}! Your message has been received. Our support team will get back to you shortly.`);
+  closeModal('contact-modal');
+  e.target.reset();
+}
 
 window.onload = () => { 
   fetchAllData(); 
