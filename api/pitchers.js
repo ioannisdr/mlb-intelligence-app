@@ -3,16 +3,16 @@ const FG_URL = 'https://www.fangraphs.com/api/leaders/major-league/data' +
   '?age=0&pos=all&stats=pit&lg=all&qual=20&season=2026&season1=2026' +
   '&ind=0&team=0&pageitems=500&pagenum=1&rost=0&players=0&type=8';
 
-// Map FanGraphs team abbreviation → app team nickname
+// Map FanGraphs team abbreviation → official 3-letter team code
 const FG_TEAM = {
-  'ARI':'Diamondbacks','ATL':'Braves','BAL':'Orioles','BOS':'Red Sox',
-  'CHC':'Cubs','CWS':'White Sox','CIN':'Reds','CLE':'Guardians',
-  'COL':'Rockies','DET':'Tigers','HOU':'Astros','KCR':'Royals',
-  'LAA':'Angels','LAD':'Dodgers','MIA':'Marlins','MIL':'Brewers',
-  'MIN':'Twins','NYM':'Mets','NYY':'Yankees','OAK':'Athletics',
-  'PHI':'Phillies','PIT':'Pirates','SDP':'Padres','SFG':'Giants',
-  'SEA':'Mariners','STL':'Cardinals','TBR':'Rays','TEX':'Rangers',
-  'TOR':'Blue Jays','WSN':'Nationals'
+  'ARI':'ARI','ATL':'ATL','BAL':'BAL','BOS':'BOS',
+  'CHC':'CHC','CWS':'CWS','CHW':'CWS','CIN':'CIN','CLE':'CLE',
+  'COL':'COL','DET':'DET','HOU':'HOU','KC':'KCR','KCR':'KCR',
+  'LAA':'LAA','LAD':'LAD','MIA':'MIA','MIL':'MIL',
+  'MIN':'MIN','NYM':'NYM','NYY':'NYY','OAK':'ATH','ATH':'ATH',
+  'PHI':'PHI','PIT':'PIT','SD':'SDP','SDP':'SDP','SF':'SFG','SFG':'SFG',
+  'SEA':'SEA','STL':'STL','TB':'TBR','TBR':'TBR','TEX':'TEX',
+  'TOR':'TOR','WAS':'WSH','WSN':'WSH','WSH':'WSH'
 };
 
 function stripHtml(s) {
@@ -102,12 +102,12 @@ export default async function handler(req, res) {
       };
 
       const mlbTeams = {
-        133: 'Athletics', 134: 'Pirates', 135: 'Padres', 136: 'Mariners', 137: 'Giants',
-        138: 'Cardinals', 139: 'Rays', 140: 'Rangers', 141: 'Blue Jays', 142: 'Twins',
-        143: 'Phillies', 144: 'Braves', 145: 'White Sox', 146: 'Marlins', 147: 'Yankees',
-        158: 'Brewers', 108: 'Angels', 109: 'Diamondbacks', 110: 'Orioles', 111: 'Red Sox',
-        112: 'Cubs', 113: 'Reds', 114: 'Guardians', 115: 'Rockies', 116: 'Tigers',
-        117: 'Astros', 118: 'Royals', 119: 'Dodgers', 120: 'Nationals', 121: 'Mets'
+        133: 'ATH', 134: 'PIT', 135: 'SDP', 136: 'SEA', 137: 'SFG',
+        138: 'STL', 139: 'TBR', 140: 'TEX', 141: 'TOR', 142: 'MIN',
+        143: 'PHI', 144: 'ATL', 145: 'CWS', 146: 'MIA', 147: 'NYY',
+        158: 'MIL', 108: 'LAA', 109: 'ARI', 110: 'BAL', 111: 'BOS',
+        112: 'CHC', 113: 'CIN', 114: 'CLE', 115: 'COL', 116: 'DET',
+        117: 'HOU', 118: 'KCR', 119: 'LAD', 120: 'WSH', 121: 'NYM'
       };
       
       let pTeamMap = {};

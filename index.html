@@ -1318,6 +1318,50 @@ function getTeamName(fullName) {
   return fullName.split(' ').pop();
 }
 
+const TEAM_ABBR = {
+  'Braves': 'ATL', 'Atlanta Braves': 'ATL', 'ATL': 'ATL',
+  'Diamondbacks': 'ARI', 'D-backs': 'ARI', 'Arizona Diamondbacks': 'ARI', 'ARI': 'ARI', 'AZ': 'ARI',
+  'Orioles': 'BAL', 'Baltimore Orioles': 'BAL', 'BAL': 'BAL',
+  'Red Sox': 'BOS', 'Boston Red Sox': 'BOS', 'BOS': 'BOS',
+  'Cubs': 'CHC', 'Chicago Cubs': 'CHC', 'CHC': 'CHC',
+  'White Sox': 'CWS', 'Chicago White Sox': 'CWS', 'CWS': 'CWS', 'CHW': 'CWS',
+  'Reds': 'CIN', 'Cincinnati Reds': 'CIN', 'CIN': 'CIN',
+  'Guardians': 'CLE', 'Cleveland Guardians': 'CLE', 'CLE': 'CLE',
+  'Rockies': 'COL', 'Colorado Rockies': 'COL', 'COL': 'COL',
+  'Tigers': 'DET', 'Detroit Tigers': 'DET', 'DET': 'DET',
+  'Astros': 'HOU', 'Houston Astros': 'HOU', 'HOU': 'HOU',
+  'Royals': 'KCR', 'Kansas City Royals': 'KCR', 'KC': 'KCR', 'KCR': 'KCR',
+  'Angels': 'LAA', 'Los Angeles Angels': 'LAA', 'LAA': 'LAA',
+  'Dodgers': 'LAD', 'Los Angeles Dodgers': 'LAD', 'LAD': 'LAD',
+  'Marlins': 'MIA', 'Miami Marlins': 'MIA', 'MIA': 'MIA',
+  'Brewers': 'MIL', 'Milwaukee Brewers': 'MIL', 'MIL': 'MIL',
+  'Twins': 'MIN', 'Minnesota Twins': 'MIN', 'MIN': 'MIN',
+  'Mets': 'NYM', 'New York Mets': 'NYM', 'NYM': 'NYM',
+  'Yankees': 'NYY', 'New York Yankees': 'NYY', 'NYY': 'NYY',
+  'Athletics': 'ATH', 'Oakland Athletics': 'ATH', 'OAK': 'ATH', 'ATH': 'ATH',
+  'Phillies': 'PHI', 'Philadelphia Phillies': 'PHI', 'PHI': 'PHI',
+  'Pirates': 'PIT', 'Pittsburgh Pirates': 'PIT', 'PIT': 'PIT',
+  'Padres': 'SDP', 'San Diego Padres': 'SDP', 'SD': 'SDP', 'SDP': 'SDP',
+  'Giants': 'SFG', 'San Francisco Giants': 'SFG', 'SF': 'SFG', 'SFG': 'SFG',
+  'Mariners': 'SEA', 'Seattle Mariners': 'SEA', 'SEA': 'SEA',
+  'Cardinals': 'STL', 'St. Louis Cardinals': 'STL', 'STL': 'STL',
+  'Rays': 'TBR', 'Tampa Bay Rays': 'TBR', 'TB': 'TBR', 'TBR': 'TBR',
+  'Rangers': 'TEX', 'Texas Rangers': 'TEX', 'TEX': 'TEX',
+  'Blue Jays': 'TOR', 'Toronto Blue Jays': 'TOR', 'TOR': 'TOR',
+  'Nationals': 'WSH', 'Washington Nationals': 'WSH', 'WAS': 'WSH', 'WSH': 'WSH'
+};
+
+function getTeamAbbr(str) {
+  if (!str || str === 'UNK') return 'MLB';
+  if (TEAM_ABBR[str]) return TEAM_ABBR[str];
+  for (let key in TEAM_ABBR) {
+    if (str.toLowerCase().includes(key.toLowerCase())) {
+      return TEAM_ABBR[key];
+    }
+  }
+  return str.substring(0, 3).toUpperCase();
+}
+
 // Pseudo-random generator for consistent variance
 function seedRand(str) {
   let h = 0; for(let i=0;i<str.length;i++) h = Math.imul(31, h) + str.charCodeAt(i) | 0;
@@ -1375,7 +1419,7 @@ async function fetchAllData() {
       p.hand  = p.hand  || (seedRand(k + 'hand') > 0.7 ? 'LHP' : 'RHP');
       p.tier  = p.xera < 3.0 ? 'Elite' : (p.xera < 3.8 ? 'Strong' : 'Mid');
       p.score = ((4.5 - p.xera) * 1.5).toFixed(2);
-      p.team  = 'UNK';
+      p.team  = getTeamAbbr(p.team);
       p.name  = k;
     });
 
@@ -1415,8 +1459,8 @@ async function fetchAllData() {
         const awayP = g.teams.away.probablePitcher?.fullName || 'TBD';
         const homeP = g.teams.home.probablePitcher?.fullName || 'TBD';
 
-        if (P[awayP]) P[awayP].team = away;
-        if (P[homeP]) P[homeP].team = home;
+        if (P[awayP]) P[awayP].team = getTeamAbbr(g.teams.away.team.name);
+        if (P[homeP]) P[homeP].team = getTeamAbbr(g.teams.home.team.name);
 
         // Lineup quality: extract batting order if hydrated
         let awayLineupWoba = null, homeLineupWoba = null;
@@ -2634,7 +2678,7 @@ function renderPitchers() {
           <div class="pc-hdr">
             <div>
               <div class="pc-title"><span class="pc-dot">●</span> ${p.name}</div>
-              <div class="pc-sub">${p.team || 'UNK'} · ${p.hand || 'RHP'} · ${ip > 0 ? ip + ' IP' : 'No IP data'}</div>
+              <div class="pc-sub">${getTeamAbbr(p.team)} · ${p.hand || 'RHP'} · ${ip > 0 ? ip + ' IP' : 'No IP data'}</div>
             </div>
             <div class="pc-score-box">
               <div class="pc-score">${score >= 0 ? '+' + score : score}</div>
@@ -2657,7 +2701,7 @@ function renderPitchers() {
     tbodyHtml += `
       <tr>
         <td style="font-weight:700"><span style="color:var(--y)">●</span> ${p.name}</td>
-        <td>${p.team || 'UNK'}</td>
+        <td><strong style="color:var(--b)">${getTeamAbbr(p.team)}</strong></td>
         <td>${p.hand || 'RHP'}</td>
         <td><span class="tier ${tClass}">${p.tier || 'Mid'}</span></td>
         <td class="${era < 3 ? 'c-g' : era > 5 ? 'c-r' : ''}">${era.toFixed(2)}</td>
