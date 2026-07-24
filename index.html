@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>MLB Betting Intelligence v14.0</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+(function() {
+  const saved = localStorage.getItem('userTheme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+})();
+</script>
 <style>
 :root{
   --bg:#0f1117;--bg2:#171b26;--bg3:#1e2335;--bg4:#252b40;
@@ -18,6 +24,34 @@
   --or:#ff9f43;--orbg:rgba(255,159,67,.1);
   --R:10px;--Rs:6px;
 }
+[data-theme="light"] {
+  --bg: #f4f6fb;
+  --bg2: #ffffff;
+  --bg3: #f0f3fa;
+  --bg4: #e2e7f3;
+  --bdr: rgba(0, 0, 0, 0.09);
+  --bdr2: rgba(0, 0, 0, 0.16);
+  --tx: #131722;
+  --tx2: #4a5168;
+  --tx3: #78819d;
+  --g: #00a870;
+  --gbg: rgba(0, 168, 112, 0.1);
+  --gbr: rgba(0, 168, 112, 0.28);
+  --y: #d97706;
+  --ybg: rgba(217, 119, 6, 0.1);
+  --ybr: rgba(217, 119, 6, 0.28);
+  --r: #e11d48;
+  --rbg: rgba(225, 29, 72, 0.1);
+  --rbr: rgba(225, 29, 72, 0.28);
+  --b: #2563eb;
+  --bbg: rgba(37, 99, 235, 0.1);
+  --bbr: rgba(37, 99, 235, 0.28);
+  --pu: #7c3aed;
+  --pubg: rgba(124, 58, 237, 0.1);
+  --or: #ea580c;
+  --orbg: rgba(234, 88, 12, 0.1);
+}
+[data-theme="light"] .modal-box { box-shadow: 0 24px 64px rgba(0,0,0,.15); }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans-serif;font-size:13px;line-height:1.5}
 .app{max-width:1160px;margin:0 auto;padding:20px 16px}
@@ -509,6 +543,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
+    <button id="theme-toggle-btn" onclick="toggleTheme()" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx);cursor:pointer;font-weight:600;display:flex;align-items:center;gap:3px">🌙 Dark</button>
     <button onclick="openModal('faq-modal')" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx);cursor:pointer;font-weight:600">❓ FAQ & Guide</button>
     <button onclick="openModal('contact-modal')" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx);cursor:pointer;font-weight:600">✉️ Contact</button>
     <select id="book-select" onchange="changeBook(this.value)" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bdr2);border-radius:4px;padding:3px 6px;font-size:10px;outline:none;cursor:pointer;">
@@ -2118,7 +2153,9 @@ function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 
   if (chartsObj.monthlyChart) chartsObj.monthlyChart.destroy();
   if (chartsObj.marketChart) chartsObj.marketChart.destroy();
 
-  Chart.defaults.color = '#8b91a8';
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const gridColor = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.05)';
+  Chart.defaults.color = isLight ? '#4a5168' : '#8b91a8';
   Chart.defaults.font.family = 'Inter';
 
   // Sort P/L
@@ -2144,7 +2181,7 @@ function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { display: false, drawBorder: false } },
-        y: { grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false } }
+        y: { grid: { color: gridColor, drawBorder: false } }
       }
     }
   });
@@ -2181,7 +2218,7 @@ function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { display: false, drawBorder: false } },
-        y: { beginAtZero: true, max: 100, grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false } }
+        y: { beginAtZero: true, max: 100, grid: { color: gridColor, drawBorder: false } }
       }
     }
   });
@@ -2210,7 +2247,7 @@ function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { display: false, drawBorder: false } },
-        y: { grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false } }
+        y: { grid: { color: gridColor, drawBorder: false } }
       }
     }
   });
@@ -2248,7 +2285,7 @@ function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 
       plugins: { legend: { display: false } },
       scales: {
         x: { grid: { display: false, drawBorder: false } },
-        y: { grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false } }
+        y: { grid: { color: gridColor, drawBorder: false } }
       }
     }
   });
@@ -3139,7 +3176,31 @@ function handleContactSubmit(e) {
   e.target.reset();
 }
 
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  setTheme(next);
+}
+
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('userTheme', theme);
+  updateThemeBtn();
+  if (chartsObj.plChart) {
+    runBacktest();
+  }
+}
+
+function updateThemeBtn() {
+  const btn = document.getElementById('theme-toggle-btn');
+  if (btn) {
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    btn.innerHTML = current === 'dark' ? '☀️ Light' : '🌙 Dark';
+  }
+}
+
 window.onload = () => { 
+  updateThemeBtn();
   fetchAllData(); 
   setInterval(() => {
     const today = new Date();
