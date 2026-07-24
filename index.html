@@ -1770,17 +1770,18 @@ async function runBacktest() {
             }
 
             // Best EV selection considering ML, RL, and O/U signals
+            const ouText = `${ouPick.charAt(0) + ouPick.slice(1).toLowerCase()} ${mod.mkt.ou.toFixed(1)}`;
             const candidates = [
               { mkt: 'ML', sig: mlSig, ev: mlEV, text: `${mlPick} ML` },
               { mkt: 'RL', sig: rlSig, ev: Math.max(0, mlPickProb - 0.50), text: `${rlPick} -1.5` },
-              { mkt: 'OU', sig: ouSig, ev: ouEV, text: `${ouPick} ${mod.mkt.ou.toFixed(1)}` }
+              { mkt: 'OU', sig: ouSig, ev: ouEV, text: ouText }
             ];
             candidates.sort((a, b) => b.sig.v - a.sig.v || b.ev - a.ev);
             const bestCand = candidates[0];
             
-            // Only display Best EV if it is a PRIME (v=3) or EDGE (v=2); show dash if all are SKIP (v=1)
+            // Display clean bet text for PRIME/EDGE plays; show dash if all are SKIP (v=1)
             const bestEVStr = bestCand.sig.v > 1
-              ? `<span class="sig-box ${bestCand.sig.c}">${bestCand.sig.icon} ${bestCand.sig.l}</span> <span style="font-weight:700;margin-left:4px">${bestCand.text}</span>`
+              ? `<span style="font-weight:700">${bestCand.text}</span>`
               : `<span style="color:var(--tx3)">—</span>`;
 
             // Profit/loss coloring
