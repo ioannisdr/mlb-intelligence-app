@@ -550,6 +550,166 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .form-textarea { min-height: 80px; resize: vertical; }
 .form-btn { background: linear-gradient(135deg,#4da6ff,#a78bfa); color: #fff; font-weight: 700; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 12px; transition: opacity 0.15s; }
 .form-btn:hover { opacity: 0.9; }
+
+/* ── COMPREHENSIVE MOBILE & TABLET RESPONSIVE SYSTEM ────────────── */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Touch Scrolling Improvements */
+.tabs, .scroll-x, .odds-wrap, .score-grid, #acca-legs-list, .modal-box {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+/* Hide scrollbar track on tab bar for clean app feel */
+.tabs::-webkit-scrollbar { display: none; }
+
+/* ── TABLET VIEWPORTS (768px – 1024px) ───────────────────────── */
+@media (max-width: 1024px) {
+  .app { padding: 14px 12px; }
+  .kpi-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .pred-summary { grid-template-columns: repeat(3, 1fr); }
+  .about-grid { grid-template-columns: repeat(2, 1fr); }
+  .charts-grid { grid-template-columns: 1fr; gap: 14px; }
+}
+
+/* ── MOBILE PHONES (320px – 767px) ────────────────────────────── */
+@media (max-width: 767px) {
+  .app { padding: 10px 8px; }
+  
+  /* Header & Navigation Controls */
+  .hdr { flex-direction: column; align-items: stretch; gap: 12px; }
+  .hdr-l { gap: 8px; }
+  .hdr h1 { font-size: 14px; }
+  .hdr p { font-size: 9.5px; }
+  
+  /* Controls bar wrapper */
+  .hdr > div:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px !important;
+    width: 100%;
+  }
+  .hdr button, .hdr select {
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+    min-height: 32px;
+    flex-grow: 1;
+    text-align: center;
+    justify-content: center;
+  }
+
+  /* Tabs Bar */
+  .tabs {
+    padding: 3px;
+    gap: 2px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+  }
+  .tab {
+    padding: 7px 10px;
+    font-size: 11px;
+    border-radius: 6px;
+  }
+
+  /* Predictions Summary Cards */
+  .pred-summary { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .pred-box { padding: 10px; }
+  .pred-box .val { font-size: 20px; }
+
+  /* Game Cards (.gc) */
+  .gc-head { padding: 10px 12px; }
+  .gc-top { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .mup { gap: 10px; width: 100%; justify-content: space-between; }
+  .ta { font-size: 16px; }
+  .tw { font-size: 10px; }
+  .gc-time { font-size: 10px; }
+  .picks { padding: 10px 12px; gap: 6px; }
+  .pk { min-width: 100%; flex: 1 1 100%; }
+
+  /* Best Bets Row (.bb-row) */
+  .bb-row {
+    flex-direction: column;
+    align-items: stretch;
+    position: relative;
+    padding-bottom: 6px;
+  }
+  .bb-grade-box {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    margin: 0 !important;
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 18px !important;
+  }
+  .bb-info { padding: 10px 10px 6px 58px; }
+  .bb-pick-title { font-size: 14px; flex-wrap: wrap; gap: 6px; }
+  .bb-right {
+    text-align: left;
+    padding: 8px 12px;
+    margin-left: 58px;
+    background: rgba(255,255,255,0.02);
+    border-top: 1px dashed var(--bdr2);
+    border-radius: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-width: auto;
+  }
+
+  /* Backtest KPI Grid */
+  .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .kpi-card { padding: 12px 10px; }
+  .kpi-val { font-size: 20px; }
+  .kpi-label { font-size: 8.5px; margin-bottom: 6px; }
+
+  /* Pitchers Tab Starters Grid & Table */
+  #pitch-cards { grid-template-columns: 1fr; }
+  .pc { padding: 12px; }
+  .pc-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+
+  /* Live Scores */
+  .live-card { padding: 10px 12px; }
+  .live-card-top { flex-wrap: wrap; gap: 6px; }
+  .live-teams { gap: 12px; flex-wrap: wrap; width: 100%; }
+  .live-team-name { font-size: 14px; }
+  .live-score { font-size: 20px; }
+
+  /* Odds Layout & Sticky Acca Sidebar */
+  .odds-layout { flex-direction: column; }
+  .acca-sidebar { width: 100%; position: relative; top: 0; margin-top: 12px; }
+
+  /* Modals */
+  .modal-box {
+    width: calc(100% - 16px);
+    max-height: 92vh;
+    padding: 14px;
+    margin: 8px;
+    border-radius: 10px;
+  }
+  .modal-close { width: 36px; height: 36px; font-size: 20px; top: 8px; right: 8px; }
+  .calc-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
+
+  /* Footer */
+  .footer-compact { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .footer-nav { flex-wrap: wrap; gap: 6px; }
+  .footer-sub-bar { flex-direction: column; align-items: flex-start; gap: 4px; }
+}
+
+/* ── SMALL PHONES (< 400px) ─────────────────────────────────── */
+@media (max-width: 400px) {
+  .pred-summary { grid-template-columns: 1fr; }
+  .kpi-grid { grid-template-columns: 1fr; }
+  .pc-grid { grid-template-columns: repeat(2, 1fr); }
+}
 </style>
 
 </head>
