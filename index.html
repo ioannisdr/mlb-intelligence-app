@@ -1769,11 +1769,19 @@ async function runBacktest() {
                if (ouHit) { grHits.ALL[ouSig.l].w++; grHits.OU[ouSig.l].w++; }
             }
 
-            // Best EV label for row
-            const bestSig = mlEV > ouEV ? mlSig : ouSig;
-            const bestEVStr = mlEV > ouEV
-              ? `<span class="sig-box ${mlSig.c}">${mlSig.icon} ${mlSig.l}</span> <span style="font-weight:700;margin-left:4px">${mlPick} ML</span>`
-              : `<span class="sig-box ${ouSig.c}">${ouSig.icon} ${ouSig.l}</span> <span style="font-weight:700;margin-left:4px">${ouPick} ${mod.mkt.ou.toFixed(1)}</span>`;
+            // Best EV selection considering ML, RL, and O/U signals
+            const candidates = [
+              { mkt: 'ML', sig: mlSig, ev: mlEV, text: `${mlPick} ML` },
+              { mkt: 'RL', sig: rlSig, ev: Math.max(0, mlPickProb - 0.50), text: `${rlPick} -1.5` },
+              { mkt: 'OU', sig: ouSig, ev: ouEV, text: `${ouPick} ${mod.mkt.ou.toFixed(1)}` }
+            ];
+            candidates.sort((a, b) => b.sig.v - a.sig.v || b.ev - a.ev);
+            const bestCand = candidates[0];
+            
+            // Only display Best EV if it is a PRIME (v=3) or EDGE (v=2); show dash if all are SKIP (v=1)
+            const bestEVStr = bestCand.sig.v > 1
+              ? `<span class="sig-box ${bestCand.sig.c}">${bestCand.sig.icon} ${bestCand.sig.l}</span> <span style="font-weight:700;margin-left:4px">${bestCand.text}</span>`
+              : `<span style="color:var(--tx3)">—</span>`;
 
             // Profit/loss coloring
             const mlProfC = mlProfit > 0 ? 'color:var(--g)' : 'color:var(--r)';
