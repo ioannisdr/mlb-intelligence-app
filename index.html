@@ -1790,7 +1790,7 @@ function calculateRegression(p) {
   return { score: Math.max(-3.0, Math.min(3.0, score)), text };
 }
 
-function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTotal = null) {
+function calculateModel(g, overrideMkt = null) {
   let ap = P[g.awayP] || { xera: 4.2, kpct: 22, fip: 4.3 };
   let hp = P[g.homeP] || { xera: 4.2, kpct: 22, fip: 4.3 };
   let as = S[g.away] || { woba: 0.315 };
@@ -1818,22 +1818,11 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   }
 
   // Seeded noise — deterministic per matchup + date
-  // r1: ML win probability noise (matchup-only, intentionally stable)
-  // r2: OU market line — MUST include dateKey so line varies per game
-  //     Real OU lines change daily based on starting pitchers, weather etc.
-  //     Without dateKey, every Yankees vs Red Sox game all season would get
-  //     the exact same simulated line, making hit/miss comparisons wrong.
   let r1 = seedRand(g.away + g.home + "var1") * 2 - 1;
   let r2 = seedRand(g.away + g.home + (g.dateKey || '') + "ouline") * 2 - 1;
 
   // Model win probability via logistic regression
   let logit = (h_off + h_pitch + 0.08) - (a_off + a_pitch) + (r1 * 0.22) + eraGapLogit;
-
-  // Mild backtest nudge on ~30% of games
-  if (backtestWinner) {
-    let nudgeSeed = seedRand(g.away + g.home + backtestWinner + "nudge");
-    if (nudgeSeed > 0.70) logit += backtestWinner === g.home ? 0.28 : -0.28;
-  }
 
   let homeProb = 1 / (1 + Math.exp(-logit));
   let awayProb = 1 - homeProb;
@@ -2332,7 +2321,7 @@ async function runBacktest() {
                realMkt = ODDS[home][currentBook];
             }
 
-            const mod   = calculateModel(mockG, realMkt, winner, totalScore);
+            const mod   = calculateModel(mockG, realMkt);
 
             // ─ ML pick ───────────────────────────────────────────
             let mlPick;
