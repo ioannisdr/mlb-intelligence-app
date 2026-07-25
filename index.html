@@ -970,9 +970,9 @@ html, body {
   <div style="overflow-x:auto;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--R);padding:10px;">
     <table class="bt-main-t">
       <thead><tr>
-        <th>Date</th><th>Game</th><th>Score</th><th>Winner</th>
-        <th>ML Pick</th><th>Model%</th><th>Signal</th><th>ML</th><th>ML P/L</th>
-        <th>RL Pick</th><th>Signal</th><th>RL</th><th>RL P/L</th>
+        <th>Date</th><th>Game</th><th>Score</th><th>Real Winner</th>
+        <th>Model ML Pick</th><th>Model%</th><th>Signal</th><th>ML Result</th><th>ML P/L</th>
+        <th>RL Pick</th><th>Signal</th><th>RL Result</th><th>RL P/L</th>
         <th>O/U Pick · Mkt Line</th><th>Signal</th><th>O/U vs Line</th><th>O/U P/L</th><th>Best EV</th>
       </tr></thead>
 
@@ -2437,8 +2437,8 @@ async function runBacktest() {
               <td style="color:var(--tx2)">${dStr}</td>
               <td style="font-weight:700">${away} @ ${home}</td>
               <td style="color:var(--tx2)">${awayScore}–${homeScore}</td>
-              <td style="font-weight:700;color:${mlHit&&mlPick===winner?'var(--g)':'var(--tx)'}">${winner}</td>
-              <td style="font-weight:700">${mlPick} ${(isDog && mlSig.l !== 'SKIP') ? '<span class="dog-tag">DOG</span>' : ''}</td>
+              <td style="color:var(--tx2);font-size:10px">${winner} <span style="font-size:8px;color:var(--tx3)">(Final)</span></td>
+              <td style="font-weight:800;color:var(--tx);font-size:12px">${mlPick} ${(isDog && mlSig.l !== 'SKIP') ? '<span class="dog-tag">DOG</span>' : ''}</td>
               <td style="color:var(--b)">${(Math.max(mod.homeProb,mod.awayProb)*100).toFixed(0)}% <span style="font-size:9px;color:var(--tx3)">(model)</span></td>
               <td><span class="sig-box ${mlSig.c}">${mlSig.icon} ${mlSig.l}</span></td>
               <td>${mlSig.l === 'SKIP' ? `<span class="sig-box sig-skip">⬜ SKIP</span>` : `<span class="hit-box ${mlHit?'hit-w':'hit-l'}">${mlHit?'HIT':'MISS'}</span>`}</td>
