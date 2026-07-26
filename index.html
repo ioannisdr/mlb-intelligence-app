@@ -1466,9 +1466,68 @@ function changeBook(b) {
 }
 
 function formatDateStr(d) {
-  // Always fetch the MLB schedule for the current date in US Eastern Time, regardless of user's local timezone
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
+  if (!d || isNaN(new Date(d).getTime())) d = new Date();
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).formatToParts(d);
+    let y = '', m = '', day = '';
+    for (const p of parts) {
+      if (p.type === 'year') y = p.value;
+      if (p.type === 'month') m = p.value;
+      if (p.type === 'day') day = p.value;
+    }
+    if (y && m && day) return y + '-' + m + '-' + day;
+  } catch (e) {}
 }
+
+async function fetchScheduleWithFallback(dateStr) {
+  // Try same-origin serverless proxy first (bypasses adblockers like Brave/uBlock)
+  try {
+    const r = await fetch(`/api/schedule?date=${dateStr}`);
+    if (r.ok) {
+      const data = await r.json();
+      if (data && data.dates && Array.isArray(data.dates) && data.dates.length > 0) {
+        return data;
+      }
+    }
+  } catch (e) {}
+
+  // Fallback to direct MLB Stats API if proxy returns empty or fails
+  try {
+    const url = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${dateStr}&hydrate=probablePitcher,linescore,team,lineups`;
+    const r = await fetch(url);
+    if (r.ok) return await r.json();
+  } catch (e) {}
+
+  return { dates: [] };
+}
+
+async function fetchBacktestScheduleWithFallback(startDate, endDate) {
+  // Try same-origin serverless proxy first
+  try {
+    const r = await fetch(`/api/schedule?startDate=${startDate}&endDate=${endDate}&gameType=R`);
+    if (r.ok) {
+      const data = await r.json();
+      if (data && data.dates && Array.isArray(data.dates) && data.dates.length > 0) {
+        return data;
+      }
+    }
+  } catch (e) {}
+
+  // Fallback to direct MLB Stats API
+  try {
+    const url = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=${startDate}&endDate=${endDate}&gameType=R&hydrate=probablePitcher`;
+    const r = await fetch(url);
+    if (r.ok) return await r.json();
+  } catch (e) {}
+
+  return null;
+}
+
 
 function getTeamName(fullName) {
   if(!fullName) return "UNK";
@@ -1538,7 +1597,7 @@ async function fetchAllData() {
       fetch('/api/pitchers?v=2').then(r => r.json()).catch(() => ({})),
       fetch('/api/teams').then(r => r.json()).catch(() => ({})),
       fetch('/api/weather').then(r => r.json()).catch(() => ({})), // returns stadium metadata
-      fetch(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${formatDateStr(currentDate)}&hydrate=probablePitcher,linescore,team,lineups`).then(r => r.json()).catch(() => ({ dates: [] })),
+      fetchScheduleWithFallback(formatDateStr(currentDate)),
       fetch('/api/odds').then(r => r.json()).catch(() => [])
     ]);
 
@@ -2246,10 +2305,7 @@ async function runBacktest() {
   btBody.innerHTML = '<tr><td colspan="16" class="loading">Loading 2026 season results from MLB API...</td></tr>';
 
   try {
-    const pastRes = await fetch(
-      'https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=2026-03-20&endDate=' +
-      formatDateStr(new Date()) + '&gameType=R&hydrate=probablePitcher'
-    ).then(r => r.json()).catch(() => null);
+    const pastRes = await fetchBacktestScheduleWithFallback('2026-03-20', formatDateStr(new Date()));
 
     if (!pastRes || !pastRes.dates || pastRes.dates.length === 0) {
       btBody.innerHTML = '<tr><td colspan="16" class="loading" style="color:var(--y)">No completed games found for the 2026 season yet. Results will appear here once games are played.</td></tr>';
