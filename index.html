@@ -1538,7 +1538,7 @@ async function fetchAllData() {
       fetch('/api/pitchers?v=2').then(r => r.json()).catch(() => ({})),
       fetch('/api/teams').then(r => r.json()).catch(() => ({})),
       fetch('/api/weather').then(r => r.json()).catch(() => ({})), // returns stadium metadata
-      fetch(`/api/schedule?date=${formatDateStr(currentDate)}`).then(r => r.json()).catch(() => ({ dates: [] })),
+      fetch(`https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${formatDateStr(currentDate)}&hydrate=probablePitcher,linescore,team,lineups`).then(r => r.json()).catch(() => ({ dates: [] })),
       fetch('/api/odds').then(r => r.json()).catch(() => [])
     ]);
 
@@ -2323,7 +2323,7 @@ async function runBacktest() {
             // If this game is part of the active TODAY slate, we MUST use real odds 
             // so the backtest exactly matches the Live Predictions tab.
             let realMkt = null;
-            const isTodaySlate = TODAY.some(tg => tg.home === home && tg.away === away);
+            const isTodaySlate = TODAY.some(tg => tg.home === home && tg.away === away && tg.gameDate && tg.gameDate.startsWith(d.date));
             if (isTodaySlate && ODDS[home] && ODDS[home][currentBook]) {
                realMkt = ODDS[home][currentBook];
             }
@@ -2333,7 +2333,7 @@ async function runBacktest() {
             // ─ ML pick ───────────────────────────────────────────
             let mlPick;
             let mlEV;
-            const liveGame = TODAY.find(tg => tg.home === home && tg.away === away);
+            const liveGame = TODAY.find(tg => tg.home === home && tg.away === away && tg.gameDate && tg.gameDate.startsWith(d.date));
             
             if (liveGame && liveGame.liveMlPick) {
               // 100% perfect agreement with Live Predictions tab
