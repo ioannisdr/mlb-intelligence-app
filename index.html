@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>MLB Betting Intelligence v14.0</title>
+<title>MLB Betting Intelligence v15.1 Live</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 (function() {
@@ -1828,19 +1828,18 @@ function calculateModel(g, overrideMkt = null) {
   let awayProb = 1 - homeProb;
 
   // ── MARKET ODDS ──────────────────────────────────────────────────────────
-  // Priority: real API odds → backtest override → simulated from model prob
   let mkt;
-  if (overrideMkt) {
+  if (overrideMkt && overrideMkt.ml) {
     mkt = JSON.parse(JSON.stringify(overrideMkt));
-  } else if (ODDS[g.home] && ODDS[g.home][currentBook]) {
+  } else if (ODDS[g.home] && ODDS[g.home][currentBook] && ODDS[g.home][currentBook].ml) {
     mkt = JSON.parse(JSON.stringify(ODDS[g.home][currentBook]));
+  } else if (ODDS[g.home] && ODDS[g.home]['ESPNBet'] && ODDS[g.home]['ESPNBet'].ml) {
+    mkt = JSON.parse(JSON.stringify(ODDS[g.home]['ESPNBet']));
   } else {
     // Simulate realistic market: market is usually within +/- 5% of true prob
-    // but adds bookmaker vig (~4.5% juice split across both sides)
     let noiseSeed = seedRand(g.away + g.home + (g.dateKey || '') + "mktNoise");
-    let noise = (noiseSeed * 0.10) - 0.05; // market noise +/- 5%
+    let noise = (noiseSeed * 0.10) - 0.05;
     let mktHomeRaw = Math.max(0.28, Math.min(0.76, homeProb + noise));
-    // Apply vig: inflate both implied probs by ~2.25% each
     let mktHomeProbVig = Math.min(0.82, mktHomeRaw * 1.0225);
     let mktAwayProbVig = Math.min(0.82, (1 - mktHomeRaw) * 1.0225);
     mkt = {
@@ -1849,6 +1848,14 @@ function calculateModel(g, overrideMkt = null) {
       ou: Math.round((8.25 + (r2 * 1.1)) * 2) / 2
     };
   }
+
+  // Ensure mkt, mkt.ml, mkt.rl, mkt.ou exist with safe defaults
+  if (!mkt || !mkt.ml) {
+    mkt = { ml: { h: -110, a: -110 }, rl: { a: '+1.5', h: '-1.5' }, ou: 8.5 };
+  }
+  mkt.ml.h = mkt.ml.h || -110;
+  mkt.ml.a = mkt.ml.a || -110;
+  mkt.ou   = mkt.ou   || 8.5;
 
   // Market implied probabilities (true odds, for edge display)
   let mktHomeImplied = amToProb(mkt.ml.h);
