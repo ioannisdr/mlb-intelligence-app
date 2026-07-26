@@ -1485,9 +1485,16 @@ function formatDateStr(d) {
     }
     if (y && m && day) return y + '-' + m + '-' + day;
   } catch (e) {}
+  try {
+    return new Date(d).toISOString().split('T')[0];
+  } catch (e) {}
+  return new Date().toISOString().split('T')[0];
 }
 
 async function fetchScheduleWithFallback(dateStr) {
+  if (!dateStr || dateStr === 'undefined' || dateStr === 'null') {
+    dateStr = formatDateStr(new Date());
+  }
   // Try same-origin serverless proxy first (bypasses adblockers like Brave/uBlock)
   try {
     const r = await fetch(`/api/schedule?date=${dateStr}`);
@@ -1510,6 +1517,9 @@ async function fetchScheduleWithFallback(dateStr) {
 }
 
 async function fetchBacktestScheduleWithFallback(startDate, endDate) {
+  if (!startDate || startDate === 'undefined') startDate = '2026-03-20';
+  if (!endDate || endDate === 'undefined') endDate = formatDateStr(new Date());
+
   // Try same-origin serverless proxy first
   try {
     const r = await fetch(`/api/schedule?startDate=${startDate}&endDate=${endDate}&gameType=R`);
