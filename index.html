@@ -743,6 +743,7 @@ html, body {
     <span id="live-status" style="font-size:10px;color:var(--tx2)">Connecting...</span>
     <span style="font-size:9px;color:var(--tx3);margin-left:4px;">Auto-updates every 60s</span>
     <button onclick="fetchAllData()" style="font-size:9px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--b);cursor:pointer">↻ Refresh</button>
+    <button onclick="hardResetApp()" style="font-size:9px;padding:3px 8px;border-radius:4px;border:1px solid var(--rbr);background:var(--rbg);color:var(--r);cursor:pointer;font-weight:600">🧹 Hard Reset</button>
   </div>
 </div>
 
@@ -1468,6 +1469,28 @@ function changeBook(b) {
   renderApp();
 }
 
+function safeDate(dInput) {
+  if (!dInput) return new Date();
+  if (dInput instanceof Date) return isNaN(dInput.getTime()) ? new Date() : dInput;
+  let d = new Date(dInput);
+  if (!isNaN(d.getTime())) return d;
+  try {
+    d = new Date(String(dInput).replace(/-/g, '/'));
+    if (!isNaN(d.getTime())) return d;
+  } catch(e) {}
+  return new Date();
+}
+
+function hardResetApp() {
+  try { localStorage.clear(); } catch(e) {}
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(regs => {
+      regs.forEach(reg => reg.unregister());
+    });
+  }
+  window.location.href = window.location.pathname + '?t=' + Date.now();
+}
+
 function formatDateStr(d) {
   if (!d || isNaN(new Date(d).getTime())) d = new Date();
   try {
@@ -1624,22 +1647,29 @@ async function fetchAllData() {
     ODDS = {};
     const oddsArr = oddsRes?.games || oddsRes || [];
     if (Array.isArray(oddsArr)) {
-      oddsArr.forEach(o => { ODDS[o.home] = o.books || o; });
+      oddsArr.forEach(o => {
+        if (o && typeof o === 'object' && o.home) {
+          ODDS[o.home] = o.books || o;
+        }
+      });
     }
 
     // Cache odds in localStorage to remember closing lines for finished games (since ESPN drops them)
     try {
       let cachedOdds = JSON.parse(localStorage.getItem('cachedOdds') || '{}');
-      if (Object.keys(cachedOdds).length > 50) cachedOdds = {}; // Prevent unbounded growth
-      Object.keys(ODDS).forEach(k => { cachedOdds[k] = ODDS[k]; });
-      localStorage.setItem('cachedOdds', JSON.stringify(cachedOdds));
-      ODDS = { ...cachedOdds, ...ODDS };
+      if (cachedOdds && typeof cachedOdds === 'object' && !Array.isArray(cachedOdds)) {
+        if (Object.keys(cachedOdds).length > 50) cachedOdds = {};
+        Object.keys(ODDS).forEach(k => { if (k) cachedOdds[k] = ODDS[k]; });
+        localStorage.setItem('cachedOdds', JSON.stringify(cachedOdds));
+        ODDS = { ...cachedOdds, ...ODDS };
+      }
     } catch(e) {}
 
     // ── Pitcher stats ─────────────────────────────────────────────────────
-    P = pitcherRes || {};
+    P = (pitcherRes && typeof pitcherRes === 'object') ? pitcherRes : {};
     Object.keys(P).forEach(k => {
       const p = P[k];
+      if (!p || typeof p !== 'object') return;
       p.xera  = p.xera  || 4.20;
       p.fip   = p.fip   || (p.xera + 0.12);
       p.kpct  = p.kpct  || 22.5;
@@ -1719,7 +1749,7 @@ async function fetchAllData() {
       };
 
       TODAY.push({
-        t: new Date(g.gameDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        t: safeDate(g.gameDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         gameDate: g.gameDate,
         status: g.status?.abstractGameState || 'Scheduled',
         away, home, awayP, homeP,
@@ -2359,8 +2389,9 @@ async function runBacktest() {
 
     // Process all dates newest-first so the table shows most recent at top
     [...pastRes.dates].reverse().forEach(d => {
-      const dStr = new Date(d.date + 'T12:00:00').toLocaleString('en-US', { month:'short', day:'numeric' });
-      const mStr = new Date(d.date + 'T12:00:00').toLocaleString('en-US', { month:'long' });
+      const dObj = safeDate(d.date ? d.date + 'T12:00:00' : null);
+      const dStr = dObj.toLocaleString('en-US', { month:'short', day:'numeric' });
+      const mStr = dObj.toLocaleString('en-US', { month:'long' });
 
       d.games
         .filter(g => g.gameType === 'R' &&
@@ -3511,7 +3542,7 @@ function renderLiveScores(data) {
 
     const inningInfo = state === 'Live'
       ? `Outs: ${ls.outs ?? 0} · ${ls.balls ?? 0}-${ls.strikes ?? 0}`
-      : state === 'Final' ? 'Final score' : `Game time: ${new Date(g.gameDate).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})} Local`;
+      : state === 'Final' ? 'Final score' : `Game time: ${safeDate(g.gameDate).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})} Local`;
 
     // Inning-by-inning grid
     let gridHtml = '';
