@@ -1590,12 +1590,14 @@ async function fetchAllData() {
     const homesNeedingWeather = new Set();
     const teamIdsToFetch = new Set();
 
-    if (scheduleRes.dates && scheduleRes.dates[0]) {
-      scheduleRes.dates[0].games.filter(g => g.gameType === 'R').forEach(g => {
-        teamIdsToFetch.add(g.teams.away.team.id);
-        teamIdsToFetch.add(g.teams.home.team.id);
-      });
-    }
+    const gamesList = (scheduleRes && scheduleRes.dates && Array.isArray(scheduleRes.dates))
+      ? scheduleRes.dates.flatMap(d => d && Array.isArray(d.games) ? d.games : [])
+      : [];
+
+    gamesList.filter(g => g && g.gameType === 'R' && g.teams?.away?.team && g.teams?.home?.team).forEach(g => {
+      teamIdsToFetch.add(g.teams.away.team.id);
+      teamIdsToFetch.add(g.teams.home.team.id);
+    });
 
     let realTeamForms = {};
     if (teamIdsToFetch.size > 0) {
@@ -1609,56 +1611,54 @@ async function fetchAllData() {
       }
     }
 
-    if (scheduleRes.dates && scheduleRes.dates[0]) {
-      scheduleRes.dates[0].games.filter(g => g.gameType === 'R').forEach(g => {
-        const away = getTeamName(g.teams.away.team.name);
-        const home = getTeamName(g.teams.home.team.name);
-        const awayId = g.teams.away.team.id;
-        const homeId = g.teams.home.team.id;
+    gamesList.filter(g => g && g.gameType === 'R' && g.teams?.away?.team && g.teams?.home?.team).forEach(g => {
+      const away = getTeamName(g.teams.away.team.name);
+      const home = getTeamName(g.teams.home.team.name);
+      const awayId = g.teams.away.team.id;
+      const homeId = g.teams.home.team.id;
 
-        const awayP = g.teams.away.probablePitcher?.fullName || 'TBD';
-        const homeP = g.teams.home.probablePitcher?.fullName || 'TBD';
+      const awayP = g.teams.away.probablePitcher?.fullName || 'TBD';
+      const homeP = g.teams.home.probablePitcher?.fullName || 'TBD';
 
-        if (P[awayP]) P[awayP].team = getTeamAbbr(g.teams.away.team.name);
-        if (P[homeP]) P[homeP].team = getTeamAbbr(g.teams.home.team.name);
+      if (P[awayP]) P[awayP].team = getTeamAbbr(g.teams.away.team.name);
+      if (P[homeP]) P[homeP].team = getTeamAbbr(g.teams.home.team.name);
 
-        // Lineup quality: extract batting order if hydrated
-        let awayLineupWoba = null, homeLineupWoba = null;
-        const lin = g.lineups;
-        if (lin) {
-          awayLineupWoba = S[away]?.woba || null;
-          homeLineupWoba = S[home]?.woba || null;
+      // Lineup quality: extract batting order if hydrated
+      let awayLineupWoba = null, homeLineupWoba = null;
+      const lin = g.lineups;
+      if (lin) {
+        awayLineupWoba = S[away]?.woba || null;
+        homeLineupWoba = S[home]?.woba || null;
+      }
+
+      // Pre-seed WX with dome stadiums so model doesn't wait
+      if (STADIUMS[home]?.dome) {
+        WX[home] = { temp: 72, windMph: 0, windDir: 'dome', sky: 'Dome',
+                     pf: STADIUMS[home].pf, dome: true };
+      } else {
+        homesNeedingWeather.add(home);
+      }
+
+      const getForm = (id, seedStr) => {
+        if (id && realTeamForms[id] && Array.isArray(realTeamForms[id]) && realTeamForms[id].length > 0) {
+          return realTeamForms[id].map(game => game && game.won ? 'W' : 'L');
         }
+        return generateForm(seedStr);
+      };
 
-        // Pre-seed WX with dome stadiums so model doesn't wait
-        if (STADIUMS[home]?.dome) {
-          WX[home] = { temp: 72, windMph: 0, windDir: 'dome', sky: 'Dome',
-                       pf: STADIUMS[home].pf, dome: true };
-        } else {
-          homesNeedingWeather.add(home);
-        }
-
-        const getForm = (id, seedStr) => {
-          if (realTeamForms[id] && realTeamForms[id].length > 0) {
-            return realTeamForms[id].map(game => game.won ? 'W' : 'L');
-          }
-          return generateForm(seedStr);
-        };
-
-        TODAY.push({
-          t: new Date(g.gameDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          gameDate: g.gameDate,
-          status: g.status.abstractGameState,
-          away, home, awayP, homeP,
-          awayForm: getForm(awayId, away + home + 'A'),
-          homeForm: getForm(homeId, away + home + 'H'),
-          awayLineupWoba, homeLineupWoba,
-          awayId,
-          homeId,
-          gamePk: g.gamePk,
-        });
+      TODAY.push({
+        t: new Date(g.gameDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        gameDate: g.gameDate,
+        status: g.status?.abstractGameState || 'Scheduled',
+        away, home, awayP, homeP,
+        awayForm: getForm(awayId, away + home + 'A'),
+        homeForm: getForm(homeId, away + home + 'H'),
+        awayLineupWoba, homeLineupWoba,
+        awayId,
+        homeId,
+        gamePk: g.gamePk,
       });
-    }
+    });
 
     document.getElementById('live-status').textContent = 'Data Live';
     const opts = { month: 'short', day: 'numeric' };
@@ -1666,9 +1666,9 @@ async function fetchAllData() {
     document.getElementById('slate-label').textContent = currentDate.toLocaleDateString('en-US', opts) + ' — LIVE';
 
     // Render immediately with available data
-    renderApp();
-    renderPitchers();
-    runBacktest();
+    try { renderApp(); } catch (e) { console.error('renderApp error:', e); }
+    try { renderPitchers(); } catch (e) { console.error('renderPitchers error:', e); }
+    try { runBacktest(); } catch (e) { console.error('runBacktest error:', e); }
 
     // Phase 2: Fetch Open-Meteo weather for each outdoor home stadium (async, re-renders)
     homesNeedingWeather.forEach(async home => {
