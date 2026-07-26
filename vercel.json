@@ -5,12 +5,12 @@
       "maxDuration": 10
     }
   },
-  "routes": [
-    { "src": "/api/schedule", "dest": "/api/schedule.js" },
-    { "src": "/api/teams", "dest": "/api/teams.js" },
-    { "src": "/api/pitchers", "dest": "/api/pitchers.js" },
-    { "src": "/api/weather", "dest": "/api/weather.js" },
-    { "src": "/api/odds", "dest": "/api/odds.js" },
-    { "src": "/api/team-form", "dest": "/api/team-form.js" }
+  "rewrites": [
+    { "source": "/api/schedule", "destination": "/api/schedule.js" },
+    { "source": "/api/teams", "destination": "/api/teams.js" },
+    { "source": "/api/pitchers", "destination": "/api/pitchers.js" },
+    { "source": "/api/weather", "destination": "/api/weather.js" },
+    { "source": "/api/odds", "destination": "/api/odds.js" },
+    { "source": "/api/team-form", "destination": "/api/team-form.js" }
   ]
 }
