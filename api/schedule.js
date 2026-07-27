@@ -6,10 +6,10 @@ export default async function handler(req, res) {
 
   let url;
   if (startDate && endDate) {
-    url = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&gameType=${encodeURIComponent(gameType || 'R')}&hydrate=probablePitcher`;
+    url = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=${startDate}&endDate=${endDate}&gameType=${gameType || 'R'}&hydrate=probablePitcher`;
   } else {
-    const d = date || new Date().toISOString().split('T')[0];
-    url = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${encodeURIComponent(d)}&hydrate=probablePitcher,linescore,team,lineups`;
+    const targetDate = date || new Date().toISOString().split('T')[0];
+    url = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${targetDate}&hydrate=probablePitcher,linescore,team,lineups`;
   }
 
   try {
@@ -30,4 +30,3 @@ export default async function handler(req, res) {
     res.status(500).json({ error: 'Failed to fetch schedule data' });
   }
 }
-
