@@ -268,20 +268,20 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 }
 .odds-game-title { font-size:14px; font-weight:700; color:var(--tx); }
 .odds-game-time  { font-size:10px; color:var(--tx3); }
-.odds-wrap { overflow-x:auto; }
+.odds-wrap { width:100%; overflow-x:hidden; }
 .odds-tbl {
-  width:100%; border-collapse:collapse; font-size:11px; min-width:800px;
+  width:100%; border-collapse:collapse; font-size:11px; table-layout:fixed;
 }
 .odds-tbl th {
-  padding:9px 12px; text-align:center; border-bottom:1px solid var(--bdr2);
+  padding:9px 8px; text-align:center; border-bottom:1px solid var(--bdr2);
   font-size:9px; font-weight:600; color:var(--tx3); text-transform:uppercase;
-  letter-spacing:.4px; white-space:nowrap; background:var(--bg3);
+  letter-spacing:.4px; white-space:nowrap; background:var(--bg3); overflow:hidden;
 }
-.odds-tbl th:first-child { text-align:left; }
+.odds-tbl th:first-child { text-align:left; width:110px; min-width:110px; }
 .odds-tbl td {
-  padding:10px 12px; border-bottom:1px solid var(--bdr);
+  padding:10px 8px; border-bottom:1px solid var(--bdr);
   text-align:center; white-space:nowrap; color:var(--tx);
-  transition:background .15s;
+  transition:background .15s; overflow:hidden; text-overflow:ellipsis;
 }
 .odds-tbl td:first-child { text-align:left; font-weight:700; font-size:12px; color:var(--tx); }
 .odds-tbl tbody tr:last-child td { border-bottom:none; }
@@ -1270,6 +1270,8 @@ let STADIUMS = {}; // stadium metadata (lat, lon, pf, dome, cfBearing)
 let ODDS = {};
 let TODAY = [];
 let currentDate = new Date();
+// Frozen pre-game predictions cache — keyed by `away@home`, stores model output at kick-off
+let frozenPredictions = {};
 
 let chartsObj = {};
 let currentGrHits = {};
@@ -1872,7 +1874,17 @@ function renderApp() {
     let mkt = mod.mkt;
     let hasStarted = new Date() >= new Date(g.gameDate);
     let isFinal = g.status === 'Final';
-    let predictionsLocked = hasStarted && !isFinal;
+    let isLive = hasStarted && !isFinal;
+
+    // Freeze prediction the moment a game starts so live odds shifts don't retroactively change the pick
+    const freezeKey = `${g.away}@${g.home}`;
+    if (!hasStarted) {
+      // Pre-game: always update the frozen cache with latest model output
+      frozenPredictions[freezeKey] = { mod, bestPick: null, bestEV: null, bestIsOU: null,
+        bestSig: null, mlPickLine: null, ouPick: null, ouEV: null, ouFairOdds: null,
+        hPct: null, aPct: null, mkt, ouAbsDiff: null, pickLine: null, fairRLProb: null, projOU: null };
+    }
+    const predictionsLocked = false; // We now show frozen picks instead of blanking them
 
     // Explicitly cache the ML Pick logic so Backtest can clone it directly 
     if (mod.evH > 0 || mod.evA > 0) {
@@ -1895,6 +1907,17 @@ function renderApp() {
     if(mod.evH > mod.evA && mod.evH > 0) { bestPick = `${g.home} ML`; bestEV = mod.evH; isDog = mod.homeDog; mlPickLine = mkt.ml.h; } 
     else if(mod.evA > mod.evH && mod.evA > 0) { bestPick = `${g.away} ML`; bestEV = mod.evA; isDog = mod.awayDog; mlPickLine = mkt.ml.a; }
 
+    // If game is live, use frozen pre-game values (closing pick, not live odds)
+    let displayMod = mod, displayMkt = mkt, displayBestPick = bestPick, displayBestEV = bestEV;
+    let displayBestIsOU, displayBestSig, displayMlPickLine = mlPickLine;
+    if (isLive && frozenPredictions[freezeKey] && frozenPredictions[freezeKey].bestPick !== null) {
+      const f = frozenPredictions[freezeKey];
+      displayMod = f.mod || mod; displayMkt = f.mkt || mkt;
+      displayBestPick = f.bestPick; displayBestEV = f.bestEV;
+      displayBestIsOU = f.bestIsOU; displayBestSig = f.bestSig;
+      displayMlPickLine = f.mlPickLine;
+    }
+
     let ouPick = mod.projOU > mkt.ou ? 'OVER' : 'UNDER';
     // OU EV: same linear formula as backtest (audited against 1,466 games)
     // Each 0.5 run of projected gap ≈ 5% real edge; cap at 14%
@@ -1908,13 +1931,26 @@ function renderApp() {
     const ouSigVal = getSignal('OU', { ouAbsDiff: Math.abs(mod.projOU - mkt.ou) });
     const bestSig = !bestIsOU ? mlSig : ouSigVal;
 
-    if (!predictionsLocked) {
+    // Persist frozen prediction when first computed (pre-game only)
+    if (!hasStarted) {
+      frozenPredictions[freezeKey] = { mod, mkt, bestPick, bestEV, bestIsOU, bestSig,
+        mlPickLine, ouPick, ouEV, ouFairOdds: null };
+    }
+    if (!hasStarted) {
+      // Only count pre-game stats in the summary cards
       upcomingGames++;
       if(bestSig.v === 3) primeCount++;
       if(isDog && !bestIsOU) dogCount++;
       if(ouPick === 'UNDER') underCount++;
       totalProj += mod.projOU;
     }
+
+    // For display: if live, prefer frozen closing-pick values
+    const dispBestPick = (isLive && frozenPredictions[freezeKey]?.bestPick) || bestPick;
+    const dispBestEV   = (isLive && frozenPredictions[freezeKey]?.bestEV   != null) ? frozenPredictions[freezeKey].bestEV   : bestEV;
+    const dispBestIsOU = (isLive && frozenPredictions[freezeKey]?.bestIsOU != null) ? frozenPredictions[freezeKey].bestIsOU : bestIsOU;
+    const dispBestSig  = (isLive && frozenPredictions[freezeKey]?.bestSig)  || bestSig;
+    const dispMlPickLine = (isLive && frozenPredictions[freezeKey]?.mlPickLine != null) ? frozenPredictions[freezeKey].mlPickLine : mlPickLine;
 
     let pickProb = mod.evH > mod.evA ? mod.homeProb : mod.awayProb;
     let pickLine = mod.evH > mod.evA ? (mkt.rl.hLine||'-1.5') : (mkt.rl.aLine||'+1.5');
@@ -1970,46 +2006,42 @@ function renderApp() {
 
         </div>
 
-        ${predictionsLocked ? `
-          <div style="text-align:center; padding: 24px 0; background:rgba(255,255,255,0.02); border-top:1px solid var(--bdr2);">
-            <div style="font-size: 20px; margin-bottom: 6px;">⏳</div>
-            <div style="font-weight: 700; font-size: 13px; margin-bottom: 4px; color:var(--tx)">GAME IN PROGRESS</div>
-            <div style="font-size: 11px; color:var(--tx3);">Pre-game predictions are locked.</div>
-            <div style="font-size: 11px; color:var(--tx3); margin-top: 4px;">Check <b style="color:var(--tx)">Live Scores</b> for real-time updates.</div>
-          </div>
-        ` : `
+        ${isLive ? `<div style="display:flex;align-items:center;gap:8px;padding:8px 14px;border-top:1px solid var(--bdr2);background:rgba(239,71,111,.06);">
+            <span style="width:7px;height:7px;border-radius:50%;background:var(--r);animation:pulse 1.2s infinite;flex-shrink:0;display:inline-block;"></span>
+            <span style="font-size:10px;font-weight:700;color:var(--r);">GAME IN PROGRESS</span>
+            <span style="font-size:10px;color:var(--tx3);">Showing closing pre-game prediction · Check <b style="color:var(--tx)">Live Scores</b> for score</span>
+          </div>` : ''}
           <div class="gc-best-banner">
             <span style="color:var(--tx3)">★ BEST BET</span>
-            <span style="font-size:13px;color:var(--tx)">${bestPick}</span>
-            <span style="color:var(--b)">${!bestIsOU ? getOddsStr(mlPickLine) : '-110'}</span>
-            <span class="sig-box ${bestSig.c}">${bestSig.icon} ${bestSig.l}</span>
-            <span style="color:var(--g)">+${(bestEV*100).toFixed(1)}% EV</span>
+            <span style="font-size:13px;color:var(--tx)">${dispBestPick}</span>
+            <span style="color:var(--b)">${!dispBestIsOU ? getOddsStr(dispMlPickLine) : '-110'}</span>
+            <span class="sig-box ${dispBestSig.c}">${dispBestSig.icon} ${dispBestSig.l}</span>
+            <span style="color:var(--g)">+${(dispBestEV*100).toFixed(1)}% EV</span>
             <span style="margin-left:auto;color:var(--tx3);font-weight:400">No H2H data · ${P[g.awayP]?.hand || 'RHP'} vs ${P[g.homeP]?.hand || 'RHP'}</span>
           </div>
 
           <div class="picks">
-            <div class="pk ${!bestIsOU && bestEV>0 ? 'best-pick' : ''}">
+            <div class="pk ${!dispBestIsOU && dispBestEV>0 ? 'best-pick' : ''}">
               <div class="pt">MONEYLINE</div>
-              <div class="pv">${!bestIsOU ? bestPick : (mod.evH>mod.evA?g.home+' ML':g.away+' ML')}</div>
+              <div class="pv">${!dispBestIsOU ? dispBestPick : (mod.evH>mod.evA?g.home+' ML':g.away+' ML')}</div>
               <div class="or"><span class="mo">${getOddsStr(probToAmLine(mod.evH>mod.evA ? mod.homeProb : mod.awayProb))}</span> <span style="color:var(--tx3)">mkt ${getOddsStr(mod.evH>mod.evA ? mkt.ml.h : mkt.ml.a)}</span></div>
-              <div class="ev">edge <span style="color:${!bestIsOU && bestEV>0?'var(--g)':'var(--tx3)'}">+${(Math.max(mod.evH, mod.evA)*100).toFixed(1)}%</span></div>
-              ${!bestIsOU && bestEV>0 ? '<div class="best-star">★ Best</div>' : ''}
+              <div class="ev">edge <span style="color:${!dispBestIsOU && dispBestEV>0?'var(--g)':'var(--tx3)'}">+${(Math.max(mod.evH, mod.evA)*100).toFixed(1)}%</span></div>
+              ${!dispBestIsOU && dispBestEV>0 ? '<div class="best-star">★ Best</div>' : ''}
             </div>
             <div class="pk">
               <div class="pt">RUN LINE</div>
-              <div class="pv">${!bestIsOU ? (mod.evH>mod.evA?g.home:g.away) : g.home} ${pickLine}</div>
+              <div class="pv">${!dispBestIsOU ? (mod.evH>mod.evA?g.home:g.away) : g.home} ${pickLine}</div>
               <div class="or"><span class="mo">${getOddsStr(probToAmLine(fairRLProb))}</span> <span style="color:var(--tx3)">mkt ${getOddsStr(mod.evH>mod.evA ? (mkt.rl.hPrice||-110) : (mkt.rl.aPrice||-110))}</span></div>
               <div class="ev">model pick <span style="color:var(--tx3)">${(Math.max(mod.homeProb, mod.awayProb)*100).toFixed(1)}%</span></div>
             </div>
-            <div class="pk ${bestIsOU ? 'best-pick' : ''}">
+            <div class="pk ${dispBestIsOU ? 'best-pick' : ''}">
               <div class="pt">O/U ${mkt.ou} (PROJ ${mod.projOU.toFixed(1)})</div>
               <div class="pv" style="color:var(--y)">${ouPick} ${mkt.ou}</div>
               <div class="or"><span class="mo">${ouFairOdds}</span> <span style="color:var(--tx3)">mkt -110</span></div>
-              <div class="ev">edge <span style="color:${bestIsOU?'var(--g)':'var(--tx3)'}">+${(ouEV*100).toFixed(1)}%</span></div>
-              ${bestIsOU ? '<div class="best-star">★ Best</div>' : ''}
+              <div class="ev">edge <span style="color:${dispBestIsOU?'var(--g)':'var(--tx3)'}">+${(ouEV*100).toFixed(1)}%</span></div>
+              ${dispBestIsOU ? '<div class="best-star">★ Best</div>' : ''}
             </div>
           </div>
-        `}
       </div>
     `;
     gList.innerHTML += pCardHtml;
