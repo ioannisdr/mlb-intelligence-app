@@ -2014,10 +2014,12 @@ function renderApp() {
           </div>` : ''}
           <div class="gc-best-banner">
             <span style="color:var(--tx3)">★ BEST BET</span>
-            <span style="font-size:13px;color:var(--tx)">${dispBestPick}</span>
-            <span style="color:var(--b)">${!dispBestIsOU ? getOddsStr(dispMlPickLine) : '-110'}</span>
+            ${dispBestSig.v > 1
+              ? `<span style="font-size:13px;color:var(--tx)">${dispBestPick}</span>
+                 <span style="color:var(--b)">${!dispBestIsOU ? getOddsStr(dispMlPickLine) : '-110'}</span>`
+              : `<span style="font-size:13px;color:var(--tx3);font-style:italic">— No Bet</span>`}
             <span class="sig-box ${dispBestSig.c}">${dispBestSig.icon} ${dispBestSig.l}</span>
-            <span style="color:var(--g)">+${(dispBestEV*100).toFixed(1)}% EV</span>
+            <span style="color:${dispBestSig.v > 1 ? 'var(--g)' : 'var(--tx3)'}">+${(dispBestEV*100).toFixed(1)}% EV</span>
             <span style="margin-left:auto;color:var(--tx3);font-weight:400">No H2H data · ${P[g.awayP]?.hand || 'RHP'} vs ${P[g.homeP]?.hand || 'RHP'}</span>
           </div>
 
