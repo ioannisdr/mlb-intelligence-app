@@ -1899,23 +1899,38 @@ function renderApp() {
     let mlTeamLine = mod.evH >= mod.evA ? mkt.ml.h : mkt.ml.a;
     let isDog = mod.evH >= mod.evA ? mod.homeDog : mod.awayDog;
 
-    // Best overall pick across ML + OU
-    // Use Math.max(0, mlTeamEV) so OU only wins when it has genuinely positive EV
-    let bestEV = Math.max(0, mlTeamEV);
-    let bestPick = `${mlTeamPick} ML`;
-    let bestIsOU = false;
-    let mlPickLine = mlTeamLine;
-
-    let ouPick = mod.projOU > mkt.ou ? 'OVER' : 'UNDER';
+    let ouPick    = mod.projOU > mkt.ou ? 'OVER' : 'UNDER';
     let ouAbsDiff = Math.abs(mod.projOU - mkt.ou);
-    let ouEV = Math.min(0.14, Math.max(0, (ouAbsDiff / 0.5) * 0.05 - 0.02));
-    // OU only wins best-bet slot when it has strictly positive EV AND beats ML
-    if (ouEV > bestEV && ouEV > 0) { bestPick = `${ouPick} ${mkt.ou}`; bestEV = ouEV; bestIsOU = true; }
+    let ouEV      = Math.min(0.14, Math.max(0, (ouAbsDiff / 0.5) * 0.05 - 0.02));
 
-    // Signal system (market-aware)
+    // Signal tier for each market (PRIME=3 > EDGE=2 > SKIP=1)
     const mlSig    = getSignal('ML', { ev: mlTeamEV });
     const ouSigVal = getSignal('OU', { ouAbsDiff });
-    const bestSig  = !bestIsOU ? mlSig : ouSigVal;
+
+    // ── Best-pick selection: SIGNAL TIER wins over raw EV ──────────────────
+    // Rationale: an ML with 16% EV is SKIP (noise cap), a 4% O/U gap is PRIME.
+    // The tier-based pick ensures a real PRIME/EDGE always surfaces above a
+    // numerically-large but untrusted ML noise spike.
+    let bestPick, bestEV, bestIsOU, bestSig;
+    const mlPickLine = mlTeamLine;
+
+    if (mlSig.v > ouSigVal.v) {
+      // ML has higher tier (e.g. ML=PRIME, OU=EDGE/SKIP)
+      bestPick = `${mlTeamPick} ML`; bestEV = mlTeamEV; bestIsOU = false; bestSig = mlSig;
+    } else if (ouSigVal.v > mlSig.v) {
+      // OU has higher tier (e.g. OU=PRIME/EDGE, ML=SKIP)
+      bestPick = `${ouPick} ${mkt.ou}`; bestEV = ouEV; bestIsOU = true; bestSig = ouSigVal;
+    } else if (mlSig.v > 1) {
+      // Same PRIME or EDGE tier — choose by EV
+      if (mlTeamEV >= ouEV) {
+        bestPick = `${mlTeamPick} ML`; bestEV = mlTeamEV; bestIsOU = false; bestSig = mlSig;
+      } else {
+        bestPick = `${ouPick} ${mkt.ou}`; bestEV = ouEV; bestIsOU = true; bestSig = ouSigVal;
+      }
+    } else {
+      // Both SKIP — default to ML team pick (no bet, but still show the team)
+      bestPick = `${mlTeamPick} ML`; bestEV = Math.max(0, mlTeamEV); bestIsOU = false; bestSig = mlSig;
+    }
 
     // Persist frozen prediction pre-game (updated every render until lock)
     if (!hasStarted) {
