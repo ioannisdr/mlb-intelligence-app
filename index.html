@@ -1872,19 +1872,14 @@ function renderApp() {
   TODAY.forEach(g => {
     let mod = calculateModel(g);
     let mkt = mod.mkt;
-    let hasStarted = new Date() >= new Date(g.gameDate);
+    // Lock 2 minutes before scheduled game time so the prediction freezes before first pitch
+    const gameTime = new Date(g.gameDate);
+    const lockTime = new Date(gameTime.getTime() - 2 * 60 * 1000);
+    let hasStarted = new Date() >= lockTime;
     let isFinal = g.status === 'Final';
     let isLive = hasStarted && !isFinal;
 
-    // Freeze prediction the moment a game starts so live odds shifts don't retroactively change the pick
     const freezeKey = `${g.away}@${g.home}`;
-    if (!hasStarted) {
-      // Pre-game: always update the frozen cache with latest model output
-      frozenPredictions[freezeKey] = { mod, bestPick: null, bestEV: null, bestIsOU: null,
-        bestSig: null, mlPickLine: null, ouPick: null, ouEV: null, ouFairOdds: null,
-        hPct: null, aPct: null, mkt, ouAbsDiff: null, pickLine: null, fairRLProb: null, projOU: null };
-    }
-    const predictionsLocked = false; // We now show frozen picks instead of blanking them
 
     // Explicitly cache the ML Pick logic so Backtest can clone it directly 
     if (mod.evH > 0 || mod.evA > 0) {
@@ -1898,59 +1893,57 @@ function renderApp() {
     let hPct = (mod.homeProb * 100).toFixed(0);
     let aPct = (mod.awayProb * 100).toFixed(0);
 
-    let bestPick = '';
-    let bestEV = 0;
-    let isDog = false;
-    let mlPickLine = 0;
-    
-    // DOG = market prices the pick at positive (+) odds — not model probability
-    if(mod.evH > mod.evA && mod.evH > 0) { bestPick = `${g.home} ML`; bestEV = mod.evH; isDog = mod.homeDog; mlPickLine = mkt.ml.h; } 
-    else if(mod.evA > mod.evH && mod.evA > 0) { bestPick = `${g.away} ML`; bestEV = mod.evA; isDog = mod.awayDog; mlPickLine = mkt.ml.a; }
+    // Pure ML pick (always a team, never OU — used for the MONEYLINE card display)
+    let mlTeamPick = mod.evH >= mod.evA ? g.home : g.away;
+    let mlTeamEV   = mod.evH >= mod.evA ? mod.evH : mod.evA;
+    let mlTeamLine = mod.evH >= mod.evA ? mkt.ml.h : mkt.ml.a;
+    let isDog = mod.evH >= mod.evA ? mod.homeDog : mod.awayDog;
 
-    // If game is live, use frozen pre-game values (closing pick, not live odds)
-    let displayMod = mod, displayMkt = mkt, displayBestPick = bestPick, displayBestEV = bestEV;
-    let displayBestIsOU, displayBestSig, displayMlPickLine = mlPickLine;
-    if (isLive && frozenPredictions[freezeKey] && frozenPredictions[freezeKey].bestPick !== null) {
-      const f = frozenPredictions[freezeKey];
-      displayMod = f.mod || mod; displayMkt = f.mkt || mkt;
-      displayBestPick = f.bestPick; displayBestEV = f.bestEV;
-      displayBestIsOU = f.bestIsOU; displayBestSig = f.bestSig;
-      displayMlPickLine = f.mlPickLine;
-    }
+    // Best overall pick across ML + OU
+    let bestPick = `${mlTeamPick} ML`;
+    let bestEV = mlTeamEV;
+    let bestIsOU = false;
+    let mlPickLine = mlTeamLine;
 
     let ouPick = mod.projOU > mkt.ou ? 'OVER' : 'UNDER';
-    // OU EV: same linear formula as backtest (audited against 1,466 games)
-    // Each 0.5 run of projected gap ≈ 5% real edge; cap at 14%
     let ouAbsDiff = Math.abs(mod.projOU - mkt.ou);
     let ouEV = Math.min(0.14, Math.max(0, (ouAbsDiff / 0.5) * 0.05 - 0.02));
-    let bestIsOU = false;
-    if(ouEV > bestEV) { bestPick = `${ouPick} ${mkt.ou}`; bestEV = ouEV; bestIsOU = true; }
+    if (ouEV > bestEV) { bestPick = `${ouPick} ${mkt.ou}`; bestEV = ouEV; bestIsOU = true; }
 
     // Signal system (market-aware)
-    const mlSig = getSignal('ML', { ev: bestIsOU ? 0 : bestEV });
-    const ouSigVal = getSignal('OU', { ouAbsDiff: Math.abs(mod.projOU - mkt.ou) });
+    const mlSig = getSignal('ML', { ev: mlTeamEV });
+    const ouSigVal = getSignal('OU', { ouAbsDiff });
     const bestSig = !bestIsOU ? mlSig : ouSigVal;
 
-    // Persist frozen prediction when first computed (pre-game only)
+    // Persist frozen prediction pre-game (updated every render until lock)
     if (!hasStarted) {
-      frozenPredictions[freezeKey] = { mod, mkt, bestPick, bestEV, bestIsOU, bestSig,
-        mlPickLine, ouPick, ouEV, ouFairOdds: null };
+      frozenPredictions[freezeKey] = {
+        bestPick, bestEV, bestIsOU, bestSig, mlPickLine,
+        mlTeamPick, mlTeamEV, mlTeamLine, isDog,
+        ouPick, ouEV
+      };
     }
+
+    // Summary card counts (pre-game only)
     if (!hasStarted) {
-      // Only count pre-game stats in the summary cards
       upcomingGames++;
-      if(bestSig.v === 3) primeCount++;
-      if(isDog && !bestIsOU) dogCount++;
-      if(ouPick === 'UNDER') underCount++;
+      if (bestSig.v === 3) primeCount++;
+      if (isDog && !bestIsOU) dogCount++;
+      if (ouPick === 'UNDER') underCount++;
       totalProj += mod.projOU;
     }
 
-    // For display: if live, prefer frozen closing-pick values
-    const dispBestPick = (isLive && frozenPredictions[freezeKey]?.bestPick) || bestPick;
-    const dispBestEV   = (isLive && frozenPredictions[freezeKey]?.bestEV   != null) ? frozenPredictions[freezeKey].bestEV   : bestEV;
-    const dispBestIsOU = (isLive && frozenPredictions[freezeKey]?.bestIsOU != null) ? frozenPredictions[freezeKey].bestIsOU : bestIsOU;
-    const dispBestSig  = (isLive && frozenPredictions[freezeKey]?.bestSig)  || bestSig;
-    const dispMlPickLine = (isLive && frozenPredictions[freezeKey]?.mlPickLine != null) ? frozenPredictions[freezeKey].mlPickLine : mlPickLine;
+    // For display: use frozen closing values if game is live
+    const frozen = isLive && frozenPredictions[freezeKey]?.bestPick ? frozenPredictions[freezeKey] : null;
+    const dispBestPick    = frozen ? frozen.bestPick    : bestPick;
+    const dispBestEV      = frozen ? frozen.bestEV      : bestEV;
+    const dispBestIsOU    = frozen ? frozen.bestIsOU    : bestIsOU;
+    const dispBestSig     = frozen ? frozen.bestSig     : bestSig;
+    const dispMlPickLine  = frozen ? frozen.mlPickLine  : mlPickLine;
+    const dispMlTeamPick  = frozen ? frozen.mlTeamPick  : mlTeamPick;
+    const dispMlTeamEV    = frozen ? frozen.mlTeamEV    : mlTeamEV;
+    const dispMlTeamLine  = frozen ? frozen.mlTeamLine  : mlTeamLine;
+    const dispIsDog       = frozen ? frozen.isDog       : isDog;
 
     let pickProb = mod.evH > mod.evA ? mod.homeProb : mod.awayProb;
     let pickLine = mod.evH > mod.evA ? (mkt.rl.hLine||'-1.5') : (mkt.rl.aLine||'+1.5');
@@ -1958,6 +1951,7 @@ function renderApp() {
 
     let ouFairProb = (ouEV + 1) / 1.909;
     let ouFairOdds = getOddsStr(probToAmLine(ouFairProb));
+
 
     // PREDICTIONS UI
     let pCardHtml = `
@@ -2021,16 +2015,16 @@ function renderApp() {
           </div>
 
           <div class="picks">
-            <div class="pk ${!dispBestIsOU && dispBestEV>0 ? 'best-pick' : ''}">
+            <div class="pk ${mlSig.v > 1 && !dispBestIsOU ? 'best-pick' : ''}">
               <div class="pt">MONEYLINE</div>
-              <div class="pv">${!dispBestIsOU ? dispBestPick : (mod.evH>mod.evA?g.home+' ML':g.away+' ML')}</div>
-              <div class="or"><span class="mo">${getOddsStr(probToAmLine(mod.evH>mod.evA ? mod.homeProb : mod.awayProb))}</span> <span style="color:var(--tx3)">mkt ${getOddsStr(mod.evH>mod.evA ? mkt.ml.h : mkt.ml.a)}</span></div>
-              <div class="ev">edge <span style="color:${!dispBestIsOU && dispBestEV>0?'var(--g)':'var(--tx3)'}">+${(Math.max(mod.evH, mod.evA)*100).toFixed(1)}%</span></div>
-              ${!dispBestIsOU && dispBestEV>0 ? '<div class="best-star">★ Best</div>' : ''}
+              <div class="pv">${dispMlTeamPick} ML</div>
+              <div class="or"><span class="mo">${getOddsStr(probToAmLine(mod.evH>mod.evA ? mod.homeProb : mod.awayProb))}</span> <span style="color:var(--tx3)">mkt ${getOddsStr(dispMlTeamLine)}</span></div>
+              <div class="ev">edge <span style="color:${mlSig.v>1?'var(--g)':'var(--tx3)'}">+${(dispMlTeamEV*100).toFixed(1)}%</span></div>
+              ${mlSig.v > 1 && !dispBestIsOU ? '<div class="best-star">★ Best</div>' : ''}
             </div>
             <div class="pk">
               <div class="pt">RUN LINE</div>
-              <div class="pv">${!dispBestIsOU ? (mod.evH>mod.evA?g.home:g.away) : g.home} ${pickLine}</div>
+              <div class="pv">${dispMlTeamPick} ${pickLine}</div>
               <div class="or"><span class="mo">${getOddsStr(probToAmLine(fairRLProb))}</span> <span style="color:var(--tx3)">mkt ${getOddsStr(mod.evH>mod.evA ? (mkt.rl.hPrice||-110) : (mkt.rl.aPrice||-110))}</span></div>
               <div class="ev">model pick <span style="color:var(--tx3)">${(Math.max(mod.homeProb, mod.awayProb)*100).toFixed(1)}%</span></div>
             </div>
@@ -2046,10 +2040,10 @@ function renderApp() {
     `;
     gList.innerHTML += pCardHtml;
 
-    // BEST BETS UI — compute accurate model vs market edge
-    let pickModelPct = !bestIsOU ? (mod.evH >= mod.evA ? (mod.homeProb*100).toFixed(0) : (mod.awayProb*100).toFixed(0)) : '52';
-    let pickMktImplied = !bestIsOU ? (mod.evH >= mod.evA ? (mod.mktHomeImplied*100).toFixed(0) : (mod.mktAwayImplied*100).toFixed(0)) : '50';
-    let pickEdge = !bestIsOU ? (mod.evH >= mod.evA ? mod.edgeH : mod.edgeA) : (bestEV / 0.04 * 0.03);
+    // BEST BETS UI — use same disp* frozen values as Predictions tab for consistency
+    let pickModelPct = (mod.evH >= mod.evA ? (mod.homeProb*100) : (mod.awayProb*100)).toFixed(0);
+    let pickMktImplied = (mod.evH >= mod.evA ? (mod.mktHomeImplied*100) : (mod.mktAwayImplied*100)).toFixed(0);
+    let pickEdge = mod.evH >= mod.evA ? mod.edgeH : mod.edgeA;
     let edgeSign = pickEdge >= 0 ? '+' : '';
 
     // Build regression insight line for best bets card
@@ -2061,7 +2055,6 @@ function renderApp() {
       regInsight = `<div class="reg-row" style="margin-top:5px">${parts.join('')}</div>`;
     }
 
-    // ERA color: red = lucky (ERA < xERA), green = unlucky (ERA > xERA), grey = neutral
     const awayEraCol = P[g.awayP]?.era < P[g.awayP]?.xera ? 'var(--r)' : P[g.awayP]?.era > P[g.awayP]?.xera ? 'var(--g)' : 'var(--tx3)';
     const homeEraCol = P[g.homeP]?.era < P[g.homeP]?.xera ? 'var(--r)' : P[g.homeP]?.era > P[g.homeP]?.xera ? 'var(--g)' : 'var(--tx3)';
     const awayPitcherStr = P[g.awayP]
@@ -2073,23 +2066,23 @@ function renderApp() {
 
     let bCardHtml = `
       <div class="bb-row" onclick="gotoGame('${g.away}','${g.home}')" title="Click to see full prediction">
-        <div class="bb-grade-box ${bestSig.c}" style="background:transparent;display:flex;align-items:center;justify-content:center;font-size:20px;width:46px;margin:8px 12px 8px 8px;">${bestSig.icon}</div>
+        <div class="bb-grade-box ${dispBestSig.c}" style="background:transparent;display:flex;align-items:center;justify-content:center;font-size:20px;width:46px;margin:8px 12px 8px 8px;">${dispBestSig.icon}</div>
         <div class="bb-info">
-          <div class="bb-pick-title">${bestPick} <span class="bb-ev-tag">Best EV today</span> <span class="sig-box ${bestSig.c}">${bestSig.icon} ${bestSig.l}</span></div>
-          <div class="bb-matchup">${g.away}@${g.home} · ${g.t} Local · ${bestIsOU ? 'O/U' : 'ML'}</div>
+          <div class="bb-pick-title">${dispBestPick} <span class="bb-ev-tag">Best EV today</span> <span class="sig-box ${dispBestSig.c}">${dispBestSig.icon} ${dispBestSig.l}</span></div>
+          <div class="bb-matchup">${g.away}@${g.home} · ${g.t} Local · ${dispBestIsOU ? 'O/U' : 'ML'}</div>
           <div class="bb-pitchers">⚾ ${awayPitcherStr} vs ${homePitcherStr}</div>
           <div class="bb-stats">Proj ${mod.projOU.toFixed(1)} vs line ${mkt.ou} · ${P[g.awayP]?.hand||'RHP'} vs ${P[g.homeP]?.hand||'RHP'}</div>
           ${regInsight}
         </div>
         <div class="bb-right">
-          <div class="bb-odds-prob">${!bestIsOU ? getOddsStr(probToAmLine(mod.evH>mod.evA ? mod.homeProb : mod.awayProb)) : ouFairOdds} <span style="font-size:11px;color:var(--tx2)">(Model: ${pickModelPct}%)</span></div>
-          <div class="bb-mkt">mkt ${!bestIsOU ? getOddsStr(mlPickLine) : '-110'} (Implied: ${pickMktImplied}%)</div>
+          <div class="bb-odds-prob">${!dispBestIsOU ? getOddsStr(probToAmLine(mod.evH>=mod.evA ? mod.homeProb : mod.awayProb)) : ouFairOdds} <span style="font-size:11px;color:var(--tx2)">(Model: ${pickModelPct}%)</span></div>
+          <div class="bb-mkt">mkt ${!dispBestIsOU ? getOddsStr(dispMlPickLine) : '-110'} (Implied: ${pickMktImplied}%)</div>
           <div class="bb-edge">Edge: ${edgeSign}${(pickEdge*100).toFixed(1)}%</div>
-          <div class="bb-ev">EV: ${bestEV>=0?'+':''}${(bestEV*100).toFixed(1)}%</div>
+          <div class="bb-ev">EV: ${dispBestEV>=0?'+':''}${(dispBestEV*100).toFixed(1)}%</div>
         </div>
       </div>
     `;
-    bestBetsArr.push({ html: bCardHtml, v: bestSig.v, ev: bestEV, isPrime: bestSig.v === 3 });
+    bestBetsArr.push({ html: bCardHtml, v: dispBestSig.v, ev: dispBestEV, isPrime: dispBestSig.v === 3 });
   });
 
   bestBetsArr.sort((a,b) => {
