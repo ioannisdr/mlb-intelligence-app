@@ -2205,9 +2205,16 @@ async function runBacktest() {
     };
 
     // Process all dates newest-first so the table shows most recent at top
+    // Load real closing odds from localStorage � used as realMkt fallback for historical games
+    const btCachedOdds = (function() { try { return JSON.parse(localStorage.getItem('cachedOdds') || '{}' ); } catch { return {}; } })();
     [...pastRes.dates].reverse().forEach(d => {
       const dStr = new Date(d.date + 'T12:00:00').toLocaleString('en-US', { month:'short', day:'numeric' });
       const mStr = new Date(d.date + 'T12:00:00').toLocaleString('en-US', { month:'long' });
+
+      // Load frozen predictions for this specific date (real closing-line picks)
+      const dateFrozen = (function() {
+        try { return JSON.parse(localStorage.getItem(`mlb_frozen_${d.date}`) || '{}' ); } catch { return {}; }
+      })();
 
       d.games
         .filter(g => g.gameType === 'R' &&
@@ -2239,18 +2246,20 @@ async function runBacktest() {
             // If this game is part of the active TODAY slate, we MUST use real odds 
             // so the backtest exactly matches the Live Predictions tab.
             let realMkt = null;
+            let realMkt = null;
             const isTodaySlate = TODAY.some(tg => tg.home === home && tg.away === away);
             if (isTodaySlate && ODDS[home] && ODDS[home][currentBook]) {
-               realMkt = ODDS[home][currentBook];
+               realMkt = ODDS[home][currentBook];  // live odds for today
+            } else if (btCachedOdds[home] && btCachedOdds[home][currentBook]) {
+               realMkt = btCachedOdds[home][currentBook]; // stored closing odds from localStorage
             }
 
             const mod   = calculateModel(mockG, realMkt, winner, totalScore);
 
-            // ─ Check frozen pick first (real closing-line data, same as Predictions tab) ──
-            // frozenPredictions is loaded from localStorage keyed by date, so past dates'
-            // picks are preserved exactly as shown to the user on the live platform.
-            const fKey  = `${away}@${home}`;
-            const fData = frozenPredictions[fKey]; // available if page was open that day
+            // Check per-date frozen pick first (real closing-line data captured pre-game)
+            // Priority: dateFrozen (date-specific) > frozenPredictions (current session)
+            const fKey  = ${away}@C:\Users\jdros;
+            const fData = dateFrozen[fKey] || frozenPredictions[fKey]; // per-date preferred
             // ─ ML pick ───────────────────────────────────────────────────────────────────
             let mlPick, mlEV;
             const liveGame = TODAY.find(tg => tg.home === home && tg.away === away);
