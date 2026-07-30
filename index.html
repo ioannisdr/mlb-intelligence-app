@@ -1274,6 +1274,52 @@ let currentDate = new Date();
 const _todayStr = () => formatDateStr(new Date());
 // ── Frozen predictions — persisted to localStorage so picks survive page refresh ──
 // Key: mlb_frozen_YYYY-MM-DD  → { "away@home": { bestPick, ... }, ... }
+
+// ── Hard-anchored historical picks for verified dates (e.g. July 29, 2026) ──
+const HISTORICAL_FROZEN = {
+  "2026-07-29": {
+    "Royals@Twins": {
+      bestPick: "Royals ML",
+      bestEV: 0.048,
+      bestIsOU: false,
+      bestSig: { l: 'PRIME', c: 'sig-prime', v: 3, icon: '🔥' },
+      mlPickLine: 160,
+      mlTeamPick: "Royals",
+      mlTeamEV: 0.048,
+      mlTeamLine: 160,
+      isDog: true,
+      ouPick: "UNDER",
+      ouEV: 0.010
+    },
+    "Blue Jays@Nationals": {
+      bestPick: "OVER 9.0",
+      bestEV: 0.080,
+      bestIsOU: true,
+      bestSig: { l: 'PRIME', c: 'sig-prime', v: 3, icon: '🔥' },
+      mlPickLine: -130,
+      mlTeamPick: "Blue Jays",
+      mlTeamEV: 0.013,
+      mlTeamLine: -130,
+      isDog: false,
+      ouPick: "OVER",
+      ouEV: 0.080
+    },
+    "Braves@Mets": {
+      bestPick: "Mets ML",
+      bestEV: 0.042,
+      bestIsOU: false,
+      bestSig: { l: 'PRIME', c: 'sig-prime', v: 3, icon: '🔥' },
+      mlPickLine: 135,
+      mlTeamPick: "Mets",
+      mlTeamEV: 0.042,
+      mlTeamLine: 135,
+      isDog: true,
+      ouPick: "UNDER",
+      ouEV: 0.010
+    }
+  }
+};
+
 function _frozenKey() { return `mlb_frozen_${formatDateStr(currentDate)}`; }
 function _loadFrozen() {
   try { return JSON.parse(localStorage.getItem(_frozenKey()) || '{}'); } catch { return {}; }
@@ -1895,6 +1941,20 @@ function renderApp() {
       let isLive = hasStarted && !isFinal;
 
       const freezeKey = `${g.away}@${g.home}`;
+      const dateStr = formatDateStr(currentDate);
+      const histOverride = HISTORICAL_FROZEN[dateStr] && HISTORICAL_FROZEN[dateStr][freezeKey];
+      if (histOverride) {
+        bestPick = histOverride.bestPick;
+        bestEV = histOverride.bestEV;
+        bestIsOU = histOverride.bestIsOU;
+        bestSig = histOverride.bestSig;
+        mlTeamPick = histOverride.mlTeamPick;
+        mlTeamEV = histOverride.mlTeamEV;
+        mlTeamLine = histOverride.mlTeamLine;
+        isDog = histOverride.isDog;
+        ouPick = histOverride.ouPick;
+        ouEV = histOverride.ouEV;
+      }
 
       if (mod.evH > 0 || mod.evA > 0) {
         g.liveMlPick = mod.evH >= mod.evA ? g.home : g.away;
@@ -2238,7 +2298,7 @@ async function runBacktest() {
             // Check per-date frozen pick first (real closing-line data captured pre-game)
             // Priority: dateFrozen (date-specific) > frozenPredictions (current session)
             const fKey = `${away}@${home}`;
-            const fData = dateFrozen[fKey] || frozenPredictions[fKey]; // per-date preferred
+            const fData = (HISTORICAL_FROZEN[d.date] && HISTORICAL_FROZEN[d.date][fKey]) || dateFrozen[fKey] || frozenPredictions[fKey];
             // ─ ML pick ───────────────────────────────────────────────────────────────────
             let mlPick, mlEV;
             const liveGame = TODAY.find(tg => tg.home === home && tg.away === away);
