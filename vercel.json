@@ -12,6 +12,14 @@
     { "source": "/api/pitchers", "destination": "/api/pitchers.js" },
     { "source": "/api/weather", "destination": "/api/weather.js" },
     { "source": "/api/odds", "destination": "/api/odds.js" },
-    { "source": "/api/team-form", "destination": "/api/team-form.js" }
+    { "source": "/api/team-form", "destination": "/api/team-form.js" },
+    { "source": "/api/picks", "destination": "/api/picks.js" },
+    { "source": "/api/init_db", "destination": "/api/init_db.js" }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/fetch_schedule",
+      "schedule": "0 11 * * *"
+    }
   ]
 }
