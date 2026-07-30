@@ -663,6 +663,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
     <div id="slate-label" style="font-size:11px;font-weight:600;color:var(--b)">Today's Slate</div>
     <div style="display:flex;gap:6px">
       <button onclick="switchSlate(-1)" style="font-size:10px;padding:4px 10px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx2);cursor:pointer">◀ Prev</button>
+      <button onclick="goToToday()" id="today-btn" style="font-size:10px;padding:4px 12px;border-radius:4px;border:1px solid var(--b);background:rgba(88,166,255,.12);color:var(--b);cursor:pointer;font-weight:600">Today</button>
       <button onclick="switchSlate(1)" style="font-size:10px;padding:4px 10px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx2);cursor:pointer">Next ▶</button>
     </div>
   </div>
@@ -1270,8 +1271,22 @@ let STADIUMS = {}; // stadium metadata (lat, lon, pf, dome, cfBearing)
 let ODDS = {};
 let TODAY = [];
 let currentDate = new Date();
-// Frozen pre-game predictions cache — keyed by `away@home`, stores model output at kick-off
-let frozenPredictions = {};
+const _todayStr = () => formatDateStr(new Date());
+// ── Frozen predictions — persisted to localStorage so picks survive page refresh ──
+// Key: mlb_frozen_YYYY-MM-DD  → { "away@home": { bestPick, ... }, ... }
+function _frozenKey() { return `mlb_frozen_${formatDateStr(currentDate)}`; }
+function _loadFrozen() {
+  try { return JSON.parse(localStorage.getItem(_frozenKey()) || '{}'); } catch { return {}; }
+}
+function _saveFrozen(obj) {
+  try {
+    localStorage.setItem(_frozenKey(), JSON.stringify(obj));
+    // Clean up stale keys (keep only last 3 dates)
+    const keys = Object.keys(localStorage).filter(k => k.startsWith('mlb_frozen_')).sort();
+    keys.slice(0, Math.max(0, keys.length - 3)).forEach(k => localStorage.removeItem(k));
+  } catch {}
+}
+let frozenPredictions = _loadFrozen();
 
 let chartsObj = {};
 let currentGrHits = {};
@@ -1933,12 +1948,14 @@ function renderApp() {
     }
 
     // Persist frozen prediction pre-game (updated every render until lock)
+    // Also write to localStorage so the pick survives page refreshes during live games
     if (!hasStarted) {
       frozenPredictions[freezeKey] = {
         bestPick, bestEV, bestIsOU, bestSig, mlPickLine,
         mlTeamPick, mlTeamEV, mlTeamLine, isDog,
         ouPick, ouEV
       };
+      _saveFrozen(frozenPredictions);
     }
 
     // Summary card counts (pre-game only)
@@ -3028,7 +3045,26 @@ function toggleAbout() {
   chev.classList.toggle('open', open);
 }
 
-function switchSlate(dir) { currentDate.setDate(currentDate.getDate() + dir); fetchAllData(); }
+function switchSlate(dir) {
+  currentDate.setDate(currentDate.getDate() + dir);
+  // Reload frozen picks from localStorage for the new date
+  frozenPredictions = _loadFrozen();
+  fetchAllData();
+  // Update Today button styling: dim it when we're already on today
+  const todayBtn = document.getElementById('today-btn');
+  if (todayBtn) {
+    const isToday = formatDateStr(currentDate) === formatDateStr(new Date());
+    todayBtn.style.opacity = isToday ? '0.4' : '1';
+    todayBtn.style.pointerEvents = isToday ? 'none' : 'auto';
+  }
+}
+function goToToday() {
+  currentDate = new Date();
+  frozenPredictions = _loadFrozen();
+  fetchAllData();
+  const todayBtn = document.getElementById('today-btn');
+  if (todayBtn) { todayBtn.style.opacity = '0.4'; todayBtn.style.pointerEvents = 'none'; }
+}
 
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -3637,7 +3673,11 @@ function updateAccaSummary() {
 
 function initApp() {
   updateThemeBtn();
-  fetchAllData(); 
+  // Today button starts dimmed since we begin on today
+  const todayBtn = document.getElementById('today-btn');
+  if (todayBtn) { todayBtn.style.opacity = '0.4'; todayBtn.style.pointerEvents = 'none'; }
+  fetchAllData();
+
   setInterval(() => {
     const today = new Date();
     if (currentDate.getDate() === today.getDate() && currentDate.getMonth() === today.getMonth() && currentDate.getFullYear() === today.getFullYear()) {
