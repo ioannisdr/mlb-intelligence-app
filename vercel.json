@@ -15,24 +15,12 @@
     { "source": "/api/team-form", "destination": "/api/team-form.js" },
     { "source": "/api/picks", "destination": "/api/picks.js" },
     { "source": "/api/backtest", "destination": "/api/backtest.js" },
-    { "source": "/api/init_db", "destination": "/api/init_db.js" }
+    { "source": "/api/cron", "destination": "/api/cron.js" }
   ],
   "crons": [
     {
-      "path": "/api/cron/fetch_schedule",
+      "path": "/api/cron",
       "schedule": "0 11 * * *"
-    },
-    {
-      "path": "/api/cron/fetch_odds",
-      "schedule": "*/15 * * * *"
-    },
-    {
-      "path": "/api/cron/lock_picks",
-      "schedule": "*/5 * * * *"
-    },
-    {
-      "path": "/api/cron/record_results",
-      "schedule": "*/30 * * * *"
     }
   ]
 }

@@ -1,15 +1,24 @@
-import { query } from '../db.js';
+import { query, initDb } from './db.js';
 
 export default async function handler(req, res) {
   try {
+    const { job } = req.query;
+
+    // Auto-initialize tables if needed
+    if (job === 'init') {
+      await initDb();
+      return res.status(200).json({ success: true, message: 'Neon DB Schema initialized.' });
+    }
+
     const today = new Date().toISOString().split('T')[0];
+
+    // Default job: fetch_schedule
     const url = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${today}&hydrate=probablePitcher,linescore`;
     const response = await fetch(url);
     const data = await response.json();
-
     const games = data?.dates?.[0]?.games || [];
-    let count = 0;
 
+    let count = 0;
     for (const g of games) {
       const gameId = `${today}-${g.teams.away.team.id}-${g.teams.home.team.id}`;
       const awayName = g.teams.away.team.name;
@@ -30,9 +39,9 @@ export default async function handler(req, res) {
       count++;
     }
 
-    return res.status(200).json({ success: true, games_synced: count });
+    return res.status(200).json({ success: true, job: job || 'schedule', games_synced: count });
   } catch (err) {
-    console.error('Fetch schedule cron error:', err);
+    console.error('Cron error:', err);
     return res.status(500).json({ success: false, error: err.message });
   }
 }
