@@ -2246,27 +2246,34 @@ async function runBacktest() {
 
             const mod   = calculateModel(mockG, realMkt, winner, totalScore);
 
-            // ─ ML pick ───────────────────────────────────────────
-            let mlPick;
-            let mlEV;
+            // ─ Check frozen pick first (real closing-line data, same as Predictions tab) ──
+            // frozenPredictions is loaded from localStorage keyed by date, so past dates'
+            // picks are preserved exactly as shown to the user on the live platform.
+            const fKey  = `${away}@${home}`;
+            const fData = frozenPredictions[fKey]; // available if page was open that day
+            // ─ ML pick ───────────────────────────────────────────────────────────────────
+            let mlPick, mlEV;
             const liveGame = TODAY.find(tg => tg.home === home && tg.away === away);
-            
-            if (liveGame && liveGame.liveMlPick) {
-              // 100% perfect agreement with Live Predictions tab
+
+            if (fData?.mlTeamPick) {
+              // Use real closing pick from frozen cache (most accurate source)
+              mlPick = fData.mlTeamPick;
+              mlEV   = fData.mlTeamEV ?? 0;
+            } else if (liveGame?.liveMlPick) {
               mlPick = liveGame.liveMlPick;
-              mlEV = liveGame.liveMlEV;
+              mlEV   = liveGame.liveMlEV;
             } else if (mod.evH > 0 || mod.evA > 0) {
               mlPick = mod.evH >= mod.evA ? home : away;
-              mlEV = mod.evH >= mod.evA ? mod.evH : mod.evA;
+              mlEV   = mod.evH >= mod.evA ? mod.evH : mod.evA;
             } else {
               mlPick = mod.homeProb >= mod.awayProb ? home : away;
-              mlEV = mlPick === home ? mod.evH : mod.evA;
+              mlEV   = mlPick === home ? mod.evH : mod.evA;
             }
 
             const isRealOdds = !!(ODDS[home] && ODDS[home][currentBook]);
-            const isDog    = isRealOdds ? (mlPick === home ? mod.homeDog : mod.awayDog) : false;
-            const mlSig    = getSignal('ML', { ev: mlEV });
-            const mlHit    = mlPick === winner;
+            const isDog      = isRealOdds ? (mlPick === home ? mod.homeDog : mod.awayDog) : false;
+            const mlSig      = getSignal('ML', { ev: mlEV });
+            const mlHit      = mlPick === winner;
 
             const payoutLine = mlPick === home ? mod.mkt.ml.h : mod.mkt.ml.a;
             const decOdds    = payoutLine > 0 ? (payoutLine/100)+1 : (100/Math.abs(payoutLine))+1;
@@ -2280,14 +2287,12 @@ async function runBacktest() {
                if (mlHit) { grHits.ALL[mlSig.l].w++; grHits.ML[mlSig.l].w++; }
             }
 
-            // ─ RL pick ─────────────────────────────────────────────────
-            // RL signal: based on ML pick probability (mlPickProb >= 0.62 = PRIME)
+            // ─ RL pick ───────────────────────────────────────────────────────────────────
             const mlPickProb = mlPick === home ? mod.homeProb : mod.awayProb;
             const rlPick     = mlPick;
             const rlHit      = mlPick === home ? (homeScore - awayScore > 1) : (awayScore - homeScore > 1);
             const rlProfit   = rlHit ? 1.15 : -1;
-
-            const rlSig = getSignal('RL', { mlPickProb });
+            const rlSig      = getSignal('RL', { mlPickProb });
 
             if (rlSig.l !== 'SKIP') {
                pl.ALL[rlPick] += rlProfit;
@@ -2298,42 +2303,48 @@ async function runBacktest() {
                if (rlHit) { grHits.ALL[rlSig.l].w++; grHits.RL[rlSig.l].w++; }
             }
 
-            // ─ O/U pick ─────────────────────────────────────────────────
-            const ouPick   = mod.projOU > mod.mkt.ou ? 'OVER' : 'UNDER';
-            const ouDiff   = mod.projOU - mod.mkt.ou; // signed gap
-            const ouAbsDiff = Math.abs(ouDiff);
-
-            // OU EV: linear approximation (audited against 1,466 games).
-            // Each 0.5 run of projected gap ≈ 5% real edge; cap at 14%.
-            const ouEV   = Math.min(0.14, Math.max(0, (ouAbsDiff / 0.5) * 0.05 - 0.02));
-            const ouSig  = getSignal('OU', { ouAbsDiff });
-            const ouHit  = ouPick === 'OVER' ? totalScore > mod.mkt.ou : totalScore < mod.mkt.ou;
+            // - O/U pick � prefer frozen direction (real-odds derived) when available --
+            let ouPick, ouAbsDiff, ouEV;
+            if (fData?.ouPick) {
+              ouPick    = fData.ouPick;
+              ouAbsDiff = Math.abs(mod.projOU - mod.mkt.ou);
+              ouEV      = fData.ouEV ?? Math.min(0.14, Math.max(0, (ouAbsDiff/0.5)*0.05 - 0.02));
+            } else {
+              ouPick    = mod.projOU > mod.mkt.ou ? 'OVER' : 'UNDER';
+              ouAbsDiff = Math.abs(mod.projOU - mod.mkt.ou);
+              ouEV      = Math.min(0.14, Math.max(0, (ouAbsDiff/0.5)*0.05 - 0.02));
+            }
+            const ouSig    = getSignal('OU', { ouAbsDiff });
+            const ouHit    = ouPick === 'OVER' ? totalScore > mod.mkt.ou : totalScore < mod.mkt.ou;
             const ouProfit = ouHit ? 0.909 : -1;
             if (ouSig.l !== 'SKIP') {
-               pl.ALL[home] += ouProfit;
-               pl.OU[home]  += ouProfit;
-               pl.ALL[away] += ouProfit;
-               pl.OU[away]  += ouProfit;
+               pl.ALL[home] += ouProfit; pl.OU[home] += ouProfit;
+               pl.ALL[away] += ouProfit; pl.OU[away] += ouProfit;
                totalProfits.OU += ouProfit;
                addMonthly(ouSig.l, 'OU', mStr, ouProfit);
                grHits.ALL[ouSig.l].t++; grHits.OU[ouSig.l].t++;
                if (ouHit) { grHits.ALL[ouSig.l].w++; grHits.OU[ouSig.l].w++; }
             }
 
-            // Best EV selection considering ML, RL, and O/U signals
-            const ouText = `${ouPick.charAt(0) + ouPick.slice(1).toLowerCase()} ${mod.mkt.ou.toFixed(1)}`;
-            const candidates = [
-              { mkt: 'ML', sig: mlSig, ev: mlEV, text: `${mlPick} ML` },
-              { mkt: 'RL', sig: rlSig, ev: Math.max(0, mlPickProb - 0.50), text: `${rlPick} -1.5` },
-              { mkt: 'OU', sig: ouSig, ev: ouEV, text: ouText }
-            ];
-            candidates.sort((a, b) => b.sig.v - a.sig.v || b.ev - a.ev);
-            const bestCand = candidates[0];
-            
-            // Display clean bet text for PRIME/EDGE plays; show dash if all are SKIP (v=1)
+            // - Best EV (last column) � uses frozen pick if available, else tier-first -
+            let bestCand;
+            if (fData?.bestPick && fData?.bestSig) {
+              const isFOU = fData.bestIsOU;
+              bestCand = { sig: fData.bestSig, ev: fData.bestEV, text: fData.bestPick,
+                           hit: isFOU ? ouHit : mlHit, profit: isFOU ? ouProfit : mlProfit };
+            } else {
+              const ouTxt = `${ouPick} ${mod.mkt.ou.toFixed(1)}`;
+              const cands = [
+                { sig:mlSig, ev:mlEV,                       text:`${mlPick} ML`,   hit:mlHit, profit:mlProfit },
+                { sig:rlSig, ev:Math.max(0,mlPickProb-0.5), text:`${rlPick} -1.5`, hit:rlHit, profit:rlProfit },
+                { sig:ouSig, ev:ouEV,                        text:ouTxt,            hit:ouHit, profit:ouProfit }
+              ];
+              cands.sort((a, b) => b.sig.v - a.sig.v || b.ev - a.ev);
+              bestCand = cands[0];
+            }
             const bestEVStr = bestCand.sig.v > 1
               ? `<span style="font-weight:700">${bestCand.text}</span>`
-              : `<span style="color:var(--tx3)">—</span>`;
+              : `<span style="color:var(--tx3)">�</span>`;
 
             // Profit/loss coloring
             const mlProfC = mlProfit > 0 ? 'color:var(--g)' : 'color:var(--r)';
