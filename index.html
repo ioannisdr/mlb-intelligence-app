@@ -2083,7 +2083,7 @@ function renderApp() {
           ${isLive ? `<div style="display:flex;align-items:center;gap:8px;padding:8px 14px;border-top:1px solid var(--bdr2);background:rgba(239,71,111,.06);">
               <span style="width:7px;height:7px;border-radius:50%;background:var(--r);animation:pulse 1.2s infinite;flex-shrink:0;display:inline-block;"></span>
               <span style="font-size:10px;font-weight:700;color:var(--r);">GAME IN PROGRESS</span>
-              <span style="font-size:10px;color:var(--tx3);">Showing closing pre-game prediction · Check <b style="color:var(--tx)">Live Scores</b> for score</span>
+              <span style="font-size:10px;color:var(--tx3);">Showing closing pre-game prediction · Check <b style="color:var(--tx);cursor:pointer;text-decoration:underline;" onclick="sw('live')">Live Scores</b> for score</span>
             </div>` : ''}
             <div class="gc-best-banner">
               <span style="color:var(--tx3)">★ BEST BET</span>
