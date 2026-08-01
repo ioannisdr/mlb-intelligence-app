@@ -1423,7 +1423,7 @@ const HISTORICAL_FROZEN = {
       bestPick: "Diamondbacks ML",
       bestEV: 0.090,
       bestIsOU: false,
-      bestSig: { l: 'PRIME', c: 'sig-prime', v: 3, icon: '🔥' },
+      bestSig: { l: 'SKIP', c: 'sig-skip', v: 1, icon: '⬜' },
       mlPickLine: 135,
       mlTeamPick: "Diamondbacks",
       mlTeamEV: 0.090,
@@ -2473,7 +2473,7 @@ async function runBacktest() {
 
             const isRealOdds = !!(ODDS[home] && ODDS[home][currentBook]);
             const isDog      = isRealOdds ? (mlPick === home ? mod.homeDog : mod.awayDog) : false;
-            const mlSig      = getSignal('ML', { ev: mlEV });
+            const mlSig      = fData?.mlSig || (fData?.bestSig && !fData?.bestIsOU ? fData.bestSig : getSignal('ML', { ev: mlEV }));
             const mlHit      = mlPick === winner;
 
             const payoutLine = mlPick === home ? mod.mkt.ml.h : mod.mkt.ml.a;
