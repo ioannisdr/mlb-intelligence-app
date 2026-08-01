@@ -2015,9 +2015,9 @@ function getSignal(market, { ev = 0, mlPickProb = 0.5, ouAbsDiff = 0 } = {}) {
   const EDGE  = { l: 'EDGE',  c: 'sig-edge',  v: 2, icon: '✅' };
   const SKIP  = { l: 'SKIP',  c: 'sig-skip',  v: 1, icon: '⬜' };
   if (market === 'ML') {
-    if (ev >= 0.035 && ev <= 0.086) return PRIME;  // sweet spot: +3.5% to +11.0% EV
+    if (ev >= 0.035 && ev <= 0.110) return PRIME;  // sweet spot: +3.5% to +11.0% EV
     if (ev >= 0.010 && ev <  0.035) return EDGE;   // +1.0% to +3.5% EV
-    return SKIP;  // ev > 0.086 (noise tail) OR ev < 0.010
+    return SKIP;  // ev > 0.110 (noise tail) OR ev < 0.010
   }
   if (market === 'RL') {
     if (mlPickProb >= 0.62) return PRIME;  // historically 66-72% hit rate
