@@ -623,7 +623,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
       <div class="about-card">
         <div class="about-card-icon">🎯</div>
         <div class="about-card-title">Market Noise & The PRIME Sweet Spot</div>
-        <div class="about-card-text">The model classifies picks by EV thresholds. Historically, a +3.5% to +8.6% edge is the 🔥 PRIME sweet spot for exploitable bookmaker mistakes. The system actively ignores massive edges (>8.6%) because they usually represent "too good to be true" market noise (e.g., late injury news) rather than genuine value.</div>
+        <div class="about-card-text">The model classifies picks by EV thresholds. Historically, a +3.5% to +11.0% edge is the 🔥 PRIME sweet spot for exploitable bookmaker mistakes. The system actively ignores massive edges (>11.0%) because they usually represent "too good to be true" market noise (e.g., late injury news) rather than genuine value.</div>
       </div>
       <div class="about-card">
         <div class="about-card-icon">🔴</div>
@@ -633,7 +633,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
       <div class="about-card">
         <div class="about-card-icon">🧾</div>
         <div class="about-card-title">Full 2026 Season Backtest</div>
-        <div class="about-card-text">All signals are validated against every completed 2026 MLB game. PRIME ML picks (EV 3.5–8.6%) hit at 57%+ historically. The backtest is fully transparent — every game, every pick, every result, and cumulative unit P/L by signal tier.</div>
+        <div class="about-card-text">All signals are validated against every completed 2026 MLB game. PRIME ML picks (EV 3.5–11.0%) hit at 57%+ historically. The backtest is fully transparent — every game, every pick, every result, and cumulative unit P/L by signal tier.</div>
       </div>
     </div>
 
@@ -881,7 +881,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
         <div style="font-size:12px;font-weight:700;color:var(--g);margin-bottom:4px">1. Systematic Quantitative Bettor (Auto-Follower)</div>
         <div style="font-size:11px;color:var(--tx2);line-height:1.6">
           • <strong>How it works:</strong> Bet every 🔥 <strong>PRIME</strong> signal automatically with flat unit sizing (1.5%–2% of bankroll).<br>
-          • <strong>Why it works:</strong> You rely strictly on the model's backtested math. Historically, PRIME ML picks (+3.5% to +8.6% EV) hit at <strong>57.5%+</strong>, and Run Lines with model probability ≥ 62% hit at <strong>66–72%</strong>.<br>
+          • <strong>Why it works:</strong> You rely strictly on the model's backtested math. Historically, PRIME ML picks (+3.5% to +11.0% EV) hit at <strong>57.5%+</strong>, and Run Lines with model probability ≥ 62% hit at <strong>66–72%</strong>.<br>
           • <strong>Best for:</strong> Hands-off subscribers wanting steady, rule-based monthly net profit.
         </div>
       </div>
@@ -963,7 +963,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
         <tbody>
           <tr style="border-bottom:1px solid var(--bdr2)">
             <td style="padding:8px"><span class="sig-box sig-prime">🔥 PRIME</span></td>
-            <td style="padding:8px">ML: +3.5% to +8.6% EV<br>O/U: Gap ≥ 0.8 runs</td>
+            <td style="padding:8px">ML: +3.5% to +11.0% EV<br>O/U: Gap ≥ 0.8 runs</td>
             <td style="padding:8px;color:var(--g);font-weight:700">57.5%+ (ML)<br>66-72% (RL)</td>
             <td style="padding:8px;color:var(--tx)">1.5% to 2.0% of Bankroll (1 Unit)</td>
           </tr>
@@ -975,7 +975,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
           </tr>
           <tr>
             <td style="padding:8px"><span class="sig-box sig-skip">⬜ SKIP</span></td>
-            <td style="padding:8px">EV > +8.6% (Noise Cap)<br>EV < +1.0%</td>
+            <td style="padding:8px">EV > +11.0% (Noise Cap)<br>EV < +1.0%</td>
             <td style="padding:8px;color:var(--tx3)">N/A (Ignore)</td>
             <td style="padding:8px;color:var(--r);font-weight:700">NO BET ($0)</td>
           </tr>
@@ -1060,7 +1060,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
     <div class="faq-item">
       <div class="faq-q" onclick="toggleFaq(this)">What do PRIME, EDGE, and SKIP signals mean? <span class="faq-icon">▼</span></div>
       <div class="faq-a">
-        • <strong>🔥 PRIME:</strong> Top-tier mathematical advantage (historically 57%+ hit rate on ML, EV +3.5% to +8.6%). High-confidence sweet spot.<br>
+        • <strong>🔥 PRIME:</strong> Top-tier mathematical advantage (historically 57%+ hit rate on ML, EV +3.5% to +11.0%). High-confidence sweet spot.<br>
         • <strong>⚡ EDGE:</strong> Positive expected value (+1.0% to +3.5% EV). Solid value spot worth tracking.<br>
         • <strong>⬜ SKIP:</strong> No mathematical edge detected or line is tight. The model strongly advises passing on this market.
       </div>
@@ -1423,7 +1423,7 @@ const HISTORICAL_FROZEN = {
       bestPick: "Diamondbacks ML",
       bestEV: 0.090,
       bestIsOU: false,
-      bestSig: { l: 'SKIP', c: 'sig-skip', v: 1, icon: '⬜' },
+      bestSig: { l: 'PRIME', c: 'sig-prime', v: 3, icon: '🔥' },
       mlPickLine: 135,
       mlTeamPick: "Diamondbacks",
       mlTeamEV: 0.090,
@@ -2015,7 +2015,7 @@ function getSignal(market, { ev = 0, mlPickProb = 0.5, ouAbsDiff = 0 } = {}) {
   const EDGE  = { l: 'EDGE',  c: 'sig-edge',  v: 2, icon: '✅' };
   const SKIP  = { l: 'SKIP',  c: 'sig-skip',  v: 1, icon: '⬜' };
   if (market === 'ML') {
-    if (ev >= 0.035 && ev <= 0.086) return PRIME;  // sweet spot: +3.5% to +8.6% EV
+    if (ev >= 0.035 && ev <= 0.086) return PRIME;  // sweet spot: +3.5% to +11.0% EV
     if (ev >= 0.010 && ev <  0.035) return EDGE;   // +1.0% to +3.5% EV
     return SKIP;  // ev > 0.086 (noise tail) OR ev < 0.010
   }
@@ -2167,7 +2167,7 @@ function renderApp() {
       if (!hasStarted || histOverride) {
         upcomingGames++;
         if (bestSig.v === 3) primeCount++;
-        if (isDog && !bestIsOU) dogCount++;
+        if (isDog && !bestIsOU && bestSig.v > 1) dogCount++;
         if (ouPick === 'UNDER') underCount++;
         totalProj += mod.projOU;
       }
