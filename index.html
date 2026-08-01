@@ -3072,12 +3072,19 @@ async function loadOddsTab(forceRefresh = false) {
       games = buildSimulatedOdds();
     }
 
-    // Take snapshot before updating for movement detection
-    if (oddsData.length > 0) {
-      oddsData.forEach(g => {
+    // Populate or update oddsSnapshot for movement detection
+    if (games && games.length > 0) {
+      games.forEach(g => {
         const key = `${g.away}@${g.home}`;
         if (!oddsSnapshot[key]) {
-          oddsSnapshot[key] = JSON.parse(JSON.stringify(g.books || {}));
+          // Initialize with opening lines so movement arrows (▲ / ▼) show immediately vs opening line!
+          oddsSnapshot[key] = JSON.parse(JSON.stringify(g.openBooks || g.books || {}));
+        } else if (oddsData.length > 0) {
+          // On subsequent refreshes, store previous fetch as baseline
+          const prevGame = oddsData.find(oldG => `${oldG.away}@${oldG.home}` === key);
+          if (prevGame && prevGame.books) {
+            oddsSnapshot[key] = JSON.parse(JSON.stringify(prevGame.books));
+          }
         }
       });
     }

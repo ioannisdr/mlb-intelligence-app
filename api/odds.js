@@ -1,4 +1,4 @@
-// api/odds.js — Real MLB odds from ESPN Scoreboard API (DraftKings baseline)
+// api/odds.js — Real MLB odds from ESPN Scoreboard API (DraftKings baseline + Opening Line Tracking)
 // Cache: 90s (lines can move any minute during game day)
 
 export default async function handler(req, res) {
@@ -45,6 +45,7 @@ export default async function handler(req, res) {
         const sp = odds.pointSpread || {};
         const tot = odds.total || {};
 
+        // Current closing/live lines
         const hML = parseInt(ml.home?.close?.odds || ml.home?.open?.odds || -110);
         const aML = parseInt(ml.away?.close?.odds || ml.away?.open?.odds || -110);
         
@@ -58,6 +59,14 @@ export default async function handler(req, res) {
         const oP = parseInt(tot.over?.close?.odds || tot.over?.open?.odds || -110);
         const uP = parseInt(tot.under?.close?.odds || tot.under?.open?.odds || -110);
 
+        // Opening lines for movement tracking
+        const hMLOpen = parseInt(ml.home?.open?.odds || hML);
+        const aMLOpen = parseInt(ml.away?.open?.odds || aML);
+        const hRLPOpen = parseInt(sp.home?.open?.odds || hRLP);
+        const aRLPOpen = parseInt(sp.away?.open?.odds || aRLP);
+        const oPOpen = parseInt(tot.over?.open?.odds || oP);
+        const uPOpen = parseInt(tot.under?.open?.odds || uP);
+
         const match = {
           away: awayTeam.split(' ').pop(),
           home: homeTeam.split(' ').pop(),
@@ -67,6 +76,14 @@ export default async function handler(req, res) {
               rl: { hLine: hRL, hPrice: hRLP, aLine: aRL, aPrice: aRLP },
               ou: ouLine,
               ouPrice: { o: oP, u: uP }
+            }
+          },
+          openBooks: {
+            DraftKings: {
+              ml: { h: hMLOpen, a: aMLOpen },
+              rl: { hLine: hRL, hPrice: hRLPOpen, aLine: aRL, aPrice: aRLPOpen },
+              ou: ouLine,
+              ouPrice: { o: oPOpen, u: uPOpen }
             }
           }
         };
@@ -91,13 +108,24 @@ export default async function handler(req, res) {
 function applyBookOffsets(games, offsets) {
   return games.map(match => {
     const base = match.books.DraftKings;
+    const baseOpen = match.openBooks ? match.openBooks.DraftKings : base;
+
     Object.entries(offsets).forEach(([book, [mlA, mlH, rlPd, ouShift, ouPd]]) => {
       if (book === 'DraftKings') return;
+
       match.books[book] = {
         ml:      { a: base.ml.a + mlA, h: base.ml.h + mlH },
         ou:      +(base.ou + ouShift).toFixed(1),
         ouPrice: { o: base.ouPrice.o + ouPd, u: base.ouPrice.u - ouPd },
         rl:      { ...base.rl, aPrice: base.rl.aPrice + rlPd, hPrice: base.rl.hPrice - rlPd },
+      };
+
+      if (!match.openBooks) match.openBooks = {};
+      match.openBooks[book] = {
+        ml:      { a: baseOpen.ml.a + mlA, h: baseOpen.ml.h + mlH },
+        ou:      +(baseOpen.ou + ouShift).toFixed(1),
+        ouPrice: { o: baseOpen.ouPrice.o + ouPd, u: baseOpen.ouPrice.u - ouPd },
+        rl:      { ...baseOpen.rl, aPrice: baseOpen.rl.aPrice + rlPd, hPrice: baseOpen.rl.hPrice - rlPd },
       };
     });
     return match;
