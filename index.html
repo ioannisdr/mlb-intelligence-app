@@ -2099,18 +2099,6 @@ function renderApp() {
       const freezeKey = `${g.away}@${g.home}`;
       const dateStr = formatDateStr(currentDate);
       const histOverride = HISTORICAL_FROZEN[dateStr] && HISTORICAL_FROZEN[dateStr][freezeKey];
-      if (histOverride) {
-        bestPick = histOverride.bestPick;
-        bestEV = histOverride.bestEV;
-        bestIsOU = histOverride.bestIsOU;
-        bestSig = histOverride.bestSig;
-        mlTeamPick = histOverride.mlTeamPick;
-        mlTeamEV = histOverride.mlTeamEV;
-        mlTeamLine = histOverride.mlTeamLine;
-        isDog = histOverride.isDog;
-        ouPick = histOverride.ouPick;
-        ouEV = histOverride.ouEV;
-      }
 
       if (mod.evH > 0 || mod.evA > 0) {
         g.liveMlPick = mod.evH >= mod.evA ? g.home : g.away;
@@ -2152,6 +2140,20 @@ function renderApp() {
         bestPick = `${mlTeamPick} ML`; bestEV = Math.max(0, mlTeamEV); bestIsOU = false; bestSig = mlSig;
       }
 
+      // ✅ Apply HISTORICAL_FROZEN AFTER all variable declarations (correct override order)
+      if (histOverride) {
+        bestPick    = histOverride.bestPick;
+        bestEV      = histOverride.bestEV;
+        bestIsOU    = histOverride.bestIsOU;
+        bestSig     = histOverride.bestSig;
+        mlTeamPick  = histOverride.mlTeamPick;
+        mlTeamEV    = histOverride.mlTeamEV;
+        mlTeamLine  = histOverride.mlTeamLine;
+        isDog       = histOverride.isDog;
+        ouPick      = histOverride.ouPick;
+        ouEV        = histOverride.ouEV;
+      }
+
       if (!hasStarted) {
         frozenPredictions[freezeKey] = {
           bestPick, bestEV, bestIsOU, bestSig, mlPickLine,
@@ -2161,7 +2163,8 @@ function renderApp() {
         _saveFrozen(frozenPredictions);
       }
 
-      if (!hasStarted) {
+      // Count stats for upcoming games AND past-date historical games
+      if (!hasStarted || histOverride) {
         upcomingGames++;
         if (bestSig.v === 3) primeCount++;
         if (isDog && !bestIsOU) dogCount++;
