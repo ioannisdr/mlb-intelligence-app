@@ -1418,6 +1418,21 @@ const _todayStr = () => formatDateStr(new Date());
 
 // ── Hard-anchored historical picks for verified dates (e.g. July 29, 2026) ──
 const HISTORICAL_FROZEN = {
+  "2026-07-31": {
+    "Diamondbacks@Guardians": {
+      bestPick: "Diamondbacks ML",
+      bestEV: 0.090,
+      bestIsOU: false,
+      bestSig: { l: 'PRIME', c: 'sig-prime', v: 3, icon: '🔥' },
+      mlPickLine: 135,
+      mlTeamPick: "Diamondbacks",
+      mlTeamEV: 0.090,
+      mlTeamLine: 135,
+      isDog: true,
+      ouPick: "UNDER",
+      ouEV: 0.010
+    }
+  },
   "2026-07-29": {
     "Royals@Twins": {
       bestPick: "Royals ML",
@@ -2000,9 +2015,9 @@ function getSignal(market, { ev = 0, mlPickProb = 0.5, ouAbsDiff = 0 } = {}) {
   const EDGE  = { l: 'EDGE',  c: 'sig-edge',  v: 2, icon: '✅' };
   const SKIP  = { l: 'SKIP',  c: 'sig-skip',  v: 1, icon: '⬜' };
   if (market === 'ML') {
-    if (ev >= 0.035 && ev <= 0.086) return PRIME;  // sweet spot, historically 57.5% hit
-    if (ev >= 0.010 && ev <  0.035) return EDGE;
-    return SKIP;  // ev > 0.086 (noise tail) OR ev < 0.010
+    if (ev >= 0.035) return PRIME;  // All EV >= +3.5% is PRIME
+    if (ev >= 0.010) return EDGE;   // EV +1.0% to +3.5% is EDGE
+    return SKIP;                   // EV < +1.0% is SKIP
   }
   if (market === 'RL') {
     if (mlPickProb >= 0.62) return PRIME;  // historically 66-72% hit rate
