@@ -2451,7 +2451,8 @@ async function runBacktest() {
             // Check per-date frozen pick first (real closing-line data captured pre-game)
             // Priority: dateFrozen (date-specific) > frozenPredictions (current session)
             const fKey = `${away}@${home}`;
-            const fData = (HISTORICAL_FROZEN[d.date] && HISTORICAL_FROZEN[d.date][fKey]) || dateFrozen[fKey] || frozenPredictions[fKey];
+            const isTodayDate = d.date === formatDateStr(new Date());
+            const fData = (HISTORICAL_FROZEN[d.date] && HISTORICAL_FROZEN[d.date][fKey]) || dateFrozen[fKey] || (isTodayDate ? frozenPredictions[fKey] : null);
             // ─ ML pick ───────────────────────────────────────────────────────────────────
             let mlPick, mlEV;
             const liveGame = TODAY.find(tg => tg.home === home && tg.away === away);
