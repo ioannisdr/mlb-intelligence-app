@@ -2068,8 +2068,8 @@ function getSignal(market, { ev = 0, mlPickProb = 0.5, isMinus15 = true, ouAbsDi
   const EDGE  = { l: 'EDGE',  c: 'sig-edge',  v: 2, icon: '✅' };
   const SKIP  = { l: 'SKIP',  c: 'sig-skip',  v: 1, icon: '⬜' };
   if (market === 'ML') {
-    if ((mlPickProb >= 0.520 && ev >= 0.015) || (mlPickProb >= 0.510 && ev >= 0.050)) return PRIME; // PRIME Moneyline
-    if (mlPickProb >= 0.500 && ev >= 0.005) return EDGE;   // Solid EDGE Moneyline
+    if ((mlPickProb >= 0.520 && ev >= 0.015) || ev >= 0.050) return PRIME; // PRIME Moneyline (High Win Prob or Huge EV Edge)
+    if ((mlPickProb >= 0.500 && ev >= 0.005) || ev >= 0.020) return EDGE;   // Solid EDGE Moneyline (Favored or Solid EV Dog)
     return SKIP; // Below threshold = SKIP
   }
   if (market === 'RL') {
