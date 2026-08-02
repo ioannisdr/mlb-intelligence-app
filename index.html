@@ -2393,8 +2393,10 @@ function renderApp() {
           </div>
         </div>
       `;
-      // Add to Best Bets using frozen pre-game signal & EV if started (T-2min lock)
-      bestBetsArr.push({ html: bCardHtml, v: dispBestSig.v, ev: dispBestEV, isPrime: dispBestSig.v === 3 });
+      // Add to Best Bets ONLY if signal is PRIME or EDGE AND EV & Edge are strictly positive
+      if (dispBestSig.v > 1 && dispBestEV > 0.0001 && pickEdge > 0.0001) {
+        bestBetsArr.push({ html: bCardHtml, v: dispBestSig.v, ev: dispBestEV, isPrime: dispBestSig.v === 3 });
+      }
     } catch (renderErr) {
       console.warn('Game render error for', g ? (g.away + '@' + g.home) : 'game', ':', renderErr.message);
     }
