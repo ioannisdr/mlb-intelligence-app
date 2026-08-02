@@ -2728,7 +2728,7 @@ function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 
   Chart.defaults.color = isLight ? '#4a5168' : '#8b91a8';
   Chart.defaults.font.family = 'Inter';
 
-  // Sort P/L
+  // 1. Team P/L Chart
   let teams = Object.keys(pl.ALL).sort((a,b) => pl.ALL[b] - pl.ALL[a]);
   let vals = teams.map(t => pl.ALL[t]);
   let colors = vals.map(v => v >= 0 ? '#00d68f' : '#ef476f');
@@ -2748,7 +2748,15 @@ function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      onHover: (e, el) => { e.native.target.style.cursor = el[0] ? 'pointer' : 'default'; },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => ` P/L: ${ctx.parsed.y >= 0 ? '+' : ''}${ctx.parsed.y.toFixed(2)}u`
+          }
+        }
+      },
       scales: {
         x: { grid: { display: false, drawBorder: false } },
         y: { grid: { color: gridColor, drawBorder: false } }
@@ -2756,6 +2764,7 @@ function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 
     }
   });
 
+  // 2. Grade Hit-Rate Chart (PRIME vs EDGE)
   const SIG_LABELS = ['PRIME', 'EDGE'];
   const SIG_COLORS = ['#ffd100', '#00d68f'];
   let hitRates = SIG_LABELS.map(s => {
@@ -2775,17 +2784,32 @@ function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 
       }]
     },
     options: {
+      onHover: (e, el) => { e.native.target.style.cursor = el[0] ? 'pointer' : 'default'; },
       onClick: (e, elements) => {
         if (elements.length > 0) {
           const index = elements[0].index;
-          const labels = chartsObj.grChart.data.labels;
+          const label = chartsObj.grChart.data.labels[index];
           const el = document.getElementById('kpi-grade');
-          if (el) { el.value = labels[index]; updateKPI(); }
+          if (el) {
+            el.value = el.value === label ? 'ALL' : label;
+            updateKPI();
+          }
         }
       },
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => {
+              const sig = ctx.label;
+              const stats = currentGrHits.ALL[sig] || { w: 0, t: 0 };
+              return ` Win Rate: ${ctx.parsed.y}% (${stats.w}/${stats.t} Hits)`;
+            }
+          }
+        }
+      },
       scales: {
         x: { grid: { display: false, drawBorder: false } },
         y: { beginAtZero: true, max: 100, grid: { color: gridColor, drawBorder: false } }
@@ -2793,7 +2817,7 @@ function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 
     }
   });
 
-  // Monthly P/L chart — use ALL grades / ALL markets for initial render
+  // 3. Monthly P/L Chart
   let mthData = monthlyPL['ALL']['ALL'];
   let months = Object.keys(mthData);
   let mVals = months.map(m => mthData[m]);
@@ -2812,9 +2836,28 @@ function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 
       }]
     },
     options: {
+      onHover: (e, el) => { e.native.target.style.cursor = el[0] ? 'pointer' : 'default'; },
+      onClick: (e, elements) => {
+        if (elements.length > 0) {
+          const index = elements[0].index;
+          const monthLabel = chartsObj.monthlyChart.data.labels[index];
+          const el = document.getElementById('kpi-month');
+          if (el) {
+            el.value = el.value === monthLabel ? 'ALL' : monthLabel;
+            updateKPI();
+          }
+        }
+      },
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => ` Monthly P/L: ${ctx.parsed.y >= 0 ? '+' : ''}${ctx.parsed.y.toFixed(2)}u`
+          }
+        }
+      },
       scales: {
         x: { grid: { display: false, drawBorder: false } },
         y: { grid: { color: gridColor, drawBorder: false } }
@@ -2822,6 +2865,7 @@ function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 
     }
   });
 
+  // 4. Market P/L Chart
   let mktLabels = ['Moneyline', 'Run Line', 'Over/Under'];
   let totalML = currentTotalProfits.ML;
   let totalRL = currentTotalProfits.RL;
@@ -2842,35 +2886,51 @@ function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 
       }]
     },
     options: {
+      onHover: (e, el) => { e.native.target.style.cursor = el[0] ? 'pointer' : 'default'; },
       onClick: (e, elements) => {
         if (elements.length > 0) {
           const index = elements[0].index;
           const label = chartsObj.marketChart.data.labels[index];
+          const codeMap = { 'Moneyline': 'ML', 'Run Line': 'RL', 'Over/Under': 'OU' };
+          const code = codeMap[label] || 'ALL';
           const el = document.getElementById('kpi-market');
-          if (el) { el.value = label; updateKPI(); }
+          if (el) {
+            el.value = el.value === code ? 'ALL' : code;
+            updateKPI();
+          }
         }
       },
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => ` Market P/L: ${ctx.parsed.y >= 0 ? '+' : ''}${ctx.parsed.y.toFixed(2)}u`
+          }
+        }
+      },
       scales: {
         x: { grid: { display: false, drawBorder: false } },
         y: { grid: { color: gridColor, drawBorder: false } }
       }
     }
   });
-  // Refresh KPI dashboard with the new data
+
+  // Refresh KPI dashboard
   updateKPI();
 }
 
 function updatePlFilter(val) {
-   let teams = Object.keys(currentPlData[val]).sort((a,b) => currentPlData[val][b] - currentPlData[val][a]);
-   let vals = teams.map(t => currentPlData[val][t]);
+   let teams = Object.keys(currentPlData[val] || currentPlData['ALL']).sort((a,b) => (currentPlData[val] || currentPlData['ALL'])[b] - (currentPlData[val] || currentPlData['ALL'])[a]);
+   let vals = teams.map(t => (currentPlData[val] || currentPlData['ALL'])[t]);
    let colors = vals.map(v => v >= 0 ? '#00d68f' : '#ef476f');
-   chartsObj.plChart.data.labels = teams;
-   chartsObj.plChart.data.datasets[0].data = vals;
-   chartsObj.plChart.data.datasets[0].backgroundColor = colors;
-   chartsObj.plChart.update();
+   if (chartsObj.plChart) {
+     chartsObj.plChart.data.labels = teams;
+     chartsObj.plChart.data.datasets[0].data = vals;
+     chartsObj.plChart.data.datasets[0].backgroundColor = colors;
+     chartsObj.plChart.update();
+   }
 }
 
 function updateGrFilter(val) {
@@ -2879,8 +2939,10 @@ function updateGrFilter(val) {
     const mkt = currentGrHits[val] || currentGrHits['ALL'];
     return mkt[s]?.t > 0 ? (mkt[s].w / mkt[s].t * 100).toFixed(1) : 0;
   });
-  chartsObj.grChart.data.datasets[0].data = hitRates;
-  chartsObj.grChart.update();
+  if (chartsObj.grChart) {
+    chartsObj.grChart.data.datasets[0].data = hitRates;
+    chartsObj.grChart.update();
+  }
 }
 
 // ── KPI DASHBOARD ────────────────────────────────────────────────────────────
