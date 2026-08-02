@@ -2072,9 +2072,9 @@ function getSignal(market, { ev = 0, mlPickProb = 0.5, ouAbsDiff = 0 } = {}) {
   const EDGE  = { l: 'EDGE',  c: 'sig-edge',  v: 2, icon: '✅' };
   const SKIP  = { l: 'SKIP',  c: 'sig-skip',  v: 1, icon: '⬜' };
   if (market === 'ML') {
-    if (ev >= 0.035 && ev <= 0.110) return PRIME;  // sweet spot: +3.5% to +11.0% EV
-    if (ev >= 0.010 && ev <  0.035) return EDGE;   // +1.0% to +3.5% EV
-    return SKIP;  // ev > 0.110 (noise tail) OR ev < 0.010
+    if (mlPickProb >= 0.530 && ev >= 0.010) return PRIME;  // PRIME: High confidence (Model Win Prob >= 53.0%) & Positive EV (>= 1.0%)
+    if (mlPickProb >= 0.505 && ev >= 0.008) return EDGE;   // EDGE: Solid confidence (Model Win Prob >= 50.5%) & Positive EV (>= 0.8%)
+    return SKIP;
   }
   if (market === 'RL') {
     if (mlPickProb >= 0.62) return PRIME;  // historically 66-72% hit rate
@@ -2177,7 +2177,8 @@ function renderApp() {
       let ouAbsDiff = Math.abs(mod.projOU - mkt.ou);
       let ouEV      = Math.min(0.14, Math.max(0, (ouAbsDiff / 0.5) * 0.05 - 0.02));
 
-      const mlSig    = getSignal('ML', { ev: mlTeamEV });
+      const mlPickProb = mlTeamPick === g.home ? mod.homeProb : mod.awayProb;
+      const mlSig    = getSignal('ML', { ev: mlTeamEV, mlPickProb });
       const ouSigVal = getSignal('OU', { ouAbsDiff });
 
       let bestPick, bestEV, bestIsOU, bestSig;
@@ -2548,7 +2549,8 @@ async function runBacktest() {
 
             const isRealOdds = !!(ODDS[home] && ODDS[home][currentBook]);
             const isDog      = isRealOdds ? (mlPick === home ? mod.homeDog : mod.awayDog) : false;
-            const mlSig      = fData?.mlSig || (fData?.bestSig && !fData?.bestIsOU ? fData.bestSig : getSignal('ML', { ev: mlEV }));
+            const mlPickProb = mlPick === home ? mod.homeProb : mod.awayProb;
+            const mlSig      = fData?.mlSig || (fData?.bestSig && !fData?.bestIsOU ? fData.bestSig : getSignal('ML', { ev: mlEV, mlPickProb }));
             const mlHit      = mlPick === winner;
 
             const payoutLine = mlPick === home ? mod.mkt.ml.h : mod.mkt.ml.a;
