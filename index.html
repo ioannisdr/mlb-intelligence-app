@@ -2593,7 +2593,7 @@ async function runBacktest() {
               rlProfit = rlHit ? 0.606 : -1.0;
               rlSig = getSignal('RL', { mlPickProb: dogProb, isMinus15: false });
             } else {
-              rlPick = favTeam; isMinus15 = true; rlHit = false; rlProfit = -1.0;
+              rlPick = favTeam; isMinus15 = true; rlHit = false; rlProfit = 0;
               rlSig = { l: 'SKIP', c: 'sig-skip', v: 1, icon: '⬜' };
             }
 
@@ -2670,7 +2670,7 @@ async function runBacktest() {
               <td>${mlSig.l === 'SKIP' ? `<span class="sig-box sig-skip">⬜ SKIP</span>` : `<span class="hit-box ${mlHit?'hit-w':'hit-l'}">${mlHit?'HIT':'MISS'}</span>`}</td>
               <td style="${mlSig.l === 'SKIP' ? 'color:var(--tx3)' : mlProfC};font-weight:700">${mlSig.l === 'SKIP' ? '—' : `${mlProfit>=0?'+':''}${mlProfit.toFixed(2)}u`}</td>
 
-              <td style="font-weight:700">${rlPick} -1.5</td>
+              <td style="font-weight:700">${rlPick} ${isMinus15 ? '-1.5' : '+1.5'}</td>
               <td><span class="sig-box ${rlSig.c}">${rlSig.icon} ${rlSig.l}</span></td>
               <td>${rlSig.l === 'SKIP' ? `<span class="sig-box sig-skip">⬜ SKIP</span>` : `<span class="hit-box ${rlHit?'hit-w':'hit-l'}">${rlHit?'HIT':'MISS'}</span>`}</td>
               <td style="${rlSig.l === 'SKIP' ? 'color:var(--tx3)' : rlProfC};font-weight:700">${rlSig.l === 'SKIP' ? '—' : `${rlProfit>=0?'+':''}${rlProfit.toFixed(2)}u`}</td>
