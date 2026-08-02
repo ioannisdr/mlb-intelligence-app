@@ -2147,10 +2147,9 @@ function renderApp() {
       const gameTime = new Date(g.gameDate);
       const lockTime = new Date(gameTime.getTime() - 2 * 60 * 1000);
       let hasStarted = new Date() >= lockTime;
-      let isFinal = g.status === 'Final';
-      let isLive = hasStarted && !isFinal;
-
       const freezeKey = `${g.away}@${g.home}`;
+      let isFinal = g.status === 'Final' || g.status?.abstractGameState === 'Final' || g.status?.statusCode === 'F' || g.status?.statusCode === 'O' || g.status?.statusCode === 'CR' || (typeof liveGameStatusCache !== 'undefined' && liveGameStatusCache[freezeKey] === 'Final');
+      let isLive = hasStarted && !isFinal;
       const dateStr = formatDateStr(currentDate);
       const histOverride = HISTORICAL_FROZEN[dateStr] && HISTORICAL_FROZEN[dateStr][freezeKey];
 
@@ -2323,14 +2322,10 @@ function renderApp() {
               <span style="font-size:10px;font-weight:700;color:var(--y);">🔒 LOCKED PRE-GAME PREDICTION (T-2m)</span>
               <span style="font-size:10px;color:var(--tx3);">Odds and model signals permanently frozen 2 minutes prior to first pitch.</span>
             </div>` : ''}
-          ${isLive ? `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;background:rgba(239,71,111,.16);border-top:1px solid rgba(239,71,111,.35);border-bottom:1px solid rgba(239,71,111,.35);">
-              <div style="display:flex;align-items:center;gap:6px;">
-                <span style="width:8px;height:8px;border-radius:50%;background:#ef476f;animation:pulse 1.2s infinite;flex-shrink:0;display:inline-block;"></span>
-                <span style="font-size:11px;font-weight:800;color:#ef476f;letter-spacing:.3px;">GAME IN PROGRESS</span>
-              </div>
-              <div style="font-size:11px;color:var(--tx);font-weight:700;">
-                Follow live pitch-by-pitch action on <b style="color:#4da6ff;cursor:pointer;text-decoration:underline;font-weight:800;" onclick="sw('live')">Live Scores ⚡</b>
-              </div>
+          ${isLive ? `<div style="display:flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(239,71,111,.08);border-top:1px solid rgba(239,71,111,.2);border-bottom:1px solid rgba(239,71,111,.2);font-size:10px;flex-wrap:wrap;">
+              <span style="width:7px;height:7px;border-radius:50%;background:var(--r);animation:pulse 1.2s infinite;flex-shrink:0;display:inline-block;"></span>
+              <span style="font-weight:800;color:var(--r);letter-spacing:.3px;">GAME IN PROGRESS</span>
+              <span style="color:var(--tx3);margin-left:4px;">&bull; Follow live pitch-by-pitch action on <b style="color:var(--b);cursor:pointer;text-decoration:underline;font-weight:700;" onclick="sw('live')">Live Scores</b></span>
             </div>` : ''}
             <div class="gc-best-banner">
               <span style="color:var(--tx3)">★ BEST BET</span>
