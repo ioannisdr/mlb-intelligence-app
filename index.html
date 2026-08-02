@@ -2079,9 +2079,9 @@ function getSignal(market, { ev = 0, mlPickProb = 0.5, isMinus15 = true, ouAbsDi
     return SKIP; // Excluded from P/L calculations & signal badges
   }
   if (market === 'OU') {
-    if (ouAbsDiff >= 0.70) return PRIME;   // ~8% of games
-    if (ouAbsDiff >= 0.35) return EDGE;    // ~12% of games
-    return SKIP; // ~80% SKIP!
+    if (ouAbsDiff >= 1.00) return PRIME;   // Strong 1.00+ run gap (high confidence PRIME)
+    if (ouAbsDiff >= 0.70) return EDGE;    // Solid 0.70+ run gap (strict selective EDGE)
+    return SKIP; // ~85%+ SKIP (filters out noisy total games!)
   }
   return SKIP;
 }
