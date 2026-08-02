@@ -2080,15 +2080,7 @@ function getSignal(market, { ev = 0, mlPickProb = 0.5, isMinus15 = true, ouAbsDi
     return SKIP; // ~74% SKIP!
   }
   if (market === 'RL') {
-    if (isMinus15) {
-      if (mlPickProb >= 0.640) return PRIME;  // Strong Favorite -1.5 (prob >= 64%)
-      if (mlPickProb >= 0.610) return EDGE;   // Heavy Favorite -1.5 (prob >= 61%)
-      return SKIP;
-    } else {
-      if (mlPickProb >= 0.470) return PRIME;  // Strong Underdog +1.5 cover (prob >= 47%)
-      if (mlPickProb >= 0.450) return EDGE;   // Solid Underdog +1.5 cover (prob >= 45%)
-      return SKIP;
-    }
+    return SKIP; // Excluded from P/L calculations & signal badges
   }
   if (market === 'OU') {
     if (ouAbsDiff >= 0.70) return PRIME;   // ~8% of games
@@ -2581,28 +2573,15 @@ async function runBacktest() {
                if (mlHit) { grHits.ALL[mlSig.l].w++; grHits.ML[mlSig.l].w++; }
             }
 
-            // ─ RL pick (+1.5 Underdogs & -1.5 Favorites) ───────────────────────────────────
-            let rlPick, isMinus15, rlHit, rlProfit, rlSig;
+            // ─ RL pick (Display reference only — excluded from P/L calculations) ──────────
             let favProb = Math.max(mod.homeProb, mod.awayProb);
             let favTeam = mod.homeProb >= mod.awayProb ? home : away;
             let dogTeam = mod.homeProb >= mod.awayProb ? away : home;
-            let dogProb = 1 - favProb;
-
-            if (favProb >= 0.61) {
-              rlPick = favTeam; isMinus15 = true;
-              rlHit = rlPick === home ? (homeScore - awayScore > 1) : (awayScore - homeScore > 1);
-              rlProfit = rlHit ? 1.15 : -1.0;
-              rlSig = getSignal('RL', { mlPickProb: favProb, isMinus15: true });
-            } else if (dogProb >= 0.45) {
-              rlPick = dogTeam; isMinus15 = false;
-              let margin = rlPick === home ? (homeScore - awayScore) : (awayScore - homeScore);
-              rlHit = margin >= -1;
-              rlProfit = rlHit ? 0.606 : -1.0;
-              rlSig = getSignal('RL', { mlPickProb: dogProb, isMinus15: false });
-            } else {
-              rlPick = favTeam; isMinus15 = true; rlHit = false; rlProfit = 0;
-              rlSig = { l: 'SKIP', c: 'sig-skip', v: 1, icon: '⬜' };
-            }
+            let rlPick = favProb >= 0.55 ? favTeam : dogTeam;
+            let isMinus15 = favProb >= 0.55;
+            let rlHit = false;
+            let rlProfit = 0;
+            let rlSig = { l: 'SKIP', c: 'sig-skip', v: 1, icon: '⬜' };
 
             if (rlSig.l !== 'SKIP') {
                pl.ALL[rlPick] += rlProfit;
@@ -2882,12 +2861,11 @@ function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 
     }
   });
 
-  // 4. Market P/L Chart
-  let mktLabels = ['Moneyline', 'Run Line', 'Over/Under'];
+  // 4. Market P/L Chart (Moneyline & Over/Under — RL excluded)
+  let mktLabels = ['Moneyline', 'Over/Under'];
   let totalML = currentTotalProfits.ML;
-  let totalRL = currentTotalProfits.RL;
   let totalOU = currentTotalProfits.OU;
-  let mktVals = [totalML, totalRL, totalOU];
+  let mktVals = [totalML, totalOU];
   let mktColors = mktVals.map(v => v >= 0 ? '#00d68f' : '#ef476f');
 
   const ctxMkt = document.getElementById('market-chart').getContext('2d');
@@ -2986,7 +2964,7 @@ function updateKPI() {
     let bCount = 0, hCount = 0, uCount = 0;
 
     if (market === 'ALL') {
-      ['ml','rl','ou'].forEach(m => {
+      ['ml','ou'].forEach(m => {
         let sig = tr.getAttribute('data-' + m);
         if (signal === 'ALL' ? (sig === 'PRIME' || sig === 'EDGE') : sig === signal) {
           hasSignal = true;
