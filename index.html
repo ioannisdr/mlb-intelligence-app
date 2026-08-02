@@ -2322,6 +2322,11 @@ function renderApp() {
               <span style="font-size:10px;font-weight:700;color:var(--y);">🔒 LOCKED PRE-GAME PREDICTION (T-2m)</span>
               <span style="font-size:10px;color:var(--tx3);">Odds and model signals permanently frozen 2 minutes prior to first pitch.</span>
             </div>` : ''}
+          ${isLive ? `<div style="display:flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(239,71,111,.08);border-top:1px solid rgba(239,71,111,.2);">
+              <span style="width:7px;height:7px;border-radius:50%;background:var(--r);animation:pulse 1.2s infinite;flex-shrink:0;display:inline-block;"></span>
+              <span style="font-size:10px;font-weight:700;color:var(--r);letter-spacing:.3px;">🔴 GAME IN PROGRESS</span>
+              <span style="font-size:10px;color:var(--tx2);margin-left:auto;">Follow real-time pitch-by-pitch action on <b style="color:var(--b);cursor:pointer;text-decoration:underline;" onclick="sw('live')">Live Scores ⚡</b></span>
+            </div>` : ''}
             <div class="gc-best-banner">
               <span style="color:var(--tx3)">★ BEST BET</span>
               ${dispBestSig.v > 1
@@ -2349,9 +2354,9 @@ function renderApp() {
               </div>
               <div class="pk ${ouIsBest ? 'best-pick' : ''}">
                 <div class="pt">O/U ${mkt.ou} (PROJ ${mod.projOU.toFixed(1)})</div>
-                <div class="pv" style="color:var(--y)">${ouPick} ${mkt.ou}</div>
+                <div class="pv" style="color:${ouSigVal.v > 1 ? 'var(--y)' : 'var(--tx3)'}">${ouSigVal.v > 1 ? `${ouPick} ${mkt.ou}` : '⬜ SKIP — No Bet'}</div>
                 <div class="or"><span class="mo">${ouFairOdds}</span> <span style="color:var(--tx3)">mkt -110</span></div>
-                <div class="ev">edge <span style="color:${ouIsBest?'var(--g)':'var(--tx3)'}">+${(ouEV*100).toFixed(1)}%</span></div>
+                <div class="ev">${ouSigVal.v > 1 ? `edge <span style="color:${ouIsBest?'var(--g)':'var(--tx3)'}">+${(ouEV*100).toFixed(1)}%</span>` : '<span style="color:var(--tx3)">no edge</span>'}</div>
                 ${ouIsBest ? '<div class="best-star">★ Best</div>' : ''}
               </div>
             </div>
