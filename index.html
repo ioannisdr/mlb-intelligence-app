@@ -2068,9 +2068,9 @@ function getSignal(market, { ev = 0, mlPickProb = 0.5, isMinus15 = true, ouAbsDi
   const EDGE  = { l: 'EDGE',  c: 'sig-edge',  v: 2, icon: '✅' };
   const SKIP  = { l: 'SKIP',  c: 'sig-skip',  v: 1, icon: '⬜' };
   if (market === 'ML') {
-    if ((mlPickProb >= 0.525 && ev >= 0.020) || (mlPickProb >= 0.515 && ev >= 0.100)) return PRIME; // Standard PRIME or High-Discrepancy PRIME
-    if (mlPickProb >= 0.505 && ev >= 0.010) return EDGE;   // ~13% of games
-    return SKIP; // ~74% SKIP!
+    if ((mlPickProb >= 0.520 && ev >= 0.015) || (mlPickProb >= 0.510 && ev >= 0.050)) return PRIME; // PRIME Moneyline
+    if (mlPickProb >= 0.500 && ev >= 0.005) return EDGE;   // Solid EDGE Moneyline
+    return SKIP; // Below threshold = SKIP
   }
   if (market === 'RL') {
     return SKIP; // Excluded from P/L calculations & signal badges
