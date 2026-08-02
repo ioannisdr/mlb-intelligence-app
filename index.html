@@ -3004,12 +3004,8 @@ function updateKPI() {
   const totalMisses = totalBets - totalHits;
   const hitRate     = totalBets > 0 ? (totalHits / totalBets * 100) : 0;
 
-  // Average payout per market (based on standard juice)
-  const MKT_PAYOUT = { ML: 0.926, RL: 1.15, OU: 0.909, ALL: 0.935 };
-  const payout   = MKT_PAYOUT[market] || 0.935;
-  const netProfit = (totalHits * payout) - totalMisses;
-  const totalUnits = totalBets;
-  const roi = totalUnits > 0 ? (netProfit / totalUnits * 100) : 0;
+  const netProfit  = rawUnits;
+  const roi        = totalBets > 0 ? (netProfit / totalBets * 100) : 0;
 
   const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
   const setBadge = (id, cls, val) => {
