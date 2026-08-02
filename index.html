@@ -2365,9 +2365,16 @@ function renderApp() {
       `;
       if (pCardHtml) gList.innerHTML += pCardHtml;
 
-      let pickModelPct = (mod.evH >= mod.evA ? (mod.homeProb*100) : (mod.awayProb*100)).toFixed(0);
-      let pickMktImplied = (mod.evH >= mod.evA ? (mod.mktHomeImplied*100) : (mod.mktAwayImplied*100)).toFixed(0);
-      let pickEdge = mod.evH >= mod.evA ? mod.edgeH : mod.edgeA;
+      let pickModelPct, pickMktImplied, pickEdge;
+      if (dispBestIsOU) {
+        pickModelPct   = Math.round((0.50 + (ouAbsDiff * 0.10)) * 100);
+        pickMktImplied = 52;
+        pickEdge       = ouEV;
+      } else {
+        pickModelPct   = Math.round(mod.evH >= mod.evA ? (mod.homeProb*100) : (mod.awayProb*100));
+        pickMktImplied = Math.round(mod.evH >= mod.evA ? (mod.mktHomeImplied*100) : (mod.mktAwayImplied*100));
+        pickEdge       = mod.evH >= mod.evA ? mod.edgeH : mod.edgeA;
+      }
       let edgeSign = pickEdge >= 0 ? '+' : '';
 
       // Regression insight intentionally omitted from Best Bets (predictions tab only)
