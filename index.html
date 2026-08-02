@@ -1425,21 +1425,6 @@ const _todayStr = () => formatDateStr(new Date());
 
 // ── Hard-anchored historical picks for verified dates (e.g. July 29, 2026) ──
 const HISTORICAL_FROZEN = {
-  "2026-07-31": {
-    "Diamondbacks@Guardians": {
-      bestPick: "Diamondbacks ML",
-      bestEV: 0.090,
-      bestIsOU: false,
-      bestSig: { l: 'PRIME', c: 'sig-prime', v: 3, icon: '🔥' },
-      mlPickLine: 135,
-      mlTeamPick: "Diamondbacks",
-      mlTeamEV: 0.090,
-      mlTeamLine: 135,
-      isDog: true,
-      ouPick: "UNDER",
-      ouEV: 0.010
-    }
-  },
   "2026-07-29": {
     "Royals@Twins": {
       bestPick: "Royals ML",
@@ -2560,7 +2545,7 @@ async function runBacktest() {
             // Priority: dateFrozen (date-specific) > frozenPredictions (current session)
             const fKey = `${away}@${home}`;
             const isTodayDate = d.date === formatDateStr(new Date());
-            const fData = (HISTORICAL_FROZEN[d.date] && HISTORICAL_FROZEN[d.date][fKey]) || dateFrozen[fKey] || (isTodayDate ? frozenPredictions[fKey] : null);
+            const fData = (HISTORICAL_FROZEN[d.date] && HISTORICAL_FROZEN[d.date][fKey]) || (isTodayDate ? frozenPredictions[fKey] : null);
             // ─ ML pick ───────────────────────────────────────────────────────────────────
             let mlPick, mlEV;
             const liveGame = TODAY.find(tg => tg.home === home && tg.away === away);
