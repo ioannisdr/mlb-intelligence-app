@@ -2075,8 +2075,8 @@ function getSignal(market, { ev = 0, mlPickProb = 0.5, isMinus15 = true, ouAbsDi
   const EDGE  = { l: 'EDGE',  c: 'sig-edge',  v: 2, icon: '✅' };
   const SKIP  = { l: 'SKIP',  c: 'sig-skip',  v: 1, icon: '⬜' };
   if (market === 'ML') {
-    if (mlPickProb >= 0.525 && ev >= 0.020) return PRIME;  // ~13% of games (selective best bets)
-    if (mlPickProb >= 0.505 && ev >= 0.010) return EDGE;   // ~13% of games
+    if (mlPickProb >= 0.525 && ev >= 0.020 && ev <= 0.110) return PRIME;  // ~13% of games (selective best bets)
+    if (mlPickProb >= 0.505 && ev >= 0.010 && ev <= 0.110) return EDGE;   // ~13% of games
     return SKIP; // ~74% SKIP!
   }
   if (market === 'RL') {
@@ -2659,7 +2659,7 @@ async function runBacktest() {
             const _mlOpen = mod.mkt.ml.a, _mlClose = mod.mkt.ml.a;
             const _ou = mod.mkt.ou, _mlPickProb = mlPickProb;
 
-            html += `<tr class="bt-row-click bt-row-data" data-month="${mStr}" data-ml="${mlSig.l}" data-rl="${rlSig.l}" data-ou="${ouSig.l}" data-ml-pl="${mlProfit}" data-rl-pl="${rlProfit}" data-ou-pl="${ouProfit}" data-ml-hit="${mlHit?1:0}" data-rl-hit="${rlHit?1:0}" data-ou-hit="${ouHit?1:0}" onclick="showLineMovement('${away}','${home}','${dStr}',${mod.mkt.ml.a},${mod.mkt.ml.h},${mod.mkt.ou},${mlPickProb.toFixed(3)},${awayScore},${homeScore})">
+            html += `<tr class="bt-row-click bt-row-data" data-month="${mStr}" data-ml="${mlSig.l}" data-rl="${rlSig.l}" data-ou="${ouSig.l}" data-ml-pl="${mlSig.l !== 'SKIP' ? mlProfit : 0}" data-rl-pl="${rlSig.l !== 'SKIP' ? rlProfit : 0}" data-ou-pl="${ouSig.l !== 'SKIP' ? ouProfit : 0}" data-ml-hit="${mlSig.l !== 'SKIP' ? (mlHit?1:0) : 0}" data-rl-hit="${rlSig.l !== 'SKIP' ? (rlHit?1:0) : 0}" data-ou-hit="${ouSig.l !== 'SKIP' ? (ouHit?1:0) : 0}" onclick="showLineMovement('${away}','${home}','${dStr}',${mod.mkt.ml.a},${mod.mkt.ml.h},${mod.mkt.ou},${mlPickProb.toFixed(3)},${awayScore},${homeScore})">
               <td style="color:var(--tx2)">${dStr}</td>
               <td style="font-weight:700">${away} @ ${home}</td>
               <td style="color:var(--tx2)">${awayScore}–${homeScore}</td>
