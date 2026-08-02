@@ -85,18 +85,20 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .gc:hover{border-color:var(--bdr2)}
 .gc-head{padding:12px 14px;}
 .gc-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.mup{display:flex;align-items:flex-start;gap:20px;flex:1}
-.tb{display:flex;flex-direction:column;align-items:center;min-width:46px}
-.ta{font-size:18px;font-weight:800;display:inline-flex;align-items:center;gap:7px;line-height:1.2;}.tw{font-size:11px;color:var(--tx2);margin-top:2px}
-.team-logo{filter:drop-shadow(0 1px 3px rgba(0,0,0,0.4));transition:transform .15s ease;}
-.team-btn:hover .team-logo{transform:scale(1.18);}
-.str-pill{font-size:9px;padding:1px 4px;border-radius:3px;font-weight:700;margin-top:2px;display:inline-block;}
-.streak-box { display:flex; gap:2px; margin-top:4px; }
-.streak-box span { width:12px; height:12px; display:inline-flex; align-items:center; justify-content:center; font-size:8px; border-radius:2px; font-weight:700; }
-.str-w { background:var(--gbg); color:var(--g); }
-.str-l { background:var(--rbg); color:var(--r); }
-.gc-time{font-size:11px;color:var(--tx2);white-space:nowrap;flex-shrink:0}
-.pt-row { display:flex; justify-content:space-between; margin-top:10px; font-size:11px; color:var(--tx2); }
+.gc-grid-3 { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 16px; padding: 4px 0; }
+.gc-col-pitcher { font-size: 11px; line-height: 1.5; }
+.gc-pitcher-away { text-align: left; }
+.gc-pitcher-home { text-align: right; }
+.gc-col-matchup { display: flex; flex-direction: column; align-items: center; text-align: center; min-width: 280px; }
+.gc-matchup-teams { display: flex; align-items: center; gap: 12px; }
+.gc-matchup-team { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 800; cursor: pointer; }
+.gc-team-name { font-size: 20px; font-weight: 800; letter-spacing: -0.2px; }
+.gc-vs-badge { font-size: 11px; font-weight: 800; color: var(--tx3); background: var(--bg3); padding: 3px 9px; border-radius: 12px; border: 1px solid var(--bdr2); text-transform: uppercase; letter-spacing: 0.5px; }
+.gc-matchup-probs { display: flex; align-items: center; gap: 6px; font-size: 12px; margin-top: 5px; }
+@media(max-width:850px) {
+  .gc-grid-3 { grid-template-columns: 1fr; gap: 12px; }
+  .gc-pitcher-away, .gc-pitcher-home { text-align: center; }
+}
 .pt-row span { color:var(--b); font-weight:600;}
 .weather-row{display:flex;align-items:center;gap:6px;padding-top:10px;font-size:11px;color:var(--tx2);}
 .gc-best-banner { display:flex; align-items:center; gap:10px; background:rgba(0,214,143,0.05); border-top:1px solid rgba(0,214,143,0.15); border-bottom:1px solid rgba(0,214,143,0.15); padding:8px 14px; font-size:11px; font-weight:700; margin-top:10px; }
@@ -2247,46 +2249,63 @@ function renderApp() {
       let pCardHtml = `
         <div class="gc" id="pred-${g.away}-${g.home}">
           <div class="gc-head">
-            <div class="gc-top">
-              <div class="mup">
-                <div class="tb">
-                  <div class="ta team-btn" onclick="showTeamRecent('${g.away}',${g.awayId || 0},'away')">${getTeamLogoImg(g.away, g.awayId, 24)} <span>${g.away}</span></div>
-                  <div class="tw">${aPct}%</div>
+            <div class="gc-grid-3">
+              <div class="gc-col-pitcher gc-pitcher-away">
+                <div style="font-size:12px;font-weight:700;color:var(--tx)">
+                  <span style="color:var(--b)">🧢</span> ${g.awayP}
+                </div>
+                <div style="margin-top:2px;">
+                  <span class="tier ${P[g.awayP]?P[g.awayP].tier==='Elite'?'t-elite':P[g.awayP].tier==='Strong'?'t-strong':'t-mid':'t-mid'}">${P[g.awayP]?P[g.awayP].tier:'Mid'}</span>
+                  <span style="color:var(--tx3)"> xERA</span> <span style="color:var(--b)">${P[g.awayP]?P[g.awayP].xera.toFixed(2):'—'}</span>
+                  <span style="color:var(--tx3)"> ERA</span> <span style="color:${P[g.awayP]&&P[g.awayP].era<P[g.awayP].xera?'var(--r)':P[g.awayP]&&P[g.awayP].era>P[g.awayP].xera?'var(--g)':'var(--tx2)'}">${P[g.awayP]?P[g.awayP].era.toFixed(2):'—'}</span>
+                  <span style="color:var(--tx3)"> K%</span> <span style="color:var(--b)">${P[g.awayP]?P[g.awayP].kpct.toFixed(1):'—'}%</span>
+                </div>
+                <div style="font-size:10px;color:var(--tx3);margin-top:3px;">
+                  Off wOBA: <span style="color:var(--b);font-weight:600">${S[g.away]?.woba?.toFixed(3) || '—'}</span>
+                </div>
+                ${mod.regA ? `<div style="margin-top:2px"><span class="reg-badge reg-${mod.regA.type}">${mod.regA.text}</span></div>` : ''}
+              </div>
+
+              <div class="gc-col-matchup">
+                <div class="gc-matchup-teams">
+                  <div class="gc-matchup-team team-btn" onclick="showTeamRecent('${g.away}',${g.awayId || 0},'away')">
+                    ${getTeamLogoImg(g.away, g.awayId, 28)}
+                    <span class="gc-team-name">${g.away}</span>
+                  </div>
+                  <span class="gc-vs-badge">VS</span>
+                  <div class="gc-matchup-team team-btn" onclick="showTeamRecent('${g.home}',${g.homeId || 0},'home')">
+                    <span class="gc-team-name">${g.home}</span>
+                    ${getTeamLogoImg(g.home, g.homeId, 28)}
+                  </div>
+                </div>
+                <div class="gc-matchup-probs">
+                  <span style="color:${aPct>hPct?'var(--g)':'var(--tx2)'};font-weight:700">${aPct}%</span>
                   ${getPill(g.awayForm)}
-                </div>
-                <div style="font-size:12px;color:var(--tx3);margin-top:2px;">@</div>
-                <div class="tb">
-                  <div class="ta team-btn" onclick="showTeamRecent('${g.home}',${g.homeId || 0},'home')">${getTeamLogoImg(g.home, g.homeId, 24)} <span>${g.home}</span></div>
-                  <div class="tw">${hPct}%</div>
+                  <span style="color:var(--tx3);font-size:10px;margin:0 4px">•</span>
                   ${getPill(g.homeForm)}
+                  <span style="color:${hPct>aPct?'var(--g)':'var(--tx2)'};font-weight:700">${hPct}%</span>
                 </div>
+                <div class="gc-time" style="margin-top:4px;font-size:11px;color:var(--tx3);">${g.t} Local</div>
               </div>
-              <div class="gc-time">${g.t} Local</div>
-            </div>
-            
-            <div class="pt-row">
-              <div>
-                <span style="color:var(--b)">🧢</span> ${g.awayP}
-                <br><span class="tier ${P[g.awayP]?P[g.awayP].tier==='Elite'?'t-elite':P[g.awayP].tier==='Strong'?'t-strong':'t-mid':'t-mid'}">${P[g.awayP]?P[g.awayP].tier:'Mid'}</span>
-                <span style="color:var(--tx3)"> xERA</span> <span style="color:var(--b)">${P[g.awayP]?P[g.awayP].xera.toFixed(2):'—'}</span>
-                <span style="color:var(--tx3)"> ERA</span> <span style="color:${P[g.awayP]&&P[g.awayP].era<P[g.awayP].xera?'var(--r)':P[g.awayP]&&P[g.awayP].era>P[g.awayP].xera?'var(--g)':'var(--tx2)'}">${P[g.awayP]?P[g.awayP].era.toFixed(2):'—'}</span>
-                <span style="color:var(--tx3)"> K%</span> <span style="color:var(--b)">${P[g.awayP]?P[g.awayP].kpct.toFixed(1):'—'}%</span>
-                <br><span style="font-size:10px;color:var(--tx3)">Off wOBA: </span><span style="font-size:10px;color:var(--b)">${S[g.away]?.woba?.toFixed(3) || '—'}</span>
-                ${mod.regA ? `<br><span class="reg-badge reg-${mod.regA.type}">${mod.regA.text}</span>` : ''}
-              </div>
-              <div style="font-size:9px;color:var(--tx3);margin-top:8px;">vs</div>
-              <div style="text-align:right;">
-                ${g.homeP} <span style="color:var(--b)">🧢</span>
-                <br><span style="color:var(--b)">${P[g.homeP]?P[g.homeP].xera.toFixed(2):'—'}</span> <span style="color:var(--tx3)">xERA </span>
-                <span style="color:${P[g.homeP]&&P[g.homeP].era<P[g.homeP].xera?'var(--r)':P[g.homeP]&&P[g.homeP].era>P[g.homeP].xera?'var(--g)':'var(--tx2)'}">${P[g.homeP]?P[g.homeP].era.toFixed(2):'—'}</span> <span style="color:var(--tx3)">ERA </span>
-                <span style="color:var(--b)">${P[g.homeP]?P[g.homeP].kpct.toFixed(1):'—'}%</span> <span style="color:var(--tx3)">K% </span>
-                <span class="tier ${P[g.homeP]?P[g.homeP].tier==='Elite'?'t-elite':P[g.homeP].tier==='Strong'?'t-strong':'t-mid':'t-mid'}">${P[g.homeP]?P[g.homeP].tier:'Mid'}</span>
-                <br><span style="font-size:10px;color:var(--tx3)">Off wOBA: </span><span style="font-size:10px;color:var(--b)">${S[g.home]?.woba?.toFixed(3) || '—'}</span>
-                ${mod.regH ? `<br><span class="reg-badge reg-${mod.regH.type}" style="float:right">${mod.regH.text}</span>` : ''}
+
+              <div class="gc-col-pitcher gc-pitcher-home">
+                <div style="font-size:12px;font-weight:700;color:var(--tx)">
+                  ${g.homeP} <span style="color:var(--b)">🧢</span>
+                </div>
+                <div style="margin-top:2px;">
+                  <span style="color:var(--b)">${P[g.homeP]?P[g.homeP].xera.toFixed(2):'—'}</span> <span style="color:var(--tx3)">xERA</span>
+                  <span style="color:${P[g.homeP]&&P[g.homeP].era<P[g.homeP].xera?'var(--r)':P[g.homeP]&&P[g.homeP].era>P[g.homeP].xera?'var(--g)':'var(--tx2)'}">${P[g.homeP]?P[g.homeP].era.toFixed(2):'—'}</span> <span style="color:var(--tx3)">ERA</span>
+                  <span style="color:var(--b)">${P[g.homeP]?P[g.homeP].kpct.toFixed(1):'—'}%</span> <span style="color:var(--tx3)">K%</span>
+                  <span class="tier ${P[g.homeP]?P[g.homeP].tier==='Elite'?'t-elite':P[g.homeP].tier==='Strong'?'t-strong':'t-mid':'t-mid'}">${P[g.homeP]?P[g.homeP].tier:'Mid'}</span>
+                </div>
+                <div style="font-size:10px;color:var(--tx3);margin-top:3px;">
+                  Off wOBA: <span style="color:var(--b);font-weight:600">${S[g.home]?.woba?.toFixed(3) || '—'}</span>
+                </div>
+                ${mod.regH ? `<div style="margin-top:2px"><span class="reg-badge reg-${mod.regH.type}" style="float:right">${mod.regH.text}</span></div>` : ''}
               </div>
             </div>
 
-            <div class="weather-row" style="font-size:11px;line-height:1.6;">${mod.wStr}</div>
+            <div class="weather-row" style="font-size:11px;line-height:1.6;margin-top:10px;">${mod.wStr}</div>
 
           </div>
 
