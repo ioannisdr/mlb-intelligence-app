@@ -1909,14 +1909,30 @@ function calculateRegression(p) {
   return { score: Math.max(-3.0, Math.min(3.0, score)), text };
 }
 
+function getPitcherComposite(p) {
+  if (!p) return 4.20;
+  let xera  = parseFloat(p.xera  || 4.20);
+  let xfip  = parseFloat(p.xFIP  || p.fip || (xera + 0.12));
+  let fip   = parseFloat(p.fip   || (xera + 0.10));
+  let era   = parseFloat(p.era   || xera);
+  let kpct  = parseFloat(p.kpct  || 22.5);
+  let bbpct = parseFloat(p.bbpct || 7.2);
+  let comp  = (xera * 0.45) + (xfip * 0.25) + (fip * 0.15) + (era * 0.15);
+  let kbbDiff = kpct - bbpct;
+  let commandAdj = (kbbDiff - 15.0) * -0.015;
+  return comp + commandAdj;
+}
+
 function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTotal = null) {
   let ap = P[g.awayP] || { xera: 4.2, kpct: 22, fip: 4.3 };
   let hp = P[g.homeP] || { xera: 4.2, kpct: 22, fip: 4.3 };
   let as = S[g.away] || { woba: 0.315 };
   let hs = S[g.home] || { woba: 0.315 };
 
-  let a_pitch = ap.xera * -0.20;
-  let h_pitch = hp.xera * -0.20;
+  let a_comp = getPitcherComposite(ap);
+  let h_comp = getPitcherComposite(hp);
+  let a_pitch = a_comp * -0.20;
+  let h_pitch = h_comp * -0.20;
   let a_off = as.woba * 5.0;
   let h_off = hs.woba * 5.0;
 
