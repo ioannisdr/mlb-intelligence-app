@@ -87,7 +87,9 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .gc-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .mup{display:flex;align-items:flex-start;gap:20px;flex:1}
 .tb{display:flex;flex-direction:column;align-items:center;min-width:46px}
-.ta{font-size:18px;font-weight:800}.tw{font-size:11px;color:var(--tx2);margin-top:2px}
+.ta{font-size:18px;font-weight:800;display:inline-flex;align-items:center;gap:7px;line-height:1.2;}.tw{font-size:11px;color:var(--tx2);margin-top:2px}
+.team-logo{filter:drop-shadow(0 1px 3px rgba(0,0,0,0.4));transition:transform .15s ease;}
+.team-btn:hover .team-logo{transform:scale(1.18);}
 .str-pill{font-size:9px;padding:1px 4px;border-radius:3px;font-weight:700;margin-top:2px;display:inline-block;}
 .streak-box { display:flex; gap:2px; margin-top:4px; }
 .streak-box span { width:12px; height:12px; display:inline-flex; align-items:center; justify-content:center; font-size:8px; border-radius:2px; font-weight:700; }
@@ -1578,6 +1580,52 @@ const TEAM_ABBR = {
   'Nationals': 'WSH', 'Washington Nationals': 'WSH', 'WAS': 'WSH', 'WSH': 'WSH'
 };
 
+const TEAM_MLB_ID = {
+  'ATL': 144, 'Braves': 144, 'Atlanta Braves': 144,
+  'ARI': 109, 'Diamondbacks': 109, 'D-backs': 109, 'Arizona Diamondbacks': 109, 'AZ': 109,
+  'BAL': 110, 'Orioles': 110, 'Baltimore Orioles': 110,
+  'BOS': 111, 'Red Sox': 111, 'Boston Red Sox': 111,
+  'CHC': 112, 'Cubs': 112, 'Chicago Cubs': 112,
+  'CWS': 145, 'White Sox': 145, 'Chicago White Sox': 145, 'CHW': 145,
+  'CIN': 113, 'Reds': 113, 'Cincinnati Reds': 113,
+  'CLE': 114, 'Guardians': 114, 'Cleveland Guardians': 114,
+  'COL': 115, 'Rockies': 115, 'Colorado Rockies': 115,
+  'DET': 116, 'Tigers': 116, 'Detroit Tigers': 116,
+  'HOU': 117, 'Astros': 117, 'Houston Astros': 117,
+  'KCR': 118, 'KC': 118, 'Royals': 118, 'Kansas City Royals': 118,
+  'LAA': 108, 'Angels': 108, 'Los Angeles Angels': 108,
+  'LAD': 119, 'Dodgers': 119, 'Los Angeles Dodgers': 119,
+  'MIA': 146, 'Marlins': 146, 'Miami Marlins': 146,
+  'MIL': 158, 'Brewers': 158, 'Milwaukee Brewers': 158,
+  'MIN': 142, 'Twins': 142, 'Minnesota Twins': 142,
+  'NYM': 121, 'Mets': 121, 'New York Mets': 121,
+  'NYY': 147, 'Yankees': 147, 'New York Yankees': 147,
+  'ATH': 133, 'OAK': 133, 'Athletics': 133, 'Oakland Athletics': 133,
+  'PHI': 143, 'Phillies': 143, 'Philadelphia Phillies': 143,
+  'PIT': 134, 'Pirates': 134, 'Pittsburgh Pirates': 134,
+  'SDP': 135, 'SD': 135, 'Padres': 135, 'San Diego Padres': 135,
+  'SFG': 137, 'SF': 137, 'Giants': 137, 'San Francisco Giants': 137,
+  'SEA': 136, 'Mariners': 136, 'Seattle Mariners': 136,
+  'STL': 138, 'Cardinals': 138, 'St. Louis Cardinals': 138,
+  'TBR': 139, 'TB': 139, 'Rays': 139, 'Tampa Bay Rays': 139,
+  'TEX': 140, 'Rangers': 140, 'Texas Rangers': 140,
+  'TOR': 141, 'Blue Jays': 141, 'Toronto Blue Jays': 141,
+  'WSH': 120, 'WAS': 120, 'Nationals': 120, 'Washington Nationals': 120
+};
+
+function getTeamLogoUrl(teamStr, teamId) {
+  if (teamId && Number(teamId) > 0) return `https://www.mlbstatic.com/team-logos/${teamId}.svg`;
+  if (teamStr && TEAM_MLB_ID[teamStr]) return `https://www.mlbstatic.com/team-logos/${TEAM_MLB_ID[teamStr]}.svg`;
+  const abbr = getTeamAbbr(teamStr);
+  if (TEAM_MLB_ID[abbr]) return `https://www.mlbstatic.com/team-logos/${TEAM_MLB_ID[abbr]}.svg`;
+  return `https://www.mlbstatic.com/team-logos/119.svg`;
+}
+
+function getTeamLogoImg(teamStr, teamId, size = 22, style = '') {
+  const url = getTeamLogoUrl(teamStr, teamId);
+  return `<img src="${url}" alt="${teamStr||''}" class="team-logo" style="width:${size}px;height:${size}px;object-fit:contain;vertical-align:middle;flex-shrink:0;${style}" loading="lazy" onerror="this.style.display='none'">`;
+}
+
 function getTeamAbbr(str) {
   if (!str || str === 'UNK') return 'MLB';
   if (TEAM_ABBR[str]) return TEAM_ABBR[str];
@@ -2204,13 +2252,13 @@ function renderApp() {
             <div class="gc-top">
               <div class="mup">
                 <div class="tb">
-                  <div class="ta team-btn" onclick="showTeamRecent('${g.away}',${g.awayId || 0},'away')">${g.away}</div>
+                  <div class="ta team-btn" onclick="showTeamRecent('${g.away}',${g.awayId || 0},'away')">${getTeamLogoImg(g.away, g.awayId, 24)} <span>${g.away}</span></div>
                   <div class="tw">${aPct}%</div>
                   ${getPill(g.awayForm)}
                 </div>
                 <div style="font-size:12px;color:var(--tx3);margin-top:2px;">@</div>
                 <div class="tb">
-                  <div class="ta team-btn" onclick="showTeamRecent('${g.home}',${g.homeId || 0},'home')">${g.home}</div>
+                  <div class="ta team-btn" onclick="showTeamRecent('${g.home}',${g.homeId || 0},'home')">${getTeamLogoImg(g.home, g.homeId, 24)} <span>${g.home}</span></div>
                   <div class="tw">${hPct}%</div>
                   ${getPill(g.homeForm)}
                 </div>
@@ -3633,11 +3681,13 @@ function renderLiveScores(data) {
         <div class="live-card-top">
           <div class="live-teams">
             <div class="live-team">
+              ${getTeamLogoImg(away, g.teams?.away?.team?.id, 20)}
               <div class="live-team-name">${away}</div>
               <div class="live-score" style="color:${typeof aScore === 'number' && typeof hScore === 'number' && aScore > hScore ? 'var(--g)' : 'var(--tx)'}">${aScore}</div>
             </div>
             <div class="live-at">@</div>
             <div class="live-team">
+              ${getTeamLogoImg(home, g.teams?.home?.team?.id, 20)}
               <div class="live-team-name">${home}</div>
               <div class="live-score" style="color:${typeof hScore === 'number' && typeof aScore === 'number' && hScore > aScore ? 'var(--g)' : 'var(--tx)'}">${hScore}</div>
             </div>
@@ -3667,9 +3717,9 @@ function renderLiveFallback() {
       <div class="live-card">
         <div class="live-card-top">
           <div class="live-teams">
-            <div class="live-team"><div class="live-team-name">${g.away}</div><div class="live-score" style="color:var(--tx3)">—</div></div>
+            <div class="live-team">${getTeamLogoImg(g.away, g.awayId, 20)}<div class="live-team-name">${g.away}</div><div class="live-score" style="color:var(--tx3)">—</div></div>
             <div class="live-at">@</div>
-            <div class="live-team"><div class="live-team-name">${g.home}</div><div class="live-score" style="color:var(--tx3)">—</div></div>
+            <div class="live-team">${getTeamLogoImg(g.home, g.homeId, 20)}<div class="live-team-name">${g.home}</div><div class="live-score" style="color:var(--tx3)">—</div></div>
           </div>
           <div>
             <span class="live-status-badge badge-sched">Scheduled</span>
