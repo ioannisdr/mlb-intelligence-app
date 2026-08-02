@@ -2072,19 +2072,19 @@ function getSignal(market, { ev = 0, mlPickProb = 0.5, ouAbsDiff = 0 } = {}) {
   const EDGE  = { l: 'EDGE',  c: 'sig-edge',  v: 2, icon: '✅' };
   const SKIP  = { l: 'SKIP',  c: 'sig-skip',  v: 1, icon: '⬜' };
   if (market === 'ML') {
-    if (ev >= 0.035 && ev <= 0.120 && mlPickProb >= 0.460) return PRIME;  // PRIME: Strong EV (>=3.5%) & Win Prob >= 46% (allows profitable underdogs & favorites)
-    if (ev >= 0.012 && ev <  0.035 && mlPickProb >= 0.440) return EDGE;   // EDGE: Solid EV (>=1.2%) & Win Prob >= 44%
-    return SKIP;
+    if (mlPickProb >= 0.525 && ev >= 0.020) return PRIME;  // ~13% of games (selective best bets)
+    if (mlPickProb >= 0.505 && ev >= 0.010) return EDGE;   // ~13% of games
+    return SKIP; // ~74% SKIP!
   }
   if (market === 'RL') {
-    if (mlPickProb >= 0.62) return PRIME;  // historically 66-72% hit rate
-    if (mlPickProb >= 0.56) return EDGE;
-    return SKIP;
+    if (mlPickProb >= 0.600) return PRIME;  // ~4% of games
+    if (mlPickProb >= 0.550) return EDGE;   // ~12% of games
+    return SKIP; // ~84% SKIP!
   }
   if (market === 'OU') {
-    if (ouAbsDiff >= 0.80) return PRIME;   // large gap = strong signal
-    if (ouAbsDiff >= 0.35) return EDGE;
-    return SKIP;
+    if (ouAbsDiff >= 0.70) return PRIME;   // ~8% of games
+    if (ouAbsDiff >= 0.35) return EDGE;    // ~12% of games
+    return SKIP; // ~80% SKIP!
   }
   return SKIP;
 }
