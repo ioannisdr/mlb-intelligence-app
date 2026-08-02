@@ -2566,7 +2566,6 @@ async function runBacktest() {
             }
 
             // ─ RL pick ───────────────────────────────────────────────────────────────────
-            const mlPickProb = mlPick === home ? mod.homeProb : mod.awayProb;
             const rlPick     = mlPick;
             const rlHit      = mlPick === home ? (homeScore - awayScore > 1) : (awayScore - homeScore > 1);
             const rlProfit   = rlHit ? 1.15 : -1;
