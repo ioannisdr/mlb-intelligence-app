@@ -2072,8 +2072,8 @@ function getSignal(market, { ev = 0, mlPickProb = 0.5, ouAbsDiff = 0 } = {}) {
   const EDGE  = { l: 'EDGE',  c: 'sig-edge',  v: 2, icon: '✅' };
   const SKIP  = { l: 'SKIP',  c: 'sig-skip',  v: 1, icon: '⬜' };
   if (market === 'ML') {
-    if (mlPickProb >= 0.530 && ev >= 0.010) return PRIME;  // PRIME: High confidence (Model Win Prob >= 53.0%) & Positive EV (>= 1.0%)
-    if (mlPickProb >= 0.505 && ev >= 0.008) return EDGE;   // EDGE: Solid confidence (Model Win Prob >= 50.5%) & Positive EV (>= 0.8%)
+    if (ev >= 0.035 && ev <= 0.120 && mlPickProb >= 0.460) return PRIME;  // PRIME: Strong EV (>=3.5%) & Win Prob >= 46% (allows profitable underdogs & favorites)
+    if (ev >= 0.012 && ev <  0.035 && mlPickProb >= 0.440) return EDGE;   // EDGE: Solid EV (>=1.2%) & Win Prob >= 44%
     return SKIP;
   }
   if (market === 'RL') {
@@ -2234,7 +2234,7 @@ function renderApp() {
       const dispBestPick    = (frozen ? frozen.bestPick    : bestPick)    || `${mlTeamPick} ML`;
       const dispBestEV      =  frozen ? frozen.bestEV      : bestEV;
       const dispBestIsOU    =  frozen ? frozen.bestIsOU    : bestIsOU;
-      const dispBestSig     = (frozen ? frozen.bestSig     : bestSig)     || getSignal('ML', { ev: 0 });
+      const dispBestSig     = (frozen ? frozen.bestSig     : bestSig)     || getSignal('ML', { ev: 0, mlPickProb: 0.5 });
       const dispMlPickLine  =  frozen ? frozen.mlPickLine  : mlPickLine;
       const dispMlTeamPick  = (frozen ? frozen.mlTeamPick  : mlTeamPick)  || mlTeamPick;
       const dispMlTeamEV    =  frozen ? frozen.mlTeamEV    : mlTeamEV;
