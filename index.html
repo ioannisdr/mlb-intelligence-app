@@ -2079,9 +2079,9 @@ function getSignal(market, { ev = 0, mlPickProb = 0.5, isMinus15 = true, ouAbsDi
     return SKIP; // Excluded from P/L calculations & signal badges
   }
   if (market === 'OU') {
-    if (ouAbsDiff >= 1.00) return PRIME;   // Strong 1.00+ run gap (high confidence PRIME)
-    if (ouAbsDiff >= 0.70) return EDGE;    // Solid 0.70+ run gap (strict selective EDGE)
-    return SKIP; // ~85%+ SKIP (filters out noisy total games!)
+    if (ouAbsDiff >= 0.70) return PRIME;   // High confidence PRIME O/U (>= 0.70 run gap)
+    if (ouAbsDiff >= 0.40) return EDGE;    // Solid EDGE O/U (0.40 to 0.69 run gap)
+    return SKIP; // Below 0.40 run gap = SKIP
   }
   return SKIP;
 }
@@ -2184,8 +2184,12 @@ function renderApp() {
         bestPick = `${mlTeamPick} ML`; bestEV = mlTeamEV; bestIsOU = false; bestSig = mlSig;
       } else if (ouSigVal.v > mlSig.v) {
         bestPick = `${ouPick} ${mkt.ou}`; bestEV = ouEV; bestIsOU = true; bestSig = ouSigVal;
-      } else if (mlSig.v > 1) {
-        bestPick = `${mlTeamPick} ML`; bestEV = mlTeamEV; bestIsOU = false; bestSig = mlSig;
+      } else if (mlSig.v > 1 || ouSigVal.v > 1) {
+        if (ouEV > mlTeamEV && ouSigVal.v > 1) {
+          bestPick = `${ouPick} ${mkt.ou}`; bestEV = ouEV; bestIsOU = true; bestSig = ouSigVal;
+        } else {
+          bestPick = `${mlTeamPick} ML`; bestEV = mlTeamEV; bestIsOU = false; bestSig = mlSig;
+        }
       } else {
         bestPick = `${mlTeamPick} ML`; bestEV = Math.max(0, mlTeamEV); bestIsOU = false; bestSig = mlSig;
       }
@@ -2215,15 +2219,6 @@ function renderApp() {
         _saveFrozen(frozenPredictions);
       }
 
-      // Count stats for upcoming games AND past-date historical games
-      if (!hasStarted || histOverride) {
-        upcomingGames++;
-        if (bestSig.v === 3) primeCount++;
-        if (isDog && !bestIsOU && bestSig.v > 1) dogCount++;
-        if (ouPick === 'UNDER') underCount++;
-        totalProj += mod.projOU;
-      }
-
       const frozen = hasStarted && frozenPredictions[freezeKey]?.bestPick ? frozenPredictions[freezeKey] : null;
       if (frozen) {
         if ((frozen.bestIsOU && ouSigVal.v === 1) || bestSig.v > (frozen.bestSig?.v || 0)) {
@@ -2243,6 +2238,15 @@ function renderApp() {
       const dispMlTeamEV    =  frozen ? frozen.mlTeamEV    : mlTeamEV;
       const dispMlTeamLine  =  frozen ? frozen.mlTeamLine  : mlTeamLine;
       const dispIsDog       =  frozen ? frozen.isDog       : isDog;
+
+      // Count stats for upcoming games AND past-date historical games based on DISPLAYED values
+      if (!hasStarted || histOverride) {
+        upcomingGames++;
+        if (dispBestSig.v === 3) primeCount++;
+        if (dispMlTeamLine > 0 && mlSig.v > 1) dogCount++;
+        if (dispBestIsOU && dispBestPick.includes('UNDER') && dispBestSig.v > 1) underCount++;
+        totalProj += mod.projOU;
+      }
 
       const mlIsBest  = !dispBestIsOU && dispBestSig.v > 1;
       const ouIsBest  =  dispBestIsOU && dispBestSig.v > 1;
