@@ -2070,7 +2070,7 @@ function getGrade(ev) {
   return { l: 'D', c: 'grade-d', v: 1 };
 }
 
-function getSignal(market, { ev = 0, mlPickProb = 0.5, ouAbsDiff = 0 } = {}) {
+function getSignal(market, { ev = 0, mlPickProb = 0.5, isMinus15 = true, ouAbsDiff = 0 } = {}) {
   const PRIME = { l: 'PRIME', c: 'sig-prime', v: 3, icon: '🔥' };
   const EDGE  = { l: 'EDGE',  c: 'sig-edge',  v: 2, icon: '✅' };
   const SKIP  = { l: 'SKIP',  c: 'sig-skip',  v: 1, icon: '⬜' };
@@ -2081,12 +2081,12 @@ function getSignal(market, { ev = 0, mlPickProb = 0.5, ouAbsDiff = 0 } = {}) {
   }
   if (market === 'RL') {
     if (isMinus15) {
-      if (mlPickProb >= 0.650) return PRIME;
-      if (mlPickProb >= 0.620) return EDGE;
+      if (mlPickProb >= 0.600) return PRIME;  // Favorite -1.5 (prob >= 60%)
+      if (mlPickProb >= 0.550) return EDGE;   // Favorite -1.5 (prob >= 55%)
       return SKIP;
     } else {
-      if (mlPickProb >= 0.460) return PRIME; // Underdog +1.5 cover
-      if (mlPickProb >= 0.440) return EDGE;
+      if (mlPickProb >= 0.450) return PRIME;  // Underdog +1.5 cover (prob >= 45%)
+      if (mlPickProb >= 0.420) return EDGE;   // Underdog +1.5 cover (prob >= 42%)
       return SKIP;
     }
   }
@@ -2581,12 +2581,12 @@ async function runBacktest() {
             let dogTeam = mod.homeProb >= mod.awayProb ? away : home;
             let dogProb = 1 - favProb;
 
-            if (favProb >= 0.62) {
+            if (favProb >= 0.55) {
               rlPick = favTeam; isMinus15 = true;
               rlHit = rlPick === home ? (homeScore - awayScore > 1) : (awayScore - homeScore > 1);
               rlProfit = rlHit ? 1.15 : -1.0;
               rlSig = getSignal('RL', { mlPickProb: favProb, isMinus15: true });
-            } else if (dogProb >= 0.44 && dogProb <= 0.49) {
+            } else if (dogProb >= 0.42) {
               rlPick = dogTeam; isMinus15 = false;
               let margin = rlPick === home ? (homeScore - awayScore) : (awayScore - homeScore);
               rlHit = margin >= -1;
