@@ -1964,12 +1964,6 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   // Model win probability via logistic regression
   let logit = (h_off + h_pitch + 0.08) - (a_off + a_pitch) + (r1 * 0.22) + eraGapLogit;
 
-  // Mild backtest nudge on ~30% of games
-  if (backtestWinner) {
-    let nudgeSeed = seedRand(g.away + g.home + backtestWinner + "nudge");
-    if (nudgeSeed > 0.70) logit += backtestWinner === g.home ? 0.28 : -0.28;
-  }
-
   let homeProb = 1 / (1 + Math.exp(-logit));
   let awayProb = 1 - homeProb;
 
@@ -2033,13 +2027,6 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   projOU += (awOBA + hwOBA) * 8; // each 0.01 wOBA above avg ≈ +0.08 projected runs
 
   projOU = Math.round(projOU * 10) / 10;
-
-  // OU nudge for backtest — only on ~30% of games, reduced magnitude
-  // FIX: reduced to avoid over-nudging which caused grade inflation
-  if (backtestTotal) {
-    const ouNudgeSeed = seedRand(g.away + g.home + String(backtestTotal) + 'ounudge');
-    if (ouNudgeSeed > 0.70) projOU += backtestTotal > mkt.ou ? 0.8 : -0.8;
-  }
 
   // DOG = market prices the team at positive (+) American odds
   const homeDog = mkt.ml.h > 0;
@@ -2537,7 +2524,7 @@ async function runBacktest() {
                realMkt = btCachedOdds[home][currentBook]; // stored closing odds from localStorage
             }
 
-            const mod   = calculateModel(mockG, realMkt, winner, totalScore);
+            const mod   = calculateModel(mockG, realMkt);
 
             // Check per-date frozen pick first (real closing-line data captured pre-game)
             // Priority: dateFrozen (date-specific) > frozenPredictions (current session)
