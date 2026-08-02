@@ -2238,8 +2238,8 @@ function renderApp() {
       const dispMlTeamLine  =  frozen ? frozen.mlTeamLine  : mlTeamLine;
       const dispIsDog       =  frozen ? frozen.isDog       : isDog;
 
-      const mlIsBest  = !dispBestIsOU && mlSig.v > 1;
-      const ouIsBest  =  dispBestIsOU && ouSigVal.v > 1;
+      const mlIsBest  = !dispBestIsOU && dispBestSig.v > 1;
+      const ouIsBest  =  dispBestIsOU && dispBestSig.v > 1;
 
       let pickProb = mod.evH > mod.evA ? mod.homeProb : mod.awayProb;
       let pickLine = mod.evH > mod.evA ? (mkt.rl.hLine||'-1.5') : (mkt.rl.aLine||'+1.5');
