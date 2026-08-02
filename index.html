@@ -2367,7 +2367,7 @@ function renderApp() {
       } else {
         pickModelPct   = Math.round(mod.evH >= mod.evA ? (mod.homeProb*100) : (mod.awayProb*100));
         pickMktImplied = Math.round(mod.evH >= mod.evA ? (mod.mktHomeImplied*100) : (mod.mktAwayImplied*100));
-        pickEdge       = mod.evH >= mod.evA ? mod.edgeH : mod.edgeA;
+        pickEdge       = dispBestEV;
       }
       let edgeSign = pickEdge >= 0 ? '+' : '';
 
@@ -2399,8 +2399,8 @@ function renderApp() {
           </div>
         </div>
       `;
-      // Add to Best Bets ONLY if signal is PRIME or EDGE AND EV & Edge are strictly positive
-      if (dispBestSig.v > 1 && dispBestEV > 0.0001 && pickEdge > 0.0001) {
+      // Add to Best Bets ONLY if signal is PRIME or EDGE AND EV is strictly positive
+      if (dispBestSig.v > 1 && dispBestEV > 0.0001) {
         bestBetsArr.push({ html: bCardHtml, v: dispBestSig.v, ev: dispBestEV, isPrime: dispBestSig.v === 3 });
       }
     } catch (renderErr) {
