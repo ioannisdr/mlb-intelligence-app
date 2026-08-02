@@ -3037,7 +3037,7 @@ function updateKPI() {
     hitRate >= 55   ? '↑ Above breakeven' :
     hitRate >= 52.4 ? '≈ At breakeven' : '↓ Below breakeven');
 
-  set('kpi-units', totalUnits > 0 ? totalUnits + 'u' : '—');
+  set('kpi-units', totalBets > 0 ? totalBets.toLocaleString() + 'u' : '—');
   setBadge('kpi-units-badge', 'neu', '1u flat staking');
 
   const netEl = document.getElementById('kpi-net');
