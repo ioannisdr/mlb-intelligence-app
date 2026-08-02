@@ -3021,11 +3021,12 @@ function updateKPI() {
   const pctEl = document.getElementById('kpi-pct');
   if (pctEl) {
     pctEl.textContent = totalBets > 0 ? hitRate.toFixed(1) + '%' : '—';
-    pctEl.style.color = hitRate >= 55 ? 'var(--g)' : hitRate >= 52.4 ? 'var(--y)' : totalBets > 0 ? 'var(--r)' : 'var(--tx)';
+    pctEl.style.color = netProfit > 0 ? 'var(--g)' : (hitRate >= 52.4 ? 'var(--y)' : 'var(--r)');
   }
-  setBadge('kpi-pct-badge', 'pur',
+  const isPos = netProfit > 0;
+  setBadge('kpi-pct-badge', isPos ? 'pos' : (hitRate >= 52.4 ? 'pur' : 'neg'),
     totalBets === 0 ? 'No data' :
-    hitRate >= 55   ? '↑ Above breakeven' :
+    isPos           ? '↑ Above breakeven' :
     hitRate >= 52.4 ? '≈ At breakeven' : '↓ Below breakeven');
 
   set('kpi-units', totalBets > 0 ? totalBets.toLocaleString() + 'u' : '—');
