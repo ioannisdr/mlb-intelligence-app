@@ -2079,9 +2079,9 @@ function getSignal(market, { ev = 0, mlPickProb = 0.5, isMinus15 = true, ouAbsDi
     return SKIP; // Excluded from P/L calculations & signal badges
   }
   if (market === 'OU') {
-    if (ouAbsDiff >= 0.70) return PRIME;   // High confidence PRIME O/U (>= 0.70 run gap)
-    if (ouAbsDiff >= 0.40) return EDGE;    // Solid EDGE O/U (0.40 to 0.69 run gap)
-    return SKIP; // Below 0.40 run gap = SKIP
+    if (ouAbsDiff >= 0.80) return PRIME;   // Strong 0.80+ run gap (high confidence PRIME)
+    if (ouAbsDiff >= 0.60) return EDGE;    // Solid 0.60+ run gap (selective EDGE)
+    return SKIP; // Below 0.60 run gap (e.g. 0.40 or 0.50) = SKIP — No Bet
   }
   return SKIP;
 }
@@ -2221,7 +2221,7 @@ function renderApp() {
 
       const frozen = hasStarted && frozenPredictions[freezeKey]?.bestPick ? frozenPredictions[freezeKey] : null;
       if (frozen) {
-        if ((frozen.bestIsOU && ouSigVal.v === 1) || bestSig.v > (frozen.bestSig?.v || 0)) {
+        if ((frozen.bestIsOU && ouSigVal.v === 1) || bestSig.v > (frozen.bestSig?.v || 0) || (frozen.bestSig?.v > 1 && bestSig.v === 1)) {
           frozen.bestPick = bestPick;
           frozen.bestEV   = bestEV;
           frozen.bestIsOU = bestIsOU;
