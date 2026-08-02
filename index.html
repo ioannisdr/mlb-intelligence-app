@@ -2186,21 +2186,19 @@ function renderApp() {
       } else if (ouSigVal.v > mlSig.v) {
         bestPick = `${ouPick} ${mkt.ou}`; bestEV = ouEV; bestIsOU = true; bestSig = ouSigVal;
       } else if (mlSig.v > 1) {
-        if (mlTeamEV >= ouEV) {
-          bestPick = `${mlTeamPick} ML`; bestEV = mlTeamEV; bestIsOU = false; bestSig = mlSig;
-        } else {
-          bestPick = `${ouPick} ${mkt.ou}`; bestEV = ouEV; bestIsOU = true; bestSig = ouSigVal;
-        }
+        bestPick = `${mlTeamPick} ML`; bestEV = mlTeamEV; bestIsOU = false; bestSig = mlSig;
       } else {
         bestPick = `${mlTeamPick} ML`; bestEV = Math.max(0, mlTeamEV); bestIsOU = false; bestSig = mlSig;
       }
 
       // ✅ Apply HISTORICAL_FROZEN AFTER all variable declarations (correct override order)
       if (histOverride) {
-        bestPick    = histOverride.bestPick;
-        bestEV      = histOverride.bestEV;
-        bestIsOU    = histOverride.bestIsOU;
-        bestSig     = histOverride.bestSig;
+        if (!(histOverride.bestIsOU && ouSigVal.v === 1)) {
+          bestPick    = histOverride.bestPick;
+          bestEV      = histOverride.bestEV;
+          bestIsOU    = histOverride.bestIsOU;
+          bestSig     = histOverride.bestSig;
+        }
         mlTeamPick  = histOverride.mlTeamPick;
         mlTeamEV    = histOverride.mlTeamEV;
         mlTeamLine  = histOverride.mlTeamLine;
@@ -2228,11 +2226,14 @@ function renderApp() {
       }
 
       const frozen = hasStarted && frozenPredictions[freezeKey]?.bestPick ? frozenPredictions[freezeKey] : null;
-      if (frozen && frozen.bestSig?.v === 1 && bestSig.v > 1) {
-        frozen.bestPick = bestPick;
-        frozen.bestEV   = bestEV;
-        frozen.bestIsOU = bestIsOU;
-        frozen.bestSig  = bestSig;
+      if (frozen) {
+        if ((frozen.bestIsOU && ouSigVal.v === 1) || bestSig.v > (frozen.bestSig?.v || 0)) {
+          frozen.bestPick = bestPick;
+          frozen.bestEV   = bestEV;
+          frozen.bestIsOU = bestIsOU;
+          frozen.bestSig  = bestSig;
+          _saveFrozen(frozenPredictions);
+        }
       }
       const dispBestPick    = (frozen ? frozen.bestPick    : bestPick)    || `${mlTeamPick} ML`;
       const dispBestEV      =  frozen ? frozen.bestEV      : bestEV;
@@ -2322,10 +2323,14 @@ function renderApp() {
               <span style="font-size:10px;font-weight:700;color:var(--y);">🔒 LOCKED PRE-GAME PREDICTION (T-2m)</span>
               <span style="font-size:10px;color:var(--tx3);">Odds and model signals permanently frozen 2 minutes prior to first pitch.</span>
             </div>` : ''}
-          ${isLive ? `<div style="display:flex;align-items:center;gap:8px;padding:7px 14px;background:rgba(239,71,111,.08);border-top:1px solid rgba(239,71,111,.2);">
-              <span style="width:7px;height:7px;border-radius:50%;background:var(--r);animation:pulse 1.2s infinite;flex-shrink:0;display:inline-block;"></span>
-              <span style="font-size:10px;font-weight:700;color:var(--r);letter-spacing:.3px;">GAME IN PROGRESS</span>
-              <span style="font-size:10px;color:var(--tx2);margin-left:auto;">Follow live pitch-by-pitch action on <b style="color:var(--b);cursor:pointer;text-decoration:underline;" onclick="sw('live')">Live Scores ⚡</b></span>
+          ${isLive ? `<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;background:rgba(239,71,111,.16);border-top:1px solid rgba(239,71,111,.35);border-bottom:1px solid rgba(239,71,111,.35);">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="width:8px;height:8px;border-radius:50%;background:#ef476f;animation:pulse 1.2s infinite;flex-shrink:0;display:inline-block;"></span>
+                <span style="font-size:11px;font-weight:800;color:#ef476f;letter-spacing:.3px;">GAME IN PROGRESS</span>
+              </div>
+              <div style="font-size:11px;color:var(--tx);font-weight:700;">
+                Follow live pitch-by-pitch action on <b style="color:#4da6ff;cursor:pointer;text-decoration:underline;font-weight:800;" onclick="sw('live')">Live Scores ⚡</b>
+              </div>
             </div>` : ''}
             <div class="gc-best-banner">
               <span style="color:var(--tx3)">★ BEST BET</span>
