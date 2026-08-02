@@ -12,9 +12,9 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   try {
-    // Fetch batting (advanced includes wOBA) and pitching stats in parallel
+    // Fetch batting (season stats includes OBP, SLG, AVG to calculate accurate wOBA) and pitching stats in parallel
     const [batRes, pitRes] = await Promise.all([
-      fetch('https://statsapi.mlb.com/api/v1/teams/stats?stats=seasonAdvanced&group=hitting&sportId=1&season=2026', {
+      fetch('https://statsapi.mlb.com/api/v1/teams/stats?stats=season&group=hitting&sportId=1&season=2026', {
         headers: { 'Accept': 'application/json' }
       }),
       fetch('https://statsapi.mlb.com/api/v1/teams/stats?stats=season&group=pitching&sportId=1&season=2026', {

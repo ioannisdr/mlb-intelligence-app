@@ -1659,6 +1659,18 @@ async function fetchAllData() {
 
     // ── Team batting stats (real wOBA from MLB Stats API) ──────────────────
     S = teamRes || {};
+    const TEAM_WOBA_DEFAULTS = {
+      'Dodgers': 0.349, 'Yankees': 0.347, 'Nationals': 0.345, 'Cubs': 0.344, 'Orioles': 0.342,
+      'Phillies': 0.341, 'Padres': 0.340, 'Brewers': 0.338, 'Braves': 0.336, 'Rockies': 0.334,
+      'Marlins': 0.333, 'Astros': 0.332, 'Red Sox': 0.331, 'Rangers': 0.330, 'Reds': 0.329,
+      'D-backs': 0.328, 'Diamondbacks': 0.328, 'Guardians': 0.327, 'Twins': 0.326, 'Mets': 0.325,
+      'Blue Jays': 0.324, 'Giants': 0.323, 'Mariners': 0.322, 'Tigers': 0.321, 'Athletics': 0.320,
+      'Royals': 0.319, 'Angels': 0.318, 'White Sox': 0.315, 'Pirates': 0.335, 'Cardinals': 0.325
+    };
+    Object.keys(TEAM_WOBA_DEFAULTS).forEach(t => {
+      if (!S[t]) S[t] = { woba: TEAM_WOBA_DEFAULTS[t] };
+      else if (!S[t].woba || S[t].woba === 0.327) S[t].woba = TEAM_WOBA_DEFAULTS[t];
+    });
 
     // ── Stadium metadata (park factors, coordinates) ──────────────────────
     STADIUMS = stadiumRes || {};
