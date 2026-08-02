@@ -2603,8 +2603,9 @@ async function runBacktest() {
             const ouHit    = ouPick === 'OVER' ? totalScore > mod.mkt.ou : totalScore < mod.mkt.ou;
             const ouProfit = ouHit ? 0.909 : -1;
             if (ouSig.l !== 'SKIP') {
-               pl.ALL[home] += ouProfit; pl.OU[home] += ouProfit;
-               pl.ALL[away] += ouProfit; pl.OU[away] += ouProfit;
+               let halfOU = ouProfit / 2;
+               pl.ALL[home] += halfOU; pl.OU[home] += halfOU;
+               pl.ALL[away] += halfOU; pl.OU[away] += halfOU;
                totalProfits.OU += ouProfit;
                addMonthly(ouSig.l, 'OU', mStr, ouProfit);
                grHits.ALL[ouSig.l].t++; grHits.OU[ouSig.l].t++;
