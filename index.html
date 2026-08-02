@@ -2080,9 +2080,15 @@ function getSignal(market, { ev = 0, mlPickProb = 0.5, ouAbsDiff = 0 } = {}) {
     return SKIP; // ~74% SKIP!
   }
   if (market === 'RL') {
-    if (mlPickProb >= 0.600) return PRIME;  // ~4% of games
-    if (mlPickProb >= 0.550) return EDGE;   // ~12% of games
-    return SKIP; // ~84% SKIP!
+    if (isMinus15) {
+      if (mlPickProb >= 0.650) return PRIME;
+      if (mlPickProb >= 0.620) return EDGE;
+      return SKIP;
+    } else {
+      if (mlPickProb >= 0.460) return PRIME; // Underdog +1.5 cover
+      if (mlPickProb >= 0.440) return EDGE;
+      return SKIP;
+    }
   }
   if (market === 'OU') {
     if (ouAbsDiff >= 0.70) return PRIME;   // ~8% of games
@@ -2568,11 +2574,28 @@ async function runBacktest() {
                if (mlHit) { grHits.ALL[mlSig.l].w++; grHits.ML[mlSig.l].w++; }
             }
 
-            // ─ RL pick ───────────────────────────────────────────────────────────────────
-            const rlPick     = mlPick;
-            const rlHit      = mlPick === home ? (homeScore - awayScore > 1) : (awayScore - homeScore > 1);
-            const rlProfit   = rlHit ? 1.15 : -1;
-            const rlSig      = getSignal('RL', { mlPickProb });
+            // ─ RL pick (+1.5 Underdogs & -1.5 Favorites) ───────────────────────────────────
+            let rlPick, isMinus15, rlHit, rlProfit, rlSig;
+            let favProb = Math.max(mod.homeProb, mod.awayProb);
+            let favTeam = mod.homeProb >= mod.awayProb ? home : away;
+            let dogTeam = mod.homeProb >= mod.awayProb ? away : home;
+            let dogProb = 1 - favProb;
+
+            if (favProb >= 0.62) {
+              rlPick = favTeam; isMinus15 = true;
+              rlHit = rlPick === home ? (homeScore - awayScore > 1) : (awayScore - homeScore > 1);
+              rlProfit = rlHit ? 1.15 : -1.0;
+              rlSig = getSignal('RL', { mlPickProb: favProb, isMinus15: true });
+            } else if (dogProb >= 0.44 && dogProb <= 0.49) {
+              rlPick = dogTeam; isMinus15 = false;
+              let margin = rlPick === home ? (homeScore - awayScore) : (awayScore - homeScore);
+              rlHit = margin >= -1;
+              rlProfit = rlHit ? 0.606 : -1.0;
+              rlSig = getSignal('RL', { mlPickProb: dogProb, isMinus15: false });
+            } else {
+              rlPick = favTeam; isMinus15 = true; rlHit = false; rlProfit = -1.0;
+              rlSig = { l: 'SKIP', c: 'sig-skip', v: 1, icon: '⬜' };
+            }
 
             if (rlSig.l !== 'SKIP') {
                pl.ALL[rlPick] += rlProfit;
