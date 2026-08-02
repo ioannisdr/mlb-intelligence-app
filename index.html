@@ -2759,7 +2759,15 @@ function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 
         }
       },
       scales: {
-        x: { grid: { display: false, drawBorder: false } },
+        x: {
+          grid: { display: false, drawBorder: false },
+          ticks: {
+            autoSkip: false,
+            maxRotation: 45,
+            minRotation: 45,
+            font: { size: 9 }
+          }
+        },
         y: { grid: { color: gridColor, drawBorder: false } }
       }
     }
