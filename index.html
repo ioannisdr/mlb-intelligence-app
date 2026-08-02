@@ -2228,6 +2228,12 @@ function renderApp() {
       }
 
       const frozen = hasStarted && frozenPredictions[freezeKey]?.bestPick ? frozenPredictions[freezeKey] : null;
+      if (frozen && frozen.bestSig?.v === 1 && bestSig.v > 1) {
+        frozen.bestPick = bestPick;
+        frozen.bestEV   = bestEV;
+        frozen.bestIsOU = bestIsOU;
+        frozen.bestSig  = bestSig;
+      }
       const dispBestPick    = (frozen ? frozen.bestPick    : bestPick)    || `${mlTeamPick} ML`;
       const dispBestEV      =  frozen ? frozen.bestEV      : bestEV;
       const dispBestIsOU    =  frozen ? frozen.bestIsOU    : bestIsOU;
