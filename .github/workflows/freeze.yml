@@ -1,0 +1,15 @@
+name: Freeze Predictions Cron
+
+on:
+  schedule:
+    # Run every 5 minutes
+    - cron: '*/5 * * * *'
+  workflow_dispatch: # Allows manual triggering from GitHub UI
+
+jobs:
+  ping-freeze-endpoint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping API Freeze Endpoint
+        run: |
+          curl -sS -X GET "https://mlb-intelligence-app.vercel.app/api/freeze"
