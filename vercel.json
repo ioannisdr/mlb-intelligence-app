@@ -15,12 +15,17 @@
     { "source": "/api/team-form", "destination": "/api/team-form.js" },
     { "source": "/api/picks", "destination": "/api/picks.js" },
     { "source": "/api/backtest", "destination": "/api/backtest.js" },
-    { "source": "/api/cron", "destination": "/api/cron.js" }
+    { "source": "/api/cron", "destination": "/api/cron.js" },
+    { "source": "/api/freeze", "destination": "/api/freeze.js" }
   ],
   "crons": [
     {
       "path": "/api/cron",
       "schedule": "0 11 * * *"
+    },
+    {
+      "path": "/api/freeze",
+      "schedule": "*/5 * * * *"
     }
   ]
 }

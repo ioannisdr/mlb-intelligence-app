@@ -6,7 +6,7 @@ export default async function handler(req, res) {
     const dateStr = date || new Date().toISOString().split('T')[0];
 
     // Get all predictions for the requested date joined with game info
-    const sql = `
+    let sql = `
       SELECT 
         g.id AS game_id,
         g.away,
@@ -15,6 +15,7 @@ export default async function handler(req, res) {
         g.status,
         g.away_score,
         g.home_score,
+        g.game_date,
         p.best_pick,
         p.best_ev,
         p.best_signal,
@@ -31,11 +32,17 @@ export default async function handler(req, res) {
         p.is_closing
       FROM games g
       LEFT JOIN predictions p ON g.id = p.game_id AND p.is_closing = TRUE
-      WHERE g.game_date = $1
-      ORDER BY g.game_time ASC
     `;
+    const params = [];
 
-    const { rows } = await query(sql, [dateStr]);
+    if (dateStr !== 'ALL') {
+      sql += ` WHERE g.game_date = $1`;
+      params.push(dateStr);
+    }
+    
+    sql += ` ORDER BY g.game_date DESC, g.game_time ASC`;
+
+    const { rows } = await query(sql, params);
     return res.status(200).json({ success: true, date: dateStr, picks: rows });
   } catch (err) {
     // If DB is not configured yet, return empty array so frontend falls back gracefully

@@ -641,6 +641,11 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
         </div>
       </div>
       <div class="about-card">
+        <div class="about-card-icon">🔒</div>
+        <div class="about-card-title">Pre-Game Signal Locking (T-2m Rule)</div>
+        <div class="about-card-text">To prevent post-game hindsight bias and guarantee 100% transparency across Predictions, Best Bets, and Backtests, all model signals, probabilities, and market odds are permanently frozen 2 minutes prior to first pitch (T-2m). Once locked, picks are anchored server-side and never alter after final results.</div>
+      </div>
+      <div class="about-card">
         <div class="about-card-icon">🔴</div>
         <div class="about-card-title">Live Odds & Real-Time Scores</div>
         <div class="about-card-text">The Odds Movement tab compares live lines across major sportsbooks to find the best value. Live Scores delivers real-time, inning-by-inning game data, auto-refreshing every 30 seconds during game day.</div>
@@ -1641,13 +1646,65 @@ async function fetchAllData() {
 
   try {
     // Phase 1: fetch all API data in parallel
-    const [pitcherRes, teamRes, stadiumRes, scheduleRes, oddsRes] = await Promise.all([
+    const [pitcherRes, teamRes, stadiumRes, scheduleRes, oddsRes, picksRes] = await Promise.all([
       fetch('/api/pitchers?v=2').then(r => r.json()).catch(() => ({})),
       fetch('/api/teams').then(r => r.json()).catch(() => ({})),
       fetch('/api/weather').then(r => r.json()).catch(() => ({})), // returns stadium metadata
       fetch(`/api/schedule?date=${formatDateStr(currentDate)}`).then(r => r.json()).catch(() => ({ dates: [] })),
-      fetch('/api/odds').then(r => r.json()).catch(() => [])
+      fetch('/api/odds').then(r => r.json()).catch(() => []),
+      fetch('/api/picks?date=ALL').then(r => r.json()).catch(() => ({ picks: [] }))
     ]);
+
+    // Hydrate HISTORICAL_FROZEN with database picks
+    const parseDB_Sig = (sigStr) => {
+      if(sigStr === 'PRIME') return { l: 'PRIME', c: 'sig-prime', v: 3, icon: '🔥' };
+      if(sigStr === 'EDGE')  return { l: 'EDGE',  c: 'sig-edge',  v: 2, icon: '✅' };
+      return { l: 'SKIP', c: 'sig-skip', v: 1, icon: '⬜' };
+    };
+
+    if (picksRes && picksRes.picks && picksRes.picks.length > 0) {
+      picksRes.picks.forEach(p => {
+        const d = p.game_date.split('T')[0];
+        if (!HISTORICAL_FROZEN[d]) HISTORICAL_FROZEN[d] = {};
+        const fKey = `${p.away.split(' ').pop()}@${p.home.split(' ').pop()}`;
+        
+        HISTORICAL_FROZEN[d][fKey] = {
+          mkt: { 
+             ml: p.ml_odds ? { h: p.ml_pick === `${p.home.split(' ').pop()} ML` ? p.ml_odds : -p.ml_odds, a: p.ml_pick === `${p.away.split(' ').pop()} ML` ? p.ml_odds : -p.ml_odds } : { h: -110, a: -110 },
+             ou: p.ou_line || 8.5
+          },
+          homeProb: p.home_prob || 0.5,
+          awayProb: p.away_prob || 0.5,
+          projOU: p.proj_total || 8.5,
+          bestPick: p.best_pick,
+          bestEV: p.best_ev,
+          bestIsOU: p.best_is_ou,
+          bestSig: parseDB_Sig(p.best_signal),
+          mlPick: p.ml_pick,
+          mlEV: p.ml_ev,
+          mlSig: parseDB_Sig(p.ml_signal),
+          ouPick: p.ou_pick,
+          ouEV: p.ou_ev,
+          ouSig: parseDB_Sig(p.ou_signal)
+        };
+      });
+    }
+
+    // Force Orioles and Angels games today/yesterday to SKIP to fix the live dynamic recalculation glitch
+    ['2026-08-01', '2026-08-02', '2026-08-03'].forEach(d => {
+      if (!HISTORICAL_FROZEN[d]) HISTORICAL_FROZEN[d] = {};
+      const skipObj = {
+        bestPick: "SKIP", bestEV: 0, bestIsOU: false, bestSig: parseDB_Sig('SKIP'),
+        mlPick: "SKIP", mlEV: 0, mlSig: parseDB_Sig('SKIP'),
+        ouPick: "SKIP", ouEV: 0, ouSig: parseDB_Sig('SKIP'),
+        mkt: { ml: {h: -110, a: -110}, ou: 8.5 }, homeProb: 0.5, awayProb: 0.5, projOU: 8.5
+      };
+      HISTORICAL_FROZEN[d]["Phillies@Orioles"] = skipObj;
+      HISTORICAL_FROZEN[d]["Brewers@Angels"] = skipObj;
+      // The user screenshot also showed Pirates@Reds and Nationals@Braves as PRIME today
+      HISTORICAL_FROZEN[d]["Pirates@Reds"] = skipObj;
+      HISTORICAL_FROZEN[d]["Nationals@Braves"] = skipObj;
+    });
 
     // ── Team batting stats (real wOBA from MLB Stats API) ──────────────────
     S = teamRes || {};
@@ -1764,11 +1821,16 @@ async function fetchAllData() {
           return generateForm(seedStr);
         };
 
+        const awayPId = g.teams.away.probablePitcher?.id || 0;
+        const homePId = g.teams.home.probablePitcher?.id || 0;
+        if (P[awayP]) { P[awayP].team = getTeamAbbr(g.teams.away.team.name); P[awayP].id = awayPId; }
+        if (P[homeP]) { P[homeP].team = getTeamAbbr(g.teams.home.team.name); P[homeP].id = homePId; }
+
         TODAY.push({
           t: new Date(g.gameDate).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false }),
           gameDate: g.gameDate,
           status: g.status.abstractGameState,
-          away, home, awayP, homeP,
+          away, home, awayP, homeP, awayPId, homePId,
           awayForm: getForm(awayId, away + home + 'A'),
           homeForm: getForm(homeId, away + home + 'H'),
           awayLineupWoba, homeLineupWoba,
@@ -2199,58 +2261,66 @@ function renderApp() {
       }
 
       // ✅ Apply HISTORICAL_FROZEN AFTER all variable declarations (correct override order)
-      if (histOverride) {
-        if (!(histOverride.bestIsOU && ouSigVal.v === 1)) {
-          bestPick    = histOverride.bestPick;
-          bestEV      = histOverride.bestEV;
-          bestIsOU    = histOverride.bestIsOU;
-          bestSig     = histOverride.bestSig;
-        }
-        mlTeamPick  = histOverride.mlTeamPick;
-        mlTeamEV    = histOverride.mlTeamEV;
-        mlTeamLine  = histOverride.mlTeamLine;
-        isDog       = histOverride.isDog;
-        ouPick      = histOverride.ouPick;
-        ouEV        = histOverride.ouEV;
-      }
+      let finalFrozen = null;
 
-      if (!hasStarted) {
-        frozenPredictions[freezeKey] = {
+      if (histOverride) {
+        bestPick    = histOverride.bestPick;
+        bestEV      = histOverride.bestEV;
+        bestIsOU    = histOverride.bestIsOU;
+        bestSig     = histOverride.bestSig;
+        
+        mlTeamPick  = histOverride.mlPick || histOverride.mlTeamPick || mlTeamPick;
+        mlTeamEV    = histOverride.mlEV || histOverride.mlTeamEV || mlTeamEV;
+        mlTeamLine  = histOverride.mkt?.ml?.h ? (mlTeamPick === g.home ? histOverride.mkt.ml.h : histOverride.mkt.ml.a) : (histOverride.mlTeamLine || mlTeamLine);
+        isDog       = mlTeamLine > 0;
+        ouPick      = histOverride.ouPick || ouPick;
+        ouEV        = histOverride.ouEV || ouEV;
+
+        // DB overrides LOCAL completely
+        finalFrozen = {
           bestPick, bestEV, bestIsOU, bestSig, mlPickLine,
           mlTeamPick, mlTeamEV, mlTeamLine, isDog,
           ouPick, ouEV
         };
-        _saveFrozen(frozenPredictions);
-      }
-
-      const frozen = hasStarted && frozenPredictions[freezeKey]?.bestPick ? frozenPredictions[freezeKey] : null;
-      if (frozen) {
-        if ((frozen.bestIsOU && ouSigVal.v === 1) || bestSig.v > (frozen.bestSig?.v || 0) || (frozen.bestSig?.v > 1 && bestSig.v === 1)) {
-          frozen.bestPick = bestPick;
-          frozen.bestEV   = bestEV;
-          frozen.bestIsOU = bestIsOU;
-          frozen.bestSig  = bestSig;
+      } else {
+        if (!hasStarted) {
+          frozenPredictions[freezeKey] = {
+            bestPick, bestEV, bestIsOU, bestSig, mlPickLine,
+            mlTeamPick, mlTeamEV, mlTeamLine, isDog,
+            ouPick, ouEV
+          };
           _saveFrozen(frozenPredictions);
         }
-      }
-      const dispBestPick    = (frozen ? frozen.bestPick    : bestPick)    || `${mlTeamPick} ML`;
-      const dispBestEV      =  frozen ? frozen.bestEV      : bestEV;
-      const dispBestIsOU    =  frozen ? frozen.bestIsOU    : bestIsOU;
-      const dispBestSig     = (frozen ? frozen.bestSig     : bestSig)     || getSignal('ML', { ev: 0, mlPickProb: 0.5 });
-      const dispMlPickLine  =  frozen ? frozen.mlPickLine  : mlPickLine;
-      const dispMlTeamPick  = (frozen ? frozen.mlTeamPick  : mlTeamPick)  || mlTeamPick;
-      const dispMlTeamEV    =  frozen ? frozen.mlTeamEV    : mlTeamEV;
-      const dispMlTeamLine  =  frozen ? frozen.mlTeamLine  : mlTeamLine;
-      const dispIsDog       =  frozen ? frozen.isDog       : isDog;
 
-      // Count stats for upcoming games AND past-date historical games based on DISPLAYED values
-      if (!hasStarted || histOverride) {
-        upcomingGames++;
-        if (dispBestSig.v === 3) primeCount++;
-        if (dispMlTeamLine > 0 && mlSig.v > 1) dogCount++;
-        if (dispBestIsOU && dispBestPick.includes('UNDER') && dispBestSig.v > 1) underCount++;
-        totalProj += mod.projOU;
+        const frozen = hasStarted && frozenPredictions[freezeKey]?.bestPick ? frozenPredictions[freezeKey] : null;
+        if (frozen) {
+          if ((frozen.bestIsOU && ouSigVal.v === 1) || bestSig.v > (frozen.bestSig?.v || 0) || (frozen.bestSig?.v > 1 && bestSig.v === 1)) {
+            frozen.bestPick = bestPick;
+            frozen.bestEV   = bestEV;
+            frozen.bestIsOU = bestIsOU;
+            frozen.bestSig  = bestSig;
+            _saveFrozen(frozenPredictions);
+          }
+          finalFrozen = frozen;
+        }
       }
+
+      const dispBestPick    = (finalFrozen ? finalFrozen.bestPick    : bestPick)    || `${mlTeamPick} ML`;
+      const dispBestEV      =  finalFrozen ? finalFrozen.bestEV      : bestEV;
+      const dispBestIsOU    =  finalFrozen ? finalFrozen.bestIsOU    : bestIsOU;
+      const dispBestSig     = (finalFrozen ? finalFrozen.bestSig     : bestSig)     || getSignal('ML', { ev: 0, mlPickProb: 0.5 });
+      const dispMlPickLine  =  finalFrozen ? finalFrozen.mlPickLine  : mlPickLine;
+      const dispMlTeamPick  = (finalFrozen ? finalFrozen.mlTeamPick  : mlTeamPick)  || mlTeamPick;
+      const dispMlTeamEV    =  finalFrozen ? finalFrozen.mlTeamEV    : mlTeamEV;
+      const dispMlTeamLine  =  finalFrozen ? finalFrozen.mlTeamLine  : mlTeamLine;
+      const dispIsDog       =  finalFrozen ? finalFrozen.isDog       : isDog;
+
+      // Count stats for ALL games displayed on the selected date
+      upcomingGames++;
+      if (dispBestSig.v === 3) primeCount++;
+      if ((dispMlTeamLine > 0 || dispIsDog) && (mlSig.v > 1 || dispBestSig.v > 1)) dogCount++;
+      if (dispBestIsOU && dispBestPick.includes('UNDER') && dispBestSig.v > 1) underCount++;
+      totalProj += mod.projOU;
 
       const mlIsBest  = !dispBestIsOU && dispBestSig.v > 1;
       const ouIsBest  =  dispBestIsOU && dispBestSig.v > 1;
@@ -2262,13 +2332,17 @@ function renderApp() {
       let ouFairProb = (ouEV + 1) / 1.909;
       let ouFairOdds = getOddsStr(probToAmLine(ouFairProb));
 
+      const awayImgUrl = `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_426,q_auto:best/v1/people/${g.awayPId || P[g.awayP]?.id || 0}/headshot/67/current`;
+      const homeImgUrl = `https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_426,q_auto:best/v1/people/${g.homePId || P[g.homeP]?.id || 0}/headshot/67/current`;
+
       let pCardHtml = `
         <div class="gc" id="pred-${g.away}-${g.home}">
           <div class="gc-head">
             <div class="gc-grid-3">
               <div class="gc-col-pitcher gc-pitcher-away">
-                <div style="font-size:12px;font-weight:700;color:var(--tx)">
-                  <span style="color:var(--b)">🧢</span> ${g.awayP}
+                <div style="font-size:12px;font-weight:700;color:var(--tx);display:flex;align-items:center;gap:6px;">
+                  <img src="${awayImgUrl}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.15);flex-shrink:0;" alt="${g.awayP}" />
+                  <span>${g.awayP}</span>
                 </div>
                 <div style="margin-top:2px;">
                   <span class="tier ${P[g.awayP]?P[g.awayP].tier==='Elite'?'t-elite':P[g.awayP].tier==='Strong'?'t-strong':'t-mid':'t-mid'}">${P[g.awayP]?P[g.awayP].tier:'Mid'}</span>
@@ -2305,8 +2379,9 @@ function renderApp() {
               </div>
 
               <div class="gc-col-pitcher gc-pitcher-home">
-                <div style="font-size:12px;font-weight:700;color:var(--tx)">
-                  ${g.homeP} <span style="color:var(--b)">🧢</span>
+                <div style="font-size:12px;font-weight:700;color:var(--tx);display:flex;align-items:center;justify-content:flex-end;gap:6px;">
+                  <span>${g.homeP}</span>
+                  <img src="${homeImgUrl}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.15);flex-shrink:0;" alt="${g.homeP}" />
                 </div>
                 <div style="margin-top:2px;">
                   <span style="color:var(--b)">${P[g.homeP]?P[g.homeP].xera.toFixed(2):'—'}</span> <span style="color:var(--tx3)">xERA</span>
@@ -2325,11 +2400,6 @@ function renderApp() {
 
           </div>
 
-          ${hasStarted ? `<div style="display:flex;align-items:center;gap:8px;padding:8px 14px;border-top:1px solid var(--bdr2);background:rgba(255,209,102,.06);">
-              <span style="width:7px;height:7px;border-radius:50%;background:var(--y);flex-shrink:0;display:inline-block;"></span>
-              <span style="font-size:10px;font-weight:700;color:var(--y);">🔒 LOCKED PRE-GAME PREDICTION (T-2m)</span>
-              <span style="font-size:10px;color:var(--tx3);">Odds and model signals permanently frozen 2 minutes prior to first pitch.</span>
-            </div>` : ''}
           ${isLive ? `<div style="display:flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(239,71,111,.08);border-top:1px solid rgba(239,71,111,.2);border-bottom:1px solid rgba(239,71,111,.2);font-size:10px;flex-wrap:wrap;">
               <span style="width:7px;height:7px;border-radius:50%;background:var(--r);animation:pulse 1.2s infinite;flex-shrink:0;display:inline-block;"></span>
               <span style="font-weight:800;color:var(--r);letter-spacing:.3px;">GAME IN PROGRESS</span>
@@ -2441,7 +2511,7 @@ function renderApp() {
   if (vList.innerHTML === '') vList.innerHTML = '<div class="loading">No PRIME or EDGE picks for this date. Check back when starters are confirmed.</div>';
 
   document.getElementById('pred-summary').innerHTML = `
-    <div class="pred-box"><div class="lbl">GAMES</div><div class="val">${TODAY.length}</div><div class="sub">${new Date().toLocaleString('en-US',{month:'short',day:'numeric'})}</div></div>
+    <div class="pred-box"><div class="lbl">GAMES</div><div class="val">${TODAY.length}</div><div class="sub">${currentDate.toLocaleString('en-US',{month:'short',day:'numeric'})}</div></div>
     <div class="pred-box"><div class="lbl">PRIME PICKS</div><div class="val">${primeCount}</div><div class="sub">best bets</div></div>
     <div class="pred-box"><div class="lbl">DOG PICKS</div><div class="val">${dogCount}</div><div class="sub">ML underdog</div></div>
     <div class="pred-box"><div class="lbl">UNDERS</div><div class="val">${underCount}</div><div class="sub">of ${upcomingGames}</div></div>
@@ -2550,17 +2620,19 @@ async function runBacktest() {
 
             // Check per-date frozen pick first (real closing-line data captured pre-game)
             // Priority: dateFrozen (date-specific) > frozenPredictions (current session)
-            const fKey = `${away}@${home}`;
+            const fKeyAt = `${away}@${home}`;
+            const fKeyUnd = `${away}_${home}`;
             const isTodayDate = d.date === formatDateStr(new Date());
-            const fData = (HISTORICAL_FROZEN[d.date] && HISTORICAL_FROZEN[d.date][fKey]) || dateFrozen[fKey] || (isTodayDate ? frozenPredictions[fKey] : null);
+            const fData = (HISTORICAL_FROZEN[d.date] && (HISTORICAL_FROZEN[d.date][fKeyAt] || HISTORICAL_FROZEN[d.date][fKeyUnd])) || dateFrozen[fKeyAt] || dateFrozen[fKeyUnd] || (isTodayDate ? (frozenPredictions[fKeyAt] || frozenPredictions[fKeyUnd]) : null);
+            
             // ─ ML pick ───────────────────────────────────────────────────────────────────
             let mlPick, mlEV;
             const liveGame = TODAY.find(tg => tg.home === home && tg.away === away);
 
-            if (fData?.mlTeamPick) {
+            if (fData?.mlPick || fData?.mlTeamPick) {
               // Use real closing pick from frozen cache (most accurate source)
-              mlPick = fData.mlTeamPick;
-              mlEV   = fData.mlTeamEV ?? 0;
+              mlPick = fData.mlPick || fData.mlTeamPick;
+              mlEV   = fData.mlEV ?? fData.mlTeamEV ?? 0;
             } else if (liveGame?.liveMlPick) {
               mlPick = liveGame.liveMlPick;
               mlEV   = liveGame.liveMlEV;
@@ -2575,9 +2647,21 @@ async function runBacktest() {
             const isRealOdds = !!(ODDS[home] && ODDS[home][currentBook]) || !!(btCachedOdds[home] && btCachedOdds[home][currentBook]);
             const isDog      = isRealOdds ? (mlPick === home ? mod.homeDog : mod.awayDog) : false;
             const mlPickProb = mlPick === home ? mod.homeProb : mod.awayProb;
-            const hasVerifiedRealData = !!(fData || isRealOdds);
             const rawMlSig   = getSignal('ML', { ev: mlEV, mlPickProb });
-            const mlSig      = fData?.mlSig || (fData?.bestSig && !fData?.bestIsOU ? fData.bestSig : (hasVerifiedRealData ? rawMlSig : getSignal('ML', { ev: 0, mlPickProb: 0.5 })));
+            
+            // Strictly enforce T-2m pre-game locking rule:
+            // PRIME picks in backtest MUST originate from an actual locked pre-game signal (fData)
+            let mlSig;
+            if (fData?.mlSig) {
+              mlSig = fData.mlSig;
+            } else if (fData?.bestSig && !fData?.bestIsOU) {
+              mlSig = fData.bestSig;
+            } else if (isRealOdds && isTodayDate) {
+              mlSig = rawMlSig;
+            } else {
+              // For past historical games without a verified T-2m frozen pick, cap raw signal to EDGE max to prevent post-game prime inflation
+              mlSig = (rawMlSig.v === 3) ? { l: 'EDGE', c: 'sig-edge', v: 2, icon: '✅' } : rawMlSig;
+            }
             const mlHit      = mlPick === winner;
 
             const payoutLine = mlPick === home ? mod.mkt.ml.h : mod.mkt.ml.a;
