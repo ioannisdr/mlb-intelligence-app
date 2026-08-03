@@ -121,7 +121,7 @@ export default async function handler(req, res) {
     const lockingGames = games.filter(g => {
       const gt = new Date(g.gameDate);
       const diffMins = (gt - now) / 60000;
-      return diffMins <= 15 && diffMins > -180 && (g.status.abstractGameState === 'Preview' || g.status.abstractGameState === 'Live');
+      return diffMins <= 2 && diffMins > -180 && (g.status.abstractGameState === 'Preview' || g.status.abstractGameState === 'Live');
     });
 
     if (lockingGames.length === 0) {
@@ -207,15 +207,8 @@ export default async function handler(req, res) {
       if (mktGame && mktGame.books && mktGame.books.DraftKings) {
         mkt = mktGame.books.DraftKings;
       } else {
-        let noiseSeed = seedRand(away + home + dateKey + "mktNoise");
-        let noise = (noiseSeed * 0.10) - 0.05;
-        let mktHomeRaw = Math.max(0.28, Math.min(0.76, homeProb + noise));
-        let mktHomeProbVig = Math.min(0.82, mktHomeRaw * 1.0225);
-        let mktAwayProbVig = Math.min(0.82, (1 - mktHomeRaw) * 1.0225);
-        mkt = {
-          ml: { h: probToAmLine(mktHomeProbVig), a: probToAmLine(mktAwayProbVig) },
-          ou: Math.round((8.25 + (r2 * 1.1)) * 2) / 2
-        };
+        // Strict Zero Mock Data Directive: Force negative EV and SKIP signal if odds missing
+        mkt = { ml: { h: -10000, a: -10000 }, ou: 0 };
       }
 
       let payoutH = mkt.ml.h > 0 ? (mkt.ml.h / 100) : (100 / Math.abs(mkt.ml.h));
@@ -236,8 +229,8 @@ export default async function handler(req, res) {
       projOU += (awOBA + hwOBA) * 8;
       projOU = Math.round(projOU * 10) / 10;
 
-      let ouAbsDiff = Math.abs(projOU - mkt.ou);
-      let ouEV = Math.min(0.14, Math.max(0, (ouAbsDiff / 0.5) * 0.05 - 0.02));
+      let ouAbsDiff = mkt.ou === 0 ? 0 : Math.abs(projOU - mkt.ou);
+      let ouEV = mkt.ou === 0 ? -99 : Math.min(0.14, Math.max(0, (ouAbsDiff / 0.5) * 0.05 - 0.02));
 
       let mlTeamPick = evH >= evA ? home : away;
       let mlTeamEV = evH >= evA ? evH : evA;
@@ -292,3 +285,6 @@ export default async function handler(req, res) {
     return res.status(500).json({ success: false, error: err.message });
   }
 }
+
+
+
