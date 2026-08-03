@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="historical_odds.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>MLB Betting Intelligence v14.0</title>
@@ -157,7 +158,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .gr-box.grade-d { color:#fff; }
 .dog-tag { font-size:8px; color:var(--or); border:1px solid var(--or); padding:1px 3px; border-radius:2px; margin-left:4px; font-weight:700;}
 
-/* ── 3-TIER SIGNAL SYSTEM ────────────────────────────────────── */
+/* -- 3-TIER SIGNAL SYSTEM -------------------------------------- */
 .sig-box {
   display:inline-flex; align-items:center; gap:3px;
   padding:3px 9px; border-radius:20px; font-size:9px; font-weight:800;
@@ -194,18 +195,18 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .bt-t th { padding:8px 6px; text-align:left; border-bottom:1px solid var(--bdr2); font-size:9px; font-weight:600; color:var(--tx3); text-transform:uppercase; white-space:nowrap }
 .bt-t td { padding:8px 6px; border-bottom:1px solid var(--bdr); white-space:nowrap; color:var(--tx) }
 
-/* ── PITCHER REGRESSION BADGES ────────────────────────────────── */
+/* -- PITCHER REGRESSION BADGES ---------------------------------- */
 .reg-badge {
   display:inline-flex; align-items:center; gap:3px;
   padding:2px 7px; border-radius:20px; font-size:9px; font-weight:700;
   margin-top:4px; white-space:nowrap;
 }
-.reg-neg  { background:rgba(239,71,111,.12); color:var(--r); border:1px solid rgba(239,71,111,.3); }  /* lucky — negative regression coming */
-.reg-pos  { background:rgba(0,214,143,.10);  color:var(--g); border:1px solid rgba(0,214,143,.28); }  /* unlucky — positive regression coming */
+.reg-neg  { background:rgba(239,71,111,.12); color:var(--r); border:1px solid rgba(239,71,111,.3); }  /* lucky � negative regression coming */
+.reg-pos  { background:rgba(0,214,143,.10);  color:var(--g); border:1px solid rgba(0,214,143,.28); }  /* unlucky � positive regression coming */
 .reg-neut { background:rgba(139,145,168,.1); color:var(--tx3); border:1px solid rgba(139,145,168,.2); }
 .reg-row  { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; align-items:center; }
 
-/* ── BACKTEST KPI DASHBOARD ─────────────────────────────────────── */
+/* -- BACKTEST KPI DASHBOARD --------------------------------------- */
 .kpi-toolbar {
   display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap;
 }
@@ -256,7 +257,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 @media(max-width:900px){ .kpi-grid{grid-template-columns:repeat(3,1fr)} }
 @media(max-width:550px){ .kpi-grid{grid-template-columns:repeat(2,1fr)} }
 
-/* ── LIVE ODDS MOVEMENT TAB ─────────────────────────────── */
+/* -- LIVE ODDS MOVEMENT TAB ------------------------------- */
 .odds-header {
   display:flex; align-items:center; justify-content:space-between;
   margin-bottom:18px; flex-wrap:wrap; gap:10px;
@@ -299,14 +300,14 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
   background:rgba(255,209,0,.08) !important;
   border-radius:4px; position:relative;
 }
-.odds-best::after { content:'★'; font-size:9px; vertical-align:super; margin-left:2px; opacity:.7; }
+.odds-best::after { content:'?'; font-size:9px; vertical-align:super; margin-left:2px; opacity:.7; }
 .odds-val { display:flex; flex-direction:column; align-items:center; gap:1px; }
 .odds-main { font-size:12px; font-weight:700; }
 .odds-juice { font-size:9px; color:var(--tx3); }
 .move-up  { color:var(--g) !important; }
-.move-up::before  { content:'▲ '; font-size:8px; }
+.move-up::before  { content:'^ '; font-size:8px; }
 .move-dn  { color:var(--r) !important; }
-.move-dn::before  { content:'▼ '; font-size:8px; }
+.move-dn::before  { content:'� '; font-size:8px; }
 .odds-book-name { font-size:11px; }
 .odds-book-logo { font-size:10px; margin-right:4px; }
 .odds-status-bar {
@@ -327,7 +328,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
   font-size:13px;
 }
 
-/* ── ABOUT SECTION ─────────────────────────────────────────── */
+/* -- ABOUT SECTION ------------------------------------------- */
 .about-bar {
   background:linear-gradient(135deg,rgba(77,166,255,.06),rgba(167,139,250,.06));
   border:1px solid rgba(77,166,255,.15); border-radius:var(--R);
@@ -362,7 +363,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .about-disclaimer { font-size:9px; color:var(--tx3); line-height:1.5; padding-top:10px; border-top:1px solid var(--bdr); margin-top:10px; }
 
 
-/* ── MODALS ────────────────────────────────────────────────── */
+/* -- MODALS -------------------------------------------------- */
 .modal-overlay {
   display:none; position:fixed; inset:0; z-index:1000;
   background:rgba(0,0,0,.65); backdrop-filter:blur(4px);
@@ -395,7 +396,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .result-w { color:var(--g); font-weight:700; }
 .result-l { color:var(--r); font-weight:700; }
 
-/* ── LIVE SCORES ───────────────────────────────────────────── */
+/* -- LIVE SCORES --------------------------------------------- */
 .live-scoreboard { display:grid; gap:12px; }
 .live-card {
   background:var(--bg2); border:1px solid var(--bdr); border-radius:var(--R);
@@ -427,7 +428,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .live-refresh-bar { display:flex; align-items:center; gap:8px; font-size:10px; color:var(--tx3); margin-bottom:14px; }
 .live-cd { color:var(--g); font-weight:700; }
 
-/* ── SHARP MONEY ───────────────────────────────────────────── */
+/* -- SHARP MONEY --------------------------------------------- */
 .pub-money-row { display:flex; gap:5px; flex-wrap:wrap; margin-top:6px; align-items:center; }
 .pub-market-lbl { font-size:8px; font-weight:700; color:var(--tx3); text-transform:uppercase; letter-spacing:.5px; white-space:nowrap; padding:2px 6px; background:var(--bg3); border-radius:4px; }
 .pub-side { display:flex; flex-direction:column; gap:2px; align-items:center; }
@@ -439,7 +440,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .pub-money-pill.normal { background:rgba(139,145,168,.08); color:var(--tx2); border:1px solid rgba(139,145,168,.2); }
 .sharp-badge { font-size:8px; font-weight:800; background:rgba(255,209,0,.15); color:#ffd100; border:1px solid rgba(255,209,0,.35); padding:2px 7px; border-radius:10px; letter-spacing:.3px; white-space:nowrap; animation:pulse 2s infinite; }
 
-/* ── GAME CLICKABLE ────────────────────────────────────────── */
+/* -- GAME CLICKABLE ------------------------------------------ */
 .team-btn { cursor:pointer; text-decoration-line:underline; text-decoration-style:dotted; text-underline-offset:3px; text-decoration-color:var(--tx3); transition:color .1s; }
 .team-btn:hover { color:var(--b); }
 .bb-row { cursor:pointer; transition:background .12s; }
@@ -449,7 +450,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 .game-flash { animation:flashHighlight 1.2s ease; }
 @keyframes flashHighlight { 0%{border-color:var(--b)} 30%{border-color:var(--b);background:rgba(77,166,255,.08)} 100%{border-color:var(--bdr)} }
 
-/* ── ODDS MODAL CHART ──────────────────────────────────────── */
+/* -- ODDS MODAL CHART ---------------------------------------- */
 .odds-modal-chart-wrap { height:200px; margin:12px 0; }
 .odds-modal-summary { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
 .oms-card { background:var(--bg3); border-radius:8px; padding:10px 12px; }
@@ -488,7 +489,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
   border-color: var(--b);
 }
 
-/* ── FOOTER & FAQ STYLES ───────────────────────────────── */
+/* -- FOOTER & FAQ STYLES --------------------------------- */
 .odds-layout { display: flex; gap: 16px; align-items: flex-start; }
 .odds-main-col { flex: 1; min-width: 0; }
 .acca-sidebar {
@@ -566,18 +567,18 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 
 <div class="hdr">
   <div class="hdr-l">
-    <div class="ico">⚾</div>
+    <div class="ico">?</div>
     <div>
       <h1>MLB Betting Intelligence <span class="tag" style="background:var(--pubg);color:var(--pu)">v15.0 Live</span></h1>
-      <p>Signal Intelligence · 🔥 PRIME / ✅ EDGE / ⬜ SKIP · Statcast Regression · wOBA · Park Factors · <span style="color:var(--g)" id="hdr-date">Today</span></p>
+      <p>Signal Intelligence � ?? PRIME / ? EDGE / ? SKIP � Statcast Regression � wOBA � Park Factors � <span style="color:var(--g)" id="hdr-date">Today</span></p>
     </div>
   </div>
   <div style="display:flex;align-items:center;gap:8px">
-    <button id="theme-toggle-btn" onclick="toggleTheme()" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx);cursor:pointer;font-weight:600;display:flex;align-items:center;gap:3px">🌙 Dark</button>
-    <button onclick="openModal('calc-modal')" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx);cursor:pointer;font-weight:600">🧮 Calculator</button>
-    <button onclick="openModal('faq-modal')" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx);cursor:pointer;font-weight:600">❓ FAQ & Guide</button>
-    <button onclick="openModal('profit-modal')" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx);cursor:pointer;font-weight:600">📘 Profitability Guide</button>
-    <button onclick="openModal('contact-modal')" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx);cursor:pointer;font-weight:600">✉️ Contact</button>
+    <button id="theme-toggle-btn" onclick="toggleTheme()" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx);cursor:pointer;font-weight:600;display:flex;align-items:center;gap:3px">?? Dark</button>
+    <button onclick="openModal('calc-modal')" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx);cursor:pointer;font-weight:600">?? Calculator</button>
+    <button onclick="openModal('faq-modal')" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx);cursor:pointer;font-weight:600">? FAQ & Guide</button>
+    <button onclick="openModal('profit-modal')" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx);cursor:pointer;font-weight:600">?? Profitability Guide</button>
+    <button onclick="openModal('contact-modal')" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx);cursor:pointer;font-weight:600">?? Contact</button>
     <select id="book-select" onchange="changeBook(this.value)" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bdr2);border-radius:4px;padding:3px 6px;font-size:10px;outline:none;cursor:pointer;">
       <option value="DraftKings">DraftKings</option>
       <option value="FanDuel">FanDuel</option>
@@ -588,7 +589,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
     </select>
     <span id="live-status" style="font-size:10px;color:var(--tx2)">Connecting...</span>
     <span style="font-size:9px;color:var(--tx3);margin-left:4px;">Auto-updates every 60s</span>
-    <button onclick="fetchAllData()" style="font-size:9px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--b);cursor:pointer">↻ Refresh</button>
+    <button onclick="fetchAllData()" style="font-size:9px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--b);cursor:pointer">? Refresh</button>
   </div>
 </div>
 
@@ -596,69 +597,69 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 <div class="about-bar">
   <div class="about-toggle" onclick="toggleAbout()" id="about-toggle">
     <div class="about-toggle-l">
-      <div style="width:28px;height:28px;background:linear-gradient(135deg,#4da6ff,#a78bfa);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">⚾</div>
+      <div style="width:28px;height:28px;background:linear-gradient(135deg,#4da6ff,#a78bfa);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">?</div>
       <div>
         <div class="about-title">About MLB Betting Intelligence</div>
-        <div class="about-tagline">Statcast · wOBA · Advanced Statcast Regression · Signal Model · Real-Time Odds · Live Market EV</div>
+        <div class="about-tagline">Statcast � wOBA � Advanced Statcast Regression � Signal Model � Real-Time Odds � Live Market EV</div>
       </div>
     </div>
-    <span class="about-chevron" id="about-chevron">▼</span>
+    <span class="about-chevron" id="about-chevron">�</span>
   </div>
   <div class="about-body" id="about-body">
     <p style="font-size:11px;color:var(--tx2);line-height:1.7;margin-top:12px">
       MLB Betting Intelligence is a data-driven sports analytics platform built to give bettors a real, measurable statistical edge.
       Instead of relying on gut feel or mainstream narratives, every game runs through a multi-factor predictive model that combines
       advanced pitcher quality metrics, team offensive strength, ballpark run factors, game-day weather, and historical line behavior
-      to calculate true win probabilities — then compares them against sportsbook implied odds to surface mispriced lines worth betting.
+      to calculate true win probabilities � then compares them against sportsbook implied odds to surface mispriced lines worth betting.
     </p>
 
     <div class="about-grid">
       <div class="about-card">
-        <div class="about-card-icon">🧪</div>
+        <div class="about-card-icon">??</div>
         <div class="about-card-title">Statcast-Powered Pitcher Model</div>
-        <div class="about-card-text">Uses xERA, xFIP, BABIP, K%, BB%, and Swinging Strike Rate — not ERA alone. Expected metrics strip out luck and small-sample noise, revealing where a pitcher truly stands and where the market is mispriced.</div>
+        <div class="about-card-text">Uses xERA, xFIP, BABIP, K%, BB%, and Swinging Strike Rate � not ERA alone. Expected metrics strip out luck and small-sample noise, revealing where a pitcher truly stands and where the market is mispriced.</div>
       </div>
       <div class="about-card">
-        <div class="about-card-icon">📐</div>
+        <div class="about-card-icon">??</div>
         <div class="about-card-title">True Probability vs Market Odds</div>
         <div class="about-card-text">The model converts true win probability to American odds, then computes Expected Value (EV) by comparing against the sportsbook line. Positive EV means the model gives you better odds than the market is offering.</div>
       </div>
       <div class="about-card">
-        <div class="about-card-icon">📊</div>
+        <div class="about-card-icon">??</div>
         <div class="about-card-title">Advanced Statcast Regression Engine</div>
         <div class="about-card-text">Evaluates multi-variable regression flags using expected outcomes (xwOBA, HardHit%, Barrel%, xERA, and xFIP vs actual results). This advanced composite math strips out luck, fielding bias, and contact quality anomalies to predict true pitching regression.</div>
       </div>
       <div class="about-card">
-        <div class="about-card-icon">🎯</div>
+        <div class="about-card-icon">??</div>
         <div class="about-card-title">Proprietary Edge & Dual-Path PRIME Best Bets</div>
         <div class="about-card-text">
-          <p style="margin-top:0;margin-bottom:8px">The system evaluates expected value (EV) and win probability to identify prime betting opportunities using a <strong>Dual-Path 🔥 PRIME Signal Rule</strong>:</p>
+          <p style="margin-top:0;margin-bottom:8px">The system evaluates expected value (EV) and win probability to identify prime betting opportunities using a <strong>Dual-Path ?? PRIME Signal Rule</strong>:</p>
           <ul style="margin: 0 0 8px 0; padding-left: 20px; line-height: 1.4;">
             <li><strong>Path 1 (High Win Probability):</strong> Win Prob &ge; 52.5% AND EV &ge; +2.0%.</li>
             <li><strong>Path 2 (High Market Discrepancy):</strong> Win Prob &ge; 51.5% AND EV &ge; +10.0%.</li>
           </ul>
-          <p style="margin-bottom:0">High-discrepancy edges (&ge;+10.0% EV with &ge;51.5% win prob, or massive +15.0%+ EV on sharp underdogs) capture high-value Public Tax mispricings, instantly upgrading them to 🔥 PRIME Best Bets.</p>
+          <p style="margin-bottom:0">High-discrepancy edges (&ge;+10.0% EV with &ge;51.5% win prob, or massive +15.0%+ EV on sharp underdogs) capture high-value Public Tax mispricings, instantly upgrading them to ?? PRIME Best Bets.</p>
         </div>
       </div>
       <div class="about-card">
-        <div class="about-card-icon">🔒</div>
+        <div class="about-card-icon">??</div>
         <div class="about-card-title">Pre-Game Signal Locking (T-2m Rule)</div>
         <div class="about-card-text">To prevent post-game hindsight bias and guarantee 100% transparency across Predictions, Best Bets, and Backtests, all model signals, probabilities, and market odds are permanently frozen 2 minutes prior to first pitch (T-2m). Once locked, picks are anchored server-side and never alter after final results.</div>
       </div>
       <div class="about-card">
-        <div class="about-card-icon">🔴</div>
+        <div class="about-card-icon">??</div>
         <div class="about-card-title">Live Odds & Real-Time Scores</div>
         <div class="about-card-text">The Odds Movement tab compares live lines across major sportsbooks to find the best value. Live Scores delivers real-time, inning-by-inning game data, auto-refreshing every 30 seconds during game day.</div>
       </div>
       <div class="about-card">
-        <div class="about-card-icon">🧾</div>
+        <div class="about-card-icon">??</div>
         <div class="about-card-title">Full 2026 Season Backtest</div>
-        <div class="about-card-text">All signals are validated against every completed 2026 MLB game. PRIME and EDGE picks are strictly calibrated for long-term mathematical consistency. The backtest is fully transparent — displaying game-by-game results, hit rates, and cumulative unit P/L.</div>
+        <div class="about-card-text">All signals are validated against every completed 2026 MLB game. PRIME and EDGE picks are strictly calibrated for long-term mathematical consistency. The backtest is fully transparent � displaying game-by-game results, hit rates, and cumulative unit P/L.</div>
       </div>
     </div>
 
     <div class="about-disclaimer">
-      ⚠️ <strong>Disclaimer:</strong> This platform is for educational and informational purposes only. All picks, projections, and signals are model outputs — not guaranteed outcomes. Sports betting carries inherent risk. Always bet responsibly and within your personal limits. Past model performance does not guarantee future results.
+      ?? <strong>Disclaimer:</strong> This platform is for educational and informational purposes only. All picks, projections, and signals are model outputs � not guaranteed outcomes. Sports betting carries inherent risk. Always bet responsibly and within your personal limits. Past model performance does not guarantee future results.
     </div>
   </div>
 </div>
@@ -669,11 +670,11 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
   <div class="tab" onclick="sw('back',this)">Backtest</div>
   <div class="tab" onclick="sw('pitch',this)">Pitchers</div>
   <div class="tab" onclick="sw('live',this)" style="position:relative">
-    🔴 Live Scores
+    ?? Live Scores
     <span style="position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--r);animation:pulse 1.5s infinite;"></span>
   </div>
   <div class="tab" onclick="sw('odds',this)" style="position:relative">
-    📊 Odds Movement
+    ?? Odds Movement
     <span style="position:absolute;top:4px;right:4px;width:6px;height:6px;border-radius:50%;background:var(--g);animation:pulse 2s infinite;"></span>
   </div>
 
@@ -684,9 +685,9 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
   <div class="sec" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
     <div id="slate-label" style="font-size:11px;font-weight:600;color:var(--b)">Today's Slate</div>
     <div style="display:flex;gap:6px">
-      <button onclick="switchSlate(-1)" style="font-size:10px;padding:4px 10px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx2);cursor:pointer">◀ Prev</button>
+      <button onclick="switchSlate(-1)" style="font-size:10px;padding:4px 10px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx2);cursor:pointer">? Prev</button>
       <button onclick="goToToday()" id="today-btn" style="font-size:10px;padding:4px 12px;border-radius:4px;border:1px solid var(--b);background:rgba(88,166,255,.12);color:var(--b);cursor:pointer;font-weight:600">Today</button>
-      <button onclick="switchSlate(1)" style="font-size:10px;padding:4px 10px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx2);cursor:pointer">Next ▶</button>
+      <button onclick="switchSlate(1)" style="font-size:10px;padding:4px 10px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx2);cursor:pointer">Next ?</button>
     </div>
   </div>
   <div class="pred-summary" id="pred-summary">
@@ -696,7 +697,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 </div>
 
 <div class="panel" id="tab-value">
-  <div class="sec">BEST BET PER GAME — TODAY</div>
+  <div class="sec">BEST BET PER GAME � TODAY</div>
   <div id="vblist"></div>
 </div>
 
@@ -723,8 +724,8 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
     </select>
     <select id="kpi-grade" class="kpi-sel" onchange="updateKPI()">
       <option value="ALL">All Signals</option>
-      <option value="PRIME">🔥 PRIME only</option>
-      <option value="EDGE">✅ EDGE only</option>
+      <option value="PRIME">?? PRIME only</option>
+      <option value="EDGE">? EDGE only</option>
     </select>
 
   </div>
@@ -733,39 +734,39 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
   <div class="kpi-grid" id="kpi-grid">
     <div class="kpi-card kc-games">
       <div class="kpi-label">Bets Placed</div>
-      <div class="kpi-val" id="kpi-games">—</div>
+      <div class="kpi-val" id="kpi-games">�</div>
       <div class="kpi-sub">total bets</div>
       <span class="kpi-badge neu" id="kpi-games-badge">2026 Season</span>
     </div>
     <div class="kpi-card kc-hit">
       <div class="kpi-label">Hits</div>
-      <div class="kpi-val" id="kpi-hits" style="color:var(--g)">—</div>
+      <div class="kpi-val" id="kpi-hits" style="color:var(--g)">�</div>
       <div class="kpi-sub">correct predictions</div>
-      <span class="kpi-badge pos" id="kpi-hits-badge">—</span>
+      <span class="kpi-badge pos" id="kpi-hits-badge">�</span>
     </div>
     <div class="kpi-card kc-miss">
       <div class="kpi-label">Misses</div>
-      <div class="kpi-val" id="kpi-misses" style="color:var(--r)">—</div>
+      <div class="kpi-val" id="kpi-misses" style="color:var(--r)">�</div>
       <div class="kpi-sub">incorrect predictions</div>
-      <span class="kpi-badge neg" id="kpi-misses-badge">—</span>
+      <span class="kpi-badge neg" id="kpi-misses-badge">�</span>
     </div>
     <div class="kpi-card kc-pct">
       <div class="kpi-label">Hit Rate</div>
-      <div class="kpi-val" id="kpi-pct" style="color:var(--pu)">—</div>
+      <div class="kpi-val" id="kpi-pct" style="color:var(--pu)">�</div>
       <div class="kpi-sub">prediction accuracy</div>
       <span class="kpi-badge pur" id="kpi-pct-badge">vs 52.4% breakeven</span>
     </div>
     <div class="kpi-card kc-units">
       <div class="kpi-label">Units Wagered</div>
-      <div class="kpi-val" id="kpi-units">—</div>
+      <div class="kpi-val" id="kpi-units">�</div>
       <div class="kpi-sub">total units risked</div>
       <span class="kpi-badge neu" id="kpi-units-badge">1u per bet</span>
     </div>
     <div class="kpi-card kc-net">
       <div class="kpi-label">Net Profit</div>
-      <div class="kpi-val" id="kpi-net">—</div>
+      <div class="kpi-val" id="kpi-net">�</div>
       <div class="kpi-sub">units profit/loss</div>
-      <span class="kpi-badge pos" id="kpi-net-badge">—</span>
+      <span class="kpi-badge pos" id="kpi-net-badge">�</span>
     </div>
   </div>
 
@@ -802,8 +803,8 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
         <div style="display:flex; gap:5px;">
           <select id="mo-grade" onchange="updateMonthlyFilter()" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bdr2);border-radius:4px;padding:3px 5px;font-size:10px;outline:none;cursor:pointer;">
             <option value="ALL">All Signals</option>
-            <option value="PRIME">🔥 PRIME</option>
-            <option value="EDGE">✅ EDGE</option>
+            <option value="PRIME">?? PRIME</option>
+            <option value="EDGE">? EDGE</option>
           </select>
           <select id="mo-mkt" onchange="updateMonthlyFilter()" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bdr2);border-radius:4px;padding:3px 5px;font-size:10px;outline:none;cursor:pointer;">
             <option value="ALL">All Markets</option>
@@ -830,7 +831,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
         <th>Date</th><th>Game</th><th>Score</th><th>Winner</th>
         <th>ML Pick</th><th>Model%</th><th>Signal</th><th>ML</th><th>ML P/L</th>
         <th>RL Pick</th><th>Signal</th><th>RL</th><th>RL P/L</th>
-        <th>O/U Pick · Mkt Line</th><th>Signal</th><th>O/U vs Line</th><th>O/U P/L</th><th>Best EV</th>
+        <th>O/U Pick � Mkt Line</th><th>Signal</th><th>O/U vs Line</th><th>O/U P/L</th><th>Best EV</th>
       </tr></thead>
 
       <tbody id="bt-body"></tbody>
@@ -839,7 +840,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 </div>
 
 <div class="panel" id="tab-pitch">
-  <div class="sec">Today's Starters — Ranked by Model Score</div>
+  <div class="sec">Today's Starters � Ranked by Model Score</div>
   <div id="pitch-cards"></div>
   <div class="sec" style="margin-top:20px;">Full Pitcher Table</div>
   <div style="overflow-x:auto;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--R);padding:10px;">
@@ -857,17 +858,17 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 <div class="panel" id="tab-live">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px">
     <div>
-      <div class="sec" style="margin-bottom:2px">🔴 Live Scores — Today's Slate</div>
-      <div style="font-size:10px;color:var(--tx3)">Real-time scores from MLB · Auto-refreshes every 30 seconds</div>
+      <div class="sec" style="margin-bottom:2px">?? Live Scores � Today's Slate</div>
+      <div style="font-size:10px;color:var(--tx3)">Real-time scores from MLB � Auto-refreshes every 30 seconds</div>
     </div>
     <div class="live-refresh-bar">
       <div class="odds-live-dot" style="background:var(--r)"></div>
       <span>Next refresh in <span class="live-cd" id="live-cd">30</span>s</span>
-      <button onclick="loadLiveScores(true)" style="font-size:10px;padding:4px 10px;border-radius:5px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--b);cursor:pointer">⟳ Now</button>
+      <button onclick="loadLiveScores(true)" style="font-size:10px;padding:4px 10px;border-radius:5px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--b);cursor:pointer">? Now</button>
     </div>
   </div>
   <div id="live-content" class="live-scoreboard">
-    <div class="loading">Loading live scores…</div>
+    <div class="loading">Loading live scores�</div>
   </div>
 </div>
 
@@ -876,10 +877,10 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 <!-- USER PROFITABILITY GUIDE MODAL -->
 <div class="modal-overlay" id="profit-modal" onclick="closeModal('profit-modal')">
   <div class="modal-box wide" onclick="event.stopPropagation()" style="max-width:860px;max-height:85vh;overflow-y:auto;">
-    <div class="modal-close" onclick="closeModal('profit-modal')">✕</div>
+    <div class="modal-close" onclick="closeModal('profit-modal')">?</div>
     
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;border-bottom:1px solid var(--bdr2);padding-bottom:14px;">
-      <div style="width:36px;height:36px;background:linear-gradient(135deg,#00d68f,#00b900);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;">📘</div>
+      <div style="width:36px;height:36px;background:linear-gradient(135deg,#00d68f,#00b900);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;">??</div>
       <div>
         <div class="modal-title" style="margin:0;font-size:16px;">User Profitability Guide</div>
         <div class="modal-sub" style="margin:2px 0 0 0;">How to maximize your ROI using quantitative model signals & positive EV math</div>
@@ -888,45 +889,45 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 
     <!-- 2 WINNING STRATEGIES -->
     <div style="font-size:13px;font-weight:700;color:var(--tx);margin:16px 0 10px 0;display:flex;align-items:center;gap:6px">
-      🎯 The 2 Core Winning Strategies
+      ?? The 2 Core Winning Strategies
     </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-bottom:20px;">
       <div style="background:var(--bg3);border:1px solid var(--bdr2);border-radius:8px;padding:14px;">
         <div style="font-size:12px;font-weight:700;color:var(--g);margin-bottom:4px">1. Systematic Quantitative Bettor (Auto-Follower)</div>
         <div style="font-size:11px;color:var(--tx2);line-height:1.6">
-          • <strong>How it works:</strong> Bet every 🔥 <strong>PRIME</strong> signal automatically with flat unit sizing (1.5%–2% of bankroll).<br>
-          • <strong>Why it works:</strong> You rely strictly on the model's backtested math. Historically, PRIME ML picks (+3.5% to +11.0% EV) hit at <strong>57.5%+</strong>, and Run Lines with model probability ≥ 62% hit at <strong>66–72%</strong>.<br>
-          • <strong>Best for:</strong> Hands-off subscribers wanting steady, rule-based monthly net profit.
+          � <strong>How it works:</strong> Bet every ?? <strong>PRIME</strong> signal automatically with flat unit sizing (1.5%�2% of bankroll).<br>
+          � <strong>Why it works:</strong> You rely strictly on the model's backtested math. Historically, PRIME ML picks (+3.5% to +11.0% EV) hit at <strong>57.5%+</strong>, and Run Lines with model probability ? 62% hit at <strong>66�72%</strong>.<br>
+          � <strong>Best for:</strong> Hands-off subscribers wanting steady, rule-based monthly net profit.
         </div>
       </div>
       <div style="background:var(--bg3);border:1px solid var(--bdr2);border-radius:8px;padding:14px;">
         <div style="font-size:12px;font-weight:700;color:var(--b);margin-bottom:4px">2. Analytical Bettor (Decision-Support Tool)</div>
         <div style="font-size:11px;color:var(--tx2);line-height:1.6">
-          • <strong>How it works:</strong> Use the platform as an advanced research engine. Inspect <strong>Pitcher Regression flags (xERA vs ERA)</strong>, <strong>Statcast wOBA</strong>, <strong>Park Factors</strong>, and <strong>Live Weather</strong> to validate your own picks.<br>
-          • <strong>Why it works:</strong> Combines your personal handicap with model-derived EV edges to eliminate bad bets.<br>
-          • <strong>Best for:</strong> Experienced bettors seeking a statistical edge before placing a wager.
+          � <strong>How it works:</strong> Use the platform as an advanced research engine. Inspect <strong>Pitcher Regression flags (xERA vs ERA)</strong>, <strong>Statcast wOBA</strong>, <strong>Park Factors</strong>, and <strong>Live Weather</strong> to validate your own picks.<br>
+          � <strong>Why it works:</strong> Combines your personal handicap with model-derived EV edges to eliminate bad bets.<br>
+          � <strong>Best for:</strong> Experienced bettors seeking a statistical edge before placing a wager.
         </div>
       </div>
     </div>
 
     <!-- TIMING STRATEGY -->
     <div style="font-size:13px;font-weight:700;color:var(--tx);margin:16px 0 10px 0;display:flex;align-items:center;gap:6px">
-      ⏰ Timing Strategy: When Should You Bet?
+      ? Timing Strategy: When Should You Bet?
     </div>
     <div style="background:var(--bg3);border:1px solid var(--bdr2);border-radius:8px;padding:14px;margin-bottom:20px;">
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;">
         <div>
           <div style="font-size:12px;font-weight:700;color:var(--g);margin-bottom:4px">Option A: Early Value Placement (Recommended for Highest ROI)</div>
           <div style="font-size:11px;color:var(--tx2);line-height:1.6">
-            • <strong>When:</strong> 2 to 6 hours before game start (when starting lineups drop).<br>
-            • <strong>Why:</strong> Captures early bookmaker pricing errors and secures superior <strong>Closing Line Value (CLV)</strong> before sharp money moves the line (e.g. locking in +140 before it drops to +125).
+            � <strong>When:</strong> 2 to 6 hours before game start (when starting lineups drop).<br>
+            � <strong>Why:</strong> Captures early bookmaker pricing errors and secures superior <strong>Closing Line Value (CLV)</strong> before sharp money moves the line (e.g. locking in +140 before it drops to +125).
           </div>
         </div>
         <div>
           <div style="font-size:12px;font-weight:700;color:var(--b);margin-bottom:4px">Option B: Pre-Game Lock (Recommended for Stability)</div>
           <div style="font-size:11px;color:var(--tx2);line-height:1.6">
-            • <strong>When:</strong> 5 to 15 minutes before first pitch.<br>
-            • <strong>Why:</strong> Final weather (wind speed/direction) and scratch info are 100% final. The server locks picks at T-10m, guaranteeing your bets match the platform's official audited backtest.
+            � <strong>When:</strong> 5 to 15 minutes before first pitch.<br>
+            � <strong>Why:</strong> Final weather (wind speed/direction) and scratch info are 100% final. The server locks picks at T-10m, guaranteeing your bets match the platform's official audited backtest.
           </div>
         </div>
       </div>
@@ -934,35 +935,35 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 
     <!-- BEATING THE SPORTSBOOK ON VALUE -->
     <div style="font-size:13px;font-weight:700;color:var(--tx);margin:16px 0 10px 0;display:flex;align-items:center;gap:6px">
-      🪙 Beating the Sportsbook on Value (+EV vs. Single-Game Variance)
+      ?? Beating the Sportsbook on Value (+EV vs. Single-Game Variance)
     </div>
     <div style="background:rgba(0,214,143,0.06);border:1px solid rgba(0,214,143,0.2);border-radius:8px;padding:14px;margin-bottom:20px;">
       <div style="font-size:12px;font-weight:700;color:var(--g);margin-bottom:4px">The Coin Flip Principle</div>
       <div style="font-size:11px;color:var(--tx2);line-height:1.6">
         In professional sports betting, <strong>beating the sportsbook is defined by positive expected value (+EV), NOT by the random result of a single 9-inning game.</strong><br><br>
         Imagine a friend offers you a deal on a 50/50 coin flip: if it lands on Tails, you lose $10; if it lands on Heads, you win $15. That is a <strong>+25% EV bet</strong>.<br>
-        • If the coin lands on Tails and you lose $10, <strong>did you make a mistake? NO.</strong> You still executed a +EV wager.<br>
-        • If you repeat that coin flip 100 times, math guarantees you walk away with <strong>+$250 in net profit</strong>.<br><br>
-        A single baseball game has random noise (a blown save, a bad umpire call, a soft bloop hit). When you place a bet with a +4.2% EV edge, <strong>you beat the sportsbook on value the moment your bet is placed</strong> — regardless of whether that single game wins or loses.
+        � If the coin lands on Tails and you lose $10, <strong>did you make a mistake? NO.</strong> You still executed a +EV wager.<br>
+        � If you repeat that coin flip 100 times, math guarantees you walk away with <strong>+$250 in net profit</strong>.<br><br>
+        A single baseball game has random noise (a blown save, a bad umpire call, a soft bloop hit). When you place a bet with a +4.2% EV edge, <strong>you beat the sportsbook on value the moment your bet is placed</strong> � regardless of whether that single game wins or loses.
       </div>
     </div>
 
     <!-- SHIFTING BEST BETS & INDEPENDENT MARKETS -->
     <div style="font-size:13px;font-weight:700;color:var(--tx);margin:16px 0 10px 0;display:flex;align-items:center;gap:6px">
-      🔀 What If the "Best Bet" Shifts Later?
+      ?? What If the "Best Bet" Shifts Later?
     </div>
     <div style="background:var(--bg3);border:1px solid var(--bdr2);border-radius:8px;padding:14px;margin-bottom:20px;">
       <div style="font-size:11px;color:var(--tx2);line-height:1.6">
         If you bet <strong>Yankees ML (+4.2% EV)</strong> at 2 hours pre-game, and at 30 minutes pre-game the single "Best Bet" banner shifts to <strong>OVER 9.0 (+6.0% EV)</strong>:<br><br>
-        1. <strong>ML and O/U are TWO SEPARATE markets:</strong> They are not mutually exclusive. A game ending Yankees 7–4 wins <strong>BOTH</strong> the Yankees ML bet AND the OVER 9.0 bet!<br>
+        1. <strong>ML and O/U are TWO SEPARATE markets:</strong> They are not mutually exclusive. A game ending Yankees 7�4 wins <strong>BOTH</strong> the Yankees ML bet AND the OVER 9.0 bet!<br>
         2. <strong>Your initial bet remains +EV:</strong> Your +4.2% ML bet is still mathematically profitable. The model simply found a second market with a slightly higher gap due to late weather/lineup updates.<br>
-        3. <strong>Best Action:</strong> Keep your ML bet. Optionally, add the OVER 9.0 as a 2nd independent bet if your bankroll permits. <strong>Never cash out early</strong> — sportsbooks charge heavy cash-out juice that destroys your long-term ROI.
+        3. <strong>Best Action:</strong> Keep your ML bet. Optionally, add the OVER 9.0 as a 2nd independent bet if your bankroll permits. <strong>Never cash out early</strong> � sportsbooks charge heavy cash-out juice that destroys your long-term ROI.
       </div>
     </div>
 
     <!-- SIGNAL TIER TABLE -->
     <div style="font-size:13px;font-weight:700;color:var(--tx);margin:16px 0 10px 0;display:flex;align-items:center;gap:6px">
-      📊 Signal Tiers & Bankroll Management
+      ?? Signal Tiers & Bankroll Management
     </div>
     <div style="overflow-x:auto;margin-bottom:16px;">
       <table style="width:100%;border-collapse:collapse;font-size:11px;color:var(--tx2);">
@@ -976,19 +977,19 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
         </thead>
         <tbody>
           <tr style="border-bottom:1px solid var(--bdr2)">
-            <td style="padding:8px"><span class="sig-box sig-prime">🔥 PRIME</span></td>
-            <td style="padding:8px">ML: +3.5% to +11.0% EV<br>RL: Win Prob ≥ 62.0%<br>O/U: Gap ≥ 0.8 runs</td>
+            <td style="padding:8px"><span class="sig-box sig-prime">?? PRIME</span></td>
+            <td style="padding:8px">ML: +3.5% to +11.0% EV<br>RL: Win Prob ? 62.0%<br>O/U: Gap ? 0.8 runs</td>
             <td style="padding:8px;color:var(--g);font-weight:700">57.5%+ (ML)<br>67.9% (RL)</td>
             <td style="padding:8px;color:var(--tx)">1.5% to 2.0% of Bankroll (1 Unit)</td>
           </tr>
           <tr style="border-bottom:1px solid var(--bdr2)">
-            <td style="padding:8px"><span class="sig-box sig-edge">✅ EDGE</span></td>
+            <td style="padding:8px"><span class="sig-box sig-edge">? EDGE</span></td>
             <td style="padding:8px">ML: +1.0% to +3.5% EV<br>RL: Win Prob 56.0% to 61.9%<br>O/U: Gap 0.35 to 0.79</td>
             <td style="padding:8px;color:var(--g)">53.0%+</td>
-            <td style="padding:8px;color:var(--tx)">0.75% to 1.0% of Bankroll (½ Unit)</td>
+            <td style="padding:8px;color:var(--tx)">0.75% to 1.0% of Bankroll (� Unit)</td>
           </tr>
           <tr>
-            <td style="padding:8px"><span class="sig-box sig-skip">⬜ SKIP</span></td>
+            <td style="padding:8px"><span class="sig-box sig-skip">? SKIP</span></td>
             <td style="padding:8px">ML: EV > +11.0% or < +1.0%<br>RL: Win Prob < 56.0%</td>
             <td style="padding:8px;color:var(--tx3)">N/A (Ignore)</td>
             <td style="padding:8px;color:var(--r);font-weight:700">NO BET ($0)</td>
@@ -998,15 +999,15 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
     </div>
     
     <div style="background:rgba(0,214,143,0.06);border:1px solid rgba(0,214,143,0.2);border-radius:8px;padding:12px;margin-bottom:20px;font-size:11px;color:var(--tx2);line-height:1.6;">
-      <strong style="color:var(--g)">💡 Why can a Moneyline pick be PRIME while the Run Line is SKIP?</strong><br>
-      Moneyline signals are based on <strong>Expected Value (EV) edge</strong>, while Run Line requires <strong>Model Win Probability ≥ 62.0%</strong>. A 57% favorite is a great straight-up Moneyline bet, but laying -1.5 runs on tight 57% games is too risky because ~28% of all MLB games are decided by exactly 1 run.
+      <strong style="color:var(--g)">?? Why can a Moneyline pick be PRIME while the Run Line is SKIP?</strong><br>
+      Moneyline signals are based on <strong>Expected Value (EV) edge</strong>, while Run Line requires <strong>Model Win Probability ? 62.0%</strong>. A 57% favorite is a great straight-up Moneyline bet, but laying -1.5 runs on tight 57% games is too risky because ~28% of all MLB games are decided by exactly 1 run.
     </div>
 
     <!-- DAILY WORKFLOW -->
     <div style="background:var(--bg3);border:1px solid var(--bdr2);border-radius:8px;padding:14px;">
-      <div style="font-size:12px;font-weight:700;color:var(--tx);margin-bottom:6px">📋 The 3-Step Daily Subscriber Workflow</div>
+      <div style="font-size:12px;font-weight:700;color:var(--tx);margin-bottom:6px">?? The 3-Step Daily Subscriber Workflow</div>
       <div style="font-size:11px;color:var(--tx2);line-height:1.6">
-        <strong>1. 12:00 PM – 2:00 PM ET (First Look):</strong> Open Predictions/Best Bets. Check for 🔥 PRIME picks when lineups drop and lock early value.<br>
+        <strong>1. 12:00 PM � 2:00 PM ET (First Look):</strong> Open Predictions/Best Bets. Check for ?? PRIME picks when lineups drop and lock early value.<br>
         <strong>2. 30 Mins Before First Pitch (Line & Weather Audit):</strong> Use Odds Movement to line-shop across sportsbooks (taking +145 over +138 adds +7% to your win payout). Check for new weather-triggered signals.<br>
         <strong>3. Post-Game (Backtest Audit):</strong> Track your monthly profit and win rate against the audited Backtest ledger.
       </div>
@@ -1017,76 +1018,76 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 
 <div class="modal-overlay" id="faq-modal" onclick="closeModal('faq-modal')">
   <div class="modal-box wide" onclick="event.stopPropagation()">
-    <div class="modal-close" onclick="closeModal('faq-modal')">✕</div>
+    <div class="modal-close" onclick="closeModal('faq-modal')">?</div>
     <div class="modal-title">FAQ & Platform Knowledge Base</div>
     <div class="modal-sub">Everything you need to know about subscriptions, predictive signals, EV, and CLV</div>
 
-    <div class="faq-sec-title">💳 Subscription & Membership Policy</div>
+    <div class="faq-sec-title">?? Subscription & Membership Policy</div>
     
     <div class="policy-box">
-      <div class="policy-title">⚠️ Membership Terms & Conditions:</div>
+      <div class="policy-title">?? Membership Terms & Conditions:</div>
       <strong>Strict Subscription Policy:</strong> Membership provides instant, complete access to live predictive edges, proprietary Statcast regression algorithms, and historical backtest data. For this reason, <strong>NO FREE TRIALS</strong> and <strong>NO REFUNDS</strong> are provided on any membership tier under any circumstances. All sales are final upon purchase.
     </div>
 
     <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">Why is there no free trial? <span class="faq-icon">▼</span></div>
+      <div class="faq-q" onclick="toggleFaq(this)">Why is there no free trial? <span class="faq-icon">�</span></div>
       <div class="faq-a">
         Because MLB Intelligence provides immediate, actionable sports betting edges, proprietary probabilities, and live market mispricings, offering a free trial would allow users to exploit live betting edges without contributing to platform maintenance. To maintain model integrity and protect paying subscribers, access requires an active membership.
       </div>
     </div>
 
     <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">Can I get a refund if I change my mind? <span class="faq-icon">▼</span></div>
+      <div class="faq-q" onclick="toggleFaq(this)">Can I get a refund if I change my mind? <span class="faq-icon">�</span></div>
       <div class="faq-a">
         <strong>No.</strong> All subscriptions are non-refundable. Once access is granted to our real-time odds engines, Statcast calculations, and daily signal feeds, digital access cannot be returned. You may cancel your subscription at any time to prevent future renewal charges.
       </div>
     </div>
 
-    <div class="faq-sec-title">📈 How the Platform Works & Strategy</div>
+    <div class="faq-sec-title">?? How the Platform Works & Strategy</div>
 
     <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">How does MLB Intelligence calculate true win probabilities? <span class="faq-icon">▼</span></div>
+      <div class="faq-q" onclick="toggleFaq(this)">How does MLB Intelligence calculate true win probabilities? <span class="faq-icon">�</span></div>
       <div class="faq-a">
         Our proprietary quantitative engine evaluates pitcher quality using expected metrics (xERA, xFIP, BABIP, K%, BB%, SwStr%) instead of surface ERA. It combines team offensive wOBA, home/away split factors, ballpark run environments, and game-day weather (wind, temperature, air density) to calculate an un-biased mathematical win probability for every matchup.
       </div>
     </div>
 
     <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">How should I use this platform to bet advantageously? <span class="faq-icon">▼</span></div>
+      <div class="faq-q" onclick="toggleFaq(this)">How should I use this platform to bet advantageously? <span class="faq-icon">�</span></div>
       <div class="faq-a">
-        Successful sports betting is not about guessing winners; it is about finding <strong>mispriced market lines</strong>. Compare our model's probability against sportsbook implied odds. Focus strictly on <strong>🔥 PRIME</strong> and <strong>⚡ EDGE</strong> picks where our expected value (EV) exceeds the market price. Always practice strict bankroll management (e.g., 1 unit per bet).
+        Successful sports betting is not about guessing winners; it is about finding <strong>mispriced market lines</strong>. Compare our model's probability against sportsbook implied odds. Focus strictly on <strong>?? PRIME</strong> and <strong>? EDGE</strong> picks where our expected value (EV) exceeds the market price. Always practice strict bankroll management (e.g., 1 unit per bet).
       </div>
     </div>
 
-    <div class="faq-sec-title">🧠 Betting Concepts: EV, CLV & Signals</div>
+    <div class="faq-sec-title">?? Betting Concepts: EV, CLV & Signals</div>
 
     <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">What is EV (Expected Value) and why does it matter? <span class="faq-icon">▼</span></div>
+      <div class="faq-q" onclick="toggleFaq(this)">What is EV (Expected Value) and why does it matter? <span class="faq-icon">�</span></div>
       <div class="faq-a">
         <strong>Expected Value (EV)</strong> measures the theoretical profit or loss per bet over a large sample size.<br><br>
-        <code>EV = (Model Win Probability × Sportsbook Payout) - (Loss Probability × Wager)</code><br><br>
+        <code>EV = (Model Win Probability ? Sportsbook Payout) - (Loss Probability ? Wager)</code><br><br>
         A bet with <strong>+EV</strong> means the sportsbook is offering higher odds than the true mathematical probability of the event occurring. Placing only +EV bets guarantees long-term statistical profitability regardless of short-term variance.
       </div>
     </div>
 
     <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">What is CLV (Closing Line Value)? <span class="faq-icon">▼</span></div>
+      <div class="faq-q" onclick="toggleFaq(this)">What is CLV (Closing Line Value)? <span class="faq-icon">�</span></div>
       <div class="faq-a">
         <strong>Closing Line Value (CLV)</strong> compares the odds you placed against the final line right before first pitch. If you bet Braves at +125 and the line closes at +105, you achieved positive CLV. Beating the closing line consistently is the gold standard indicator of sharp, profitable long-term sports betting.
       </div>
     </div>
 
     <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">What do PRIME, EDGE, and SKIP signals mean? <span class="faq-icon">▼</span></div>
+      <div class="faq-q" onclick="toggleFaq(this)">What do PRIME, EDGE, and SKIP signals mean? <span class="faq-icon">�</span></div>
       <div class="faq-a">
-        • <strong>🔥 PRIME:</strong> Top-tier mathematical advantage (historically 57%+ hit rate on ML, EV +3.5% to +11.0%). High-confidence sweet spot.<br>
-        • <strong>⚡ EDGE:</strong> Positive expected value (+1.0% to +3.5% EV). Solid value spot worth tracking.<br>
-        • <strong>⬜ SKIP:</strong> No mathematical edge detected or line is tight. The model strongly advises passing on this market.
+        � <strong>?? PRIME:</strong> Top-tier mathematical advantage (historically 57%+ hit rate on ML, EV +3.5% to +11.0%). High-confidence sweet spot.<br>
+        � <strong>? EDGE:</strong> Positive expected value (+1.0% to +3.5% EV). Solid value spot worth tracking.<br>
+        � <strong>? SKIP:</strong> No mathematical edge detected or line is tight. The model strongly advises passing on this market.
       </div>
     </div>
 
     <div class="faq-item">
-      <div class="faq-q" onclick="toggleFaq(this)">What is Edge %? <span class="faq-icon">▼</span></div>
+      <div class="faq-q" onclick="toggleFaq(this)">What is Edge %? <span class="faq-icon">�</span></div>
       <div class="faq-a">
         <strong>Edge %</strong> is the difference between our model's win probability and the sportsbook's implied probability. For example, if our model projects a team at 56.0% (implied odds -127) and DraftKings prices them at +100 (50.0% implied), your mathematical edge is <strong>+6.0%</strong>.
       </div>
@@ -1098,7 +1099,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 <!-- TERMS OF USE MODAL -->
 <div class="modal-overlay" id="terms-modal" onclick="closeModal('terms-modal')">
   <div class="modal-box wide" onclick="event.stopPropagation()">
-    <div class="modal-close" onclick="closeModal('terms-modal')">✕</div>
+    <div class="modal-close" onclick="closeModal('terms-modal')">?</div>
     <div class="modal-title">Terms of Use</div>
     <div class="modal-sub">Last updated: July 2026</div>
 
@@ -1128,7 +1129,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 <!-- PRIVACY POLICY MODAL -->
 <div class="modal-overlay" id="privacy-modal" onclick="closeModal('privacy-modal')">
   <div class="modal-box wide" onclick="event.stopPropagation()">
-    <div class="modal-close" onclick="closeModal('privacy-modal')">✕</div>
+    <div class="modal-close" onclick="closeModal('privacy-modal')">?</div>
     <div class="modal-title">Privacy Policy</div>
     <div class="modal-sub">How we protect and manage your data</div>
 
@@ -1156,7 +1157,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 <!-- CONTACT US MODAL -->
 <div class="modal-overlay" id="contact-modal" onclick="closeModal('contact-modal')">
   <div class="modal-box" onclick="event.stopPropagation()">
-    <div class="modal-close" onclick="closeModal('contact-modal')">✕</div>
+    <div class="modal-close" onclick="closeModal('contact-modal')">?</div>
     <div class="modal-title">Contact Support</div>
     <div class="modal-sub">Have questions or feedback? Send us a message below.</div>
 
@@ -1182,7 +1183,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
         <label>Message</label>
         <textarea class="form-textarea" id="cf-msg" placeholder="How can we help you?" required></textarea>
       </div>
-      <button type="submit" class="form-btn">Send Message ✉️</button>
+      <button type="submit" class="form-btn">Send Message ??</button>
     </form>
     
     <div style="margin-top:14px;font-size:10px;color:var(--tx3);text-align:center">
@@ -1194,14 +1195,14 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 <!-- ODDS CONVERTER & BETTING CALCULATOR MODAL -->
 <div class="modal-overlay" id="calc-modal" onclick="closeModal('calc-modal')">
   <div class="modal-box wide" onclick="event.stopPropagation()">
-    <div class="modal-close" onclick="closeModal('calc-modal')">✕</div>
-    <div class="modal-title">🧮 Odds Converter & Betting Calculator</div>
+    <div class="modal-close" onclick="closeModal('calc-modal')">?</div>
+    <div class="modal-title">?? Odds Converter & Betting Calculator</div>
     <div class="modal-sub">Real-time conversions for American, Decimal, Implied %, EV, and Payouts</div>
 
     <div class="calc-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:10px">
       <!-- Left: 4-Way Odds Converter -->
       <div style="background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:14px">
-        <div style="font-size:11px;font-weight:700;color:var(--b);margin-bottom:10px">🔄 4-Way Odds & Implied % Converter</div>
+        <div style="font-size:11px;font-weight:700;color:var(--b);margin-bottom:10px">?? 4-Way Odds & Implied % Converter</div>
         
         <div class="form-grp" style="margin-bottom:8px">
           <label>American Odds (e.g. -110 or +150)</label>
@@ -1227,10 +1228,10 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
       <!-- Right: Payout & Expected Value (+EV) Calculator -->
       <div style="background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:14px;display:flex;flex-direction:column;justify-content:space-between">
         <div>
-          <div style="font-size:11px;font-weight:700;color:var(--g);margin-bottom:10px">💰 Payout & Expected Value (+EV)</div>
+          <div style="font-size:11px;font-weight:700;color:var(--g);margin-bottom:10px">?? Payout & Expected Value (+EV)</div>
           
           <div class="form-grp" style="margin-bottom:8px">
-            <label>Wager Amount ($ / € / u)</label>
+            <label>Wager Amount ($ / � / u)</label>
             <input type="number" class="form-input" id="calc-wager-amount" value="10" oninput="calculatePayoutEV()" />
           </div>
 
@@ -1266,19 +1267,19 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 <!-- TEAM RECENT GAMES MODAL -->
 <div class="modal-overlay" id="team-modal" onclick="closeModal('team-modal')">
   <div class="modal-box" onclick="event.stopPropagation()">
-    <div class="modal-close" onclick="closeModal('team-modal')">✕</div>
+    <div class="modal-close" onclick="closeModal('team-modal')">?</div>
     <div class="modal-title" id="team-modal-title">Recent Games</div>
     <div class="modal-sub" id="team-modal-sub">Last 6 games</div>
-    <div id="team-modal-body"><div class="loading" style="padding:20px">Loading…</div></div>
+    <div id="team-modal-body"><div class="loading" style="padding:20px">Loading�</div></div>
   </div>
 </div>
 
 <!-- BACKTEST ODDS MOVEMENT MODAL -->
 <div class="modal-overlay" id="odds-move-modal" onclick="closeModal('odds-move-modal')">
   <div class="modal-box wide" onclick="event.stopPropagation()">
-    <div class="modal-close" onclick="closeModal('odds-move-modal')">✕</div>
+    <div class="modal-close" onclick="closeModal('odds-move-modal')">?</div>
     <div class="modal-title" id="odds-modal-title">Line Movement</div>
-    <div class="modal-sub" id="odds-modal-sub">Opening → Closing odds</div>
+    <div class="modal-sub" id="odds-modal-sub">Opening > Closing odds</div>
     <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
       <select id="odds-modal-mkt" onchange="updateOddsModal()" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bdr2);border-radius:6px;padding:4px 10px;font-size:11px;outline:none;cursor:pointer">
         <option value="ml">Moneyline</option>
@@ -1295,8 +1296,8 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 <div class="panel" id="tab-odds">
   <div class="odds-header">
     <div>
-      <div class="sec" style="margin-bottom:4px">📊 Live Odds Movement</div>
-      <div style="font-size:10px;color:var(--tx3)">Best available line highlighted ★ · Line movements vs opening</div>
+      <div class="sec" style="margin-bottom:4px">?? Live Odds Movement</div>
+      <div style="font-size:10px;color:var(--tx3)">Best available line highlighted ? � Line movements vs opening</div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
       <select id="odds-market" onchange="renderOddsTab()" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bdr2);border-radius:6px;padding:5px 10px;font-size:11px;outline:none;cursor:pointer;">
@@ -1312,14 +1313,14 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 
   <div class="odds-legend">
     <span><span class="legend-dot" style="background:#ffd100"></span> Best available line</span>
-    <span><span style="color:var(--g);font-weight:700">▲</span> Line moved in your favor (better odds than open)</span>
-    <span><span style="color:var(--r);font-weight:700">▼</span> Line moved against (worse than open)</span>
-    <span style="margin-left:auto;background:rgba(0,214,143,.1);border:1px solid rgba(0,214,143,.25);color:var(--g);padding:3px 10px;border-radius:20px;font-size:9px;font-weight:700">💡 Tip: bet the best available line to maximize value</span>
+    <span><span style="color:var(--g);font-weight:700">^</span> Line moved in your favor (better odds than open)</span>
+    <span><span style="color:var(--r);font-weight:700">�</span> Line moved against (worse than open)</span>
+    <span style="margin-left:auto;background:rgba(0,214,143,.1);border:1px solid rgba(0,214,143,.25);color:var(--g);padding:3px 10px;border-radius:20px;font-size:9px;font-weight:700">?? Tip: bet the best available line to maximize value</span>
   </div>
 
   <div class="odds-layout" style="margin-top:16px">
     <div id="odds-content" class="odds-main-col" style="flex:1;min-width:0">
-      <div class="odds-empty">Loading odds from 10 sportsbooks…</div>
+      <div class="odds-empty">Loading odds from 10 sportsbooks�</div>
     </div>
 
     <!-- STICKY ACCA / PARLAY SLIP SIDEBAR -->
@@ -1327,7 +1328,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
       <div class="acca-card">
         <div class="acca-hdr" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <div style="display:flex;align-items:center;gap:6px">
-            <span style="font-size:16px">🎯</span>
+            <span style="font-size:16px">??</span>
             <div>
               <div style="font-size:12px;font-weight:800;color:var(--tx)">Acca / Parlay Builder</div>
               <div style="font-size:9px;color:var(--tx3)">Click any line to add leg</div>
@@ -1365,7 +1366,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
           <!-- Vig Multiplier & Value Leak Box -->
           <div style="background:rgba(255,209,102,0.06);border:1px solid rgba(255,209,102,0.2);border-radius:8px;padding:10px;margin-top:10px">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-              <span style="font-size:10px;font-weight:700;color:var(--y)">⚠️ Sportsbook Vig Multiplier</span>
+              <span style="font-size:10px;font-weight:700;color:var(--y)">?? Sportsbook Vig Multiplier</span>
               <span id="vig-pct-badge" style="font-size:10px;font-weight:800;color:var(--r);background:var(--rbg);padding:1px 6px;border-radius:4px">~4.5% Vig</span>
             </div>
             <div style="height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:4px">
@@ -1383,10 +1384,10 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
   <div class="odds-status-bar">
     <div class="odds-live-dot"></div>
     <span id="odds-books-count">Comparing 10 books</span>
-    <span>·</span>
+    <span>�</span>
     <span>Auto-refresh every 90 seconds</span>
-    <span>·</span>
-    <span style="color:var(--tx3)">Data from DraftKings API · Other books: realistic spreads</span>
+    <span>�</span>
+    <span style="color:var(--tx3)">Data from DraftKings API � Other books: realistic spreads</span>
   </div>
 </div>
 
@@ -1394,17 +1395,17 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 <footer class="app-footer">
   <div class="footer-compact">
     <div class="footer-left">
-      <span class="footer-logo">⚾ MLB Intelligence</span>
+      <span class="footer-logo">? MLB Intelligence</span>
       <span class="footer-tag">Statcast & Advanced Regression Analytics</span>
     </div>
     
     <div class="footer-nav">
       <a href="javascript:void(0)" onclick="openModal('faq-modal')">FAQ & Guide</a>
-      <span class="footer-sep">•</span>
+      <span class="footer-sep">�</span>
       <a href="javascript:void(0)" onclick="openModal('terms-modal')">Terms of Use</a>
-      <span class="footer-sep">•</span>
+      <span class="footer-sep">�</span>
       <a href="javascript:void(0)" onclick="openModal('privacy-modal')">Privacy Policy</a>
-      <span class="footer-sep">•</span>
+      <span class="footer-sep">�</span>
       <a href="javascript:void(0)" onclick="openModal('contact-modal')">Contact</a>
     </div>
 
@@ -1414,7 +1415,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
   </div>
   
   <div class="footer-sub-bar">
-    <span>© 2026 MLB Betting Intelligence. All rights reserved.</span>
+    <span>� 2026 MLB Betting Intelligence. All rights reserved.</span>
     <span>18+ / 21+ Responsible Gaming. Educational purpose only.</span>
   </div>
 
@@ -1425,24 +1426,24 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 <script>
 let currentBook = 'ESPNBet';
 let P = {};
-let S = {};   // team batting stats — keyed by team nickname
-let WX = {};  // weather per team — keyed by home team nickname
+let S = {};   // team batting stats � keyed by team nickname
+let WX = {};  // weather per team � keyed by home team nickname
 let STADIUMS = {}; // stadium metadata (lat, lon, pf, dome, cfBearing)
 let ODDS = {};
 let TODAY = [];
 let currentDate = new Date();
 const _todayStr = () => formatDateStr(new Date());
-// ── Frozen predictions — persisted to localStorage so picks survive page refresh ──
-// Key: mlb_frozen_YYYY-MM-DD  → { "away@home": { bestPick, ... }, ... }
+// -- Frozen predictions � persisted to localStorage so picks survive page refresh --
+// Key: mlb_frozen_YYYY-MM-DD  > { "away@home": { bestPick, ... }, ... }
 
-// ── Hard-anchored historical picks for verified dates (e.g. July 29, 2026) ──
+// -- Hard-anchored historical picks for verified dates (e.g. July 29, 2026) --
 const HISTORICAL_FROZEN = {
   "2026-07-29": {
     "Royals@Twins": {
       bestPick: "Royals ML",
       bestEV: 0.048,
       bestIsOU: false,
-      bestSig: { l: 'PRIME', c: 'sig-prime', v: 3, icon: '🔥' },
+      bestSig: { l: 'PRIME', c: 'sig-prime', v: 3, icon: '??' },
       mlPickLine: 160,
       mlTeamPick: "Royals",
       mlTeamEV: 0.048,
@@ -1455,7 +1456,7 @@ const HISTORICAL_FROZEN = {
       bestPick: "OVER 9.0",
       bestEV: 0.080,
       bestIsOU: true,
-      bestSig: { l: 'PRIME', c: 'sig-prime', v: 3, icon: '🔥' },
+      bestSig: { l: 'PRIME', c: 'sig-prime', v: 3, icon: '??' },
       mlPickLine: -130,
       mlTeamPick: "Blue Jays",
       mlTeamEV: 0.013,
@@ -1468,7 +1469,7 @@ const HISTORICAL_FROZEN = {
       bestPick: "Mets ML",
       bestEV: 0.042,
       bestIsOU: false,
-      bestSig: { l: 'PRIME', c: 'sig-prime', v: 3, icon: '🔥' },
+      bestSig: { l: 'PRIME', c: 'sig-prime', v: 3, icon: '??' },
       mlPickLine: 135,
       mlTeamPick: "Mets",
       mlTeamEV: 0.042,
@@ -1497,12 +1498,12 @@ let frozenPredictions = _loadFrozen();
 let chartsObj = {};
 let currentGrHits = {};
 
-// ── Weather helpers ─────────────────────────────────────────────────────────
+// -- Weather helpers ---------------------------------------------------------
 function windLabel(windMph, dir) {
-  if (dir === 'dome') return '🏟️ Dome';
-  if (windMph < 5)   return '🍃 Calm';
-  const arrow = dir === 'out' ? '⬆️ Out' : dir === 'in' ? '⬇️ In' : '↔️ Cross';
-  return `💨 ${windMph}mph ${arrow}`;
+  if (dir === 'dome') return '??? Dome';
+  if (windMph < 5)   return '?? Calm';
+  const arrow = dir === 'out' ? '?? Out' : dir === 'in' ? '?? In' : '-? Cross';
+  return `?? ${windMph}mph ${arrow}`;
 }
 function windEffect(windMph, dir) {
   // Run adjustment: out=favorable for hitters, in=suppresses scoring
@@ -1511,16 +1512,16 @@ function windEffect(windMph, dir) {
   return windMph * factor;
 }
 function tempEffect(tempF) {
-  // Ball travels further in heat — ~0.012 runs per °F above 72°F
+  // Ball travels further in heat � ~0.012 runs per �F above 72�F
   return (tempF - 72) * 0.012;
 }
 function pfLabel(pf) {
-  if (pf >= 110) return `🏟️ PF ${pf} 🔥 Extreme Hitters Park`;
-  if (pf >= 105) return `🏟️ PF ${pf} 🔴 Hitters Park`;
-  if (pf >= 102) return `🏟️ PF ${pf} 🟠 Slight Hitters`;
-  if (pf >= 99)  return `🏟️ PF ${pf} ⚪ Neutral`;
-  if (pf >= 96)  return `🏟️ PF ${pf} 🔵 Slight Pitchers`;
-  return `🏟️ PF ${pf} 🟣 Pitchers Park`;
+  if (pf >= 110) return `??? PF ${pf} ?? Extreme Hitters Park`;
+  if (pf >= 105) return `??? PF ${pf} ?? Hitters Park`;
+  if (pf >= 102) return `??? PF ${pf} ?? Slight Hitters`;
+  if (pf >= 99)  return `??? PF ${pf} ? Neutral`;
+  if (pf >= 96)  return `??? PF ${pf} ?? Slight Pitchers`;
+  return `??? PF ${pf} ?? Pitchers Park`;
 }
 
 function changeBook(b) {
@@ -1657,9 +1658,9 @@ async function fetchAllData() {
 
     // Hydrate HISTORICAL_FROZEN with database picks
     const parseDB_Sig = (sigStr) => {
-      if(sigStr === 'PRIME') return { l: 'PRIME', c: 'sig-prime', v: 3, icon: '🔥' };
-      if(sigStr === 'EDGE')  return { l: 'EDGE',  c: 'sig-edge',  v: 2, icon: '✅' };
-      return { l: 'SKIP', c: 'sig-skip', v: 1, icon: '⬜' };
+      if(sigStr === 'PRIME') return { l: 'PRIME', c: 'sig-prime', v: 3, icon: '??' };
+      if(sigStr === 'EDGE')  return { l: 'EDGE',  c: 'sig-edge',  v: 2, icon: '?' };
+      return { l: 'SKIP', c: 'sig-skip', v: 1, icon: '?' };
     };
 
     if (picksRes && picksRes.picks && picksRes.picks.length > 0) {
@@ -1706,7 +1707,7 @@ async function fetchAllData() {
       HISTORICAL_FROZEN[d]["Nationals@Braves"] = skipObj;
     });
 
-    // ── Team batting stats (real wOBA from MLB Stats API) ──────────────────
+    // -- Team batting stats (real wOBA from MLB Stats API) ------------------
     S = teamRes || {};
     const TEAM_WOBA_DEFAULTS = {
       'Dodgers': 0.349, 'Yankees': 0.347, 'Nationals': 0.345, 'Cubs': 0.344, 'Orioles': 0.342,
@@ -1721,10 +1722,10 @@ async function fetchAllData() {
       else if (!S[t].woba || S[t].woba === 0.327) S[t].woba = TEAM_WOBA_DEFAULTS[t];
     });
 
-    // ── Stadium metadata (park factors, coordinates) ──────────────────────
+    // -- Stadium metadata (park factors, coordinates) ----------------------
     STADIUMS = stadiumRes || {};
 
-    // ── Odds ──────────────────────────────────────────────────────────────
+    // -- Odds --------------------------------------------------------------
     ODDS = {};
     const oddsArr = oddsRes?.games || oddsRes || [];
     if (Array.isArray(oddsArr)) {
@@ -1740,7 +1741,7 @@ async function fetchAllData() {
       ODDS = { ...cachedOdds, ...ODDS };
     } catch(e) {}
 
-    // ── Pitcher stats ─────────────────────────────────────────────────────
+    // -- Pitcher stats -----------------------------------------------------
     P = pitcherRes || {};
     Object.keys(P).forEach(k => {
       const p = P[k];
@@ -1759,7 +1760,7 @@ async function fetchAllData() {
       p.name  = k;
     });
 
-    // ── Today's schedule ──────────────────────────────────────────────────
+    // -- Today's schedule --------------------------------------------------
     TODAY = [];
     WX    = {}; // will be populated by Open-Meteo calls below
 
@@ -1844,7 +1845,7 @@ async function fetchAllData() {
     document.getElementById('live-status').textContent = 'Data Live';
     const opts = { month: 'short', day: 'numeric' };
     document.getElementById('hdr-date').textContent  = currentDate.toLocaleDateString('en-US', opts);
-    document.getElementById('slate-label').textContent = currentDate.toLocaleDateString('en-US', opts) + ' — LIVE';
+    document.getElementById('slate-label').textContent = currentDate.toLocaleDateString('en-US', opts) + ' � LIVE';
 
     // Render immediately with available data
     renderApp();
@@ -1865,18 +1866,18 @@ async function fetchAllData() {
         const wMph   = Math.round(cur.wind_speed_10m  || 0);
         const wDeg   = cur.wind_direction_10m || 0;
         // Classify wind direction relative to this park's CF bearing
-        // Wind blows "out" when wind comes FROM (cfBearing+180)°±60°
+        // Wind blows "out" when wind comes FROM (cfBearing+180)��60�
         const outFrom   = (st.cfBearing + 180) % 360;
         const angleDiff = Math.abs(((wDeg - outFrom + 540) % 360) - 180);
         const dir = wMph < 5 ? 'calm' : angleDiff < 60 ? 'out' : angleDiff > 120 ? 'in' : 'cross';
-        // WMO weather code → sky description
+        // WMO weather code > sky description
         const wmo = cur.weather_code || 0;
         const sky = wmo >= 95 ? 'Thunderstorm' : wmo >= 80 ? 'Showers' :
                     wmo >= 51 ? 'Rain' : wmo >= 45 ? 'Foggy' :
                     wmo >= 3  ? 'Overcast' : wmo >= 1 ? 'Partly Cloudy' : 'Clear';
         WX[home] = { temp: tempF, windMph: wMph, windDir: dir, windDeg: wDeg, sky, pf: st.pf, dome: false };
       } catch (_) {
-        // Weather failed — fall back to neutral
+        // Weather failed � fall back to neutral
         WX[home] = { temp: 72, windMph: 0, windDir: 'calm', sky: 'N/A', pf: st?.pf || 100, dome: false };
       }
       // Re-render cards with weather data as it arrives
@@ -1906,7 +1907,7 @@ function probToAmLine(p) {
   return Math.round((1 - p) / p * 100 / 5) * 5;
 }
 
-// ─ ADVANCED STATCAST REGRESSION MODEL ─────────────────────────────────
+// - ADVANCED STATCAST REGRESSION MODEL ---------------------------------
 function calculateRegression(p) {
   if (!p || p.name === 'TBD') return { score: 0, text: null };
   
@@ -2009,14 +2010,14 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
     regA = aReg.text;
     regH = hReg.text;
     
-    // negative aReg.score = away pitcher lucky → boost home (add to logit)
-    // positive hReg.score = home pitcher unlucky → boost home (add to logit)
+    // negative aReg.score = away pitcher lucky > boost home (add to logit)
+    // positive hReg.score = home pitcher unlucky > boost home (add to logit)
     eraGapLogit = (-aReg.score + hReg.score) * 0.05;
   }
 
-  // Seeded noise — deterministic per matchup + date
+  // Seeded noise � deterministic per matchup + date
   // r1: ML win probability noise (matchup-only, intentionally stable)
-  // r2: OU market line — MUST include dateKey so line varies per game
+  // r2: OU market line � MUST include dateKey so line varies per game
   //     Real OU lines change daily based on starting pitchers, weather etc.
   //     Without dateKey, every Yankees vs Red Sox game all season would get
   //     the exact same simulated line, making hit/miss comparisons wrong.
@@ -2029,11 +2030,13 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   let homeProb = 1 / (1 + Math.exp(-logit));
   let awayProb = 1 - homeProb;
 
-  // ── MARKET ODDS ──────────────────────────────────────────────────────────
-  // Priority: real API odds → backtest override → simulated from model prob
+  // -- MARKET ODDS ----------------------------------------------------------
+  // Priority: real API odds > backtest override > simulated from model prob
   let mkt;
   if (overrideMkt) {
     mkt = JSON.parse(JSON.stringify(overrideMkt));
+  } else if (g.dateKey && typeof window !== 'undefined' && window.HISTORICAL_ODDS && window.HISTORICAL_ODDS[g.dateKey] && window.HISTORICAL_ODDS[g.dateKey][g.home] && window.HISTORICAL_ODDS[g.dateKey][g.home][currentBook]) {
+    mkt = JSON.parse(JSON.stringify(window.HISTORICAL_ODDS[g.dateKey][g.home][currentBook]));
   } else if (ODDS[g.home] && ODDS[g.home][currentBook]) {
     mkt = JSON.parse(JSON.stringify(ODDS[g.home][currentBook]));
   } else {
@@ -2056,20 +2059,20 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   let mktHomeImplied = amToProb(mkt.ml.h);
   let mktAwayImplied = amToProb(mkt.ml.a);
 
-  // EV = model_prob × net_payout − (1 − model_prob)
+  // EV = model_prob ? net_payout ? (1 ? model_prob)
   let payoutH = mkt.ml.h > 0 ? (mkt.ml.h / 100) : (100 / Math.abs(mkt.ml.h));
   let payoutA = mkt.ml.a > 0 ? (mkt.ml.a / 100) : (100 / Math.abs(mkt.ml.a));
   let evH = (homeProb * payoutH) - awayProb;
   let evA = (awayProb * payoutA) - homeProb;
 
-  // Probability edge = model prob − market implied prob
+  // Probability edge = model prob ? market implied prob
   let edgeH = homeProb - mktHomeImplied;
   let edgeA = awayProb - mktAwayImplied;
 
-  // ── O/U projection ────────────────────────────────────────────────────────
+  // -- O/U projection --------------------------------------------------------
   // Removed artificial bias.
   // Model now projects pure data against the market line.
-  //         r1 noise reduced: 0.40 → 0.20 (matches logit noise reduction)
+  //         r1 noise reduced: 0.40 > 0.20 (matches logit noise reduction)
   let projOU = mkt.ou + ((hp.xera - 4.20) * 0.50) + ((ap.xera - 4.20) * 0.50) + (r1 * 0.20);
 
   // Park factor adjustment (Coors = 1.17 multiplier; Petco = 0.92)
@@ -2083,10 +2086,10 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
     projOU += tempEffect(wxH.temp || 72);
   }
 
-  // Offense quality adjustment: high-wOBA lineup → more runs projected
+  // Offense quality adjustment: high-wOBA lineup > more runs projected
   const awOBA = (as.woba || 0.315) - 0.315;
   const hwOBA = (hs.woba || 0.315) - 0.315;
-  projOU += (awOBA + hwOBA) * 8; // each 0.01 wOBA above avg ≈ +0.08 projected runs
+  projOU += (awOBA + hwOBA) * 8; // each 0.01 wOBA above avg ? +0.08 projected runs
 
   projOU = Math.round(projOU * 10) / 10;
 
@@ -2097,13 +2100,13 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   // Build a rich weather string for display
   let wStr;
   if (!wxH) {
-    wStr = '⏳ Fetching weather...';
+    wStr = '? Fetching weather...';
   } else if (wxH.dome) {
-    wStr = `🏟️ Dome · ${pfLabel(pf)}`;
+    wStr = `??? Dome � ${pfLabel(pf)}`;
   } else {
     const wLabel = windLabel(wxH.windMph || 0, wxH.windDir || 'calm');
     const sky    = wxH.sky || 'Clear';
-    wStr = `🌡️ ${wxH.temp || 72}°F · ${wLabel} · ${sky} · ${pfLabel(pf)}`;
+    wStr = `??? ${wxH.temp || 72}�F � ${wLabel} � ${sky} � ${pfLabel(pf)}`;
   }
 
   return { homeProb, awayProb, evH, evA, edgeH, edgeA, projOU, wStr, hp, ap, mkt,
@@ -2116,15 +2119,15 @@ function getGrade(ev) {
   // EV distribution: max=0.137, p95=0.086, p90=0.077, p80=0.062, median=0.029
   //
   // IMPORTANT: In the backtest, pitcher ERA data is not available per-game,
-  // so A+ picks are rare. On LIVE predictions, real ERA−xERA gaps drive genuine
+  // so A+ picks are rare. On LIVE predictions, real ERA?xERA gaps drive genuine
   // A+ picks with higher confidence.
   //
   // Grade distribution targets (live predictions):
-  //   A+ ≥ 0.086  → top 5% of picks by EV (≈2-3 per full slate of 15 games)
-  //   A  ≥ 0.062  → top 5-20% (≈4-5 per slate)
-  //   B  ≥ 0.035  → solid positive value
-  //   C  ≥ 0.010  → marginal edge
-  //   D  < 0.010  → no meaningful edge
+  //   A+ ? 0.086  > top 5% of picks by EV (?2-3 per full slate of 15 games)
+  //   A  ? 0.062  > top 5-20% (?4-5 per slate)
+  //   B  ? 0.035  > solid positive value
+  //   C  ? 0.010  > marginal edge
+  //   D  < 0.010  > no meaningful edge
   if(ev >= 0.086) return { l: 'A+', c: 'grade-s', v: 5 };
   if(ev >= 0.062) return { l: 'A',  c: 'grade-a', v: 4 };
   if(ev >= 0.035) return { l: 'B',  c: 'grade-b', v: 3 };
@@ -2133,9 +2136,9 @@ function getGrade(ev) {
 }
 
 function getSignal(market, { ev = 0, mlPickProb = 0.5, isMinus15 = true, ouAbsDiff = 0 } = {}) {
-  const PRIME = { l: 'PRIME', c: 'sig-prime', v: 3, icon: '🔥' };
-  const EDGE  = { l: 'EDGE',  c: 'sig-edge',  v: 2, icon: '✅' };
-  const SKIP  = { l: 'SKIP',  c: 'sig-skip',  v: 1, icon: '⬜' };
+  const PRIME = { l: 'PRIME', c: 'sig-prime', v: 3, icon: '??' };
+  const EDGE  = { l: 'EDGE',  c: 'sig-edge',  v: 2, icon: '?' };
+  const SKIP  = { l: 'SKIP',  c: 'sig-skip',  v: 1, icon: '?' };
   if (market === 'ML') {
     if ((mlPickProb >= 0.525 && ev >= 0.020) || (mlPickProb >= 0.515 && ev >= 0.100) || ev >= 0.150) return PRIME; // Dual-Path PRIME or Massive EV Dog
     if ((mlPickProb >= 0.505 && ev >= 0.010) || ev >= 0.050) return EDGE;
@@ -2147,7 +2150,7 @@ function getSignal(market, { ev = 0, mlPickProb = 0.5, isMinus15 = true, ouAbsDi
   if (market === 'OU') {
     if (ouAbsDiff >= 0.80) return PRIME;   // Strong 0.80+ run gap (high confidence PRIME)
     if (ouAbsDiff >= 0.60) return EDGE;    // Solid 0.60+ run gap (selective EDGE)
-    return SKIP; // Below 0.60 run gap (e.g. 0.40 or 0.50) = SKIP — No Bet
+    return SKIP; // Below 0.60 run gap (e.g. 0.40 or 0.50) = SKIP � No Bet
   }
   return SKIP;
 }
@@ -2260,7 +2263,7 @@ function renderApp() {
         bestPick = `${mlTeamPick} ML`; bestEV = Math.max(0, mlTeamEV); bestIsOU = false; bestSig = mlSig;
       }
 
-      // ✅ Apply HISTORICAL_FROZEN AFTER all variable declarations (correct override order)
+      // ? Apply HISTORICAL_FROZEN AFTER all variable declarations (correct override order)
       let finalFrozen = null;
 
       if (histOverride) {
@@ -2346,12 +2349,12 @@ function renderApp() {
                 </div>
                 <div style="margin-top:2px;">
                   <span class="tier ${P[g.awayP]?P[g.awayP].tier==='Elite'?'t-elite':P[g.awayP].tier==='Strong'?'t-strong':'t-mid':'t-mid'}">${P[g.awayP]?P[g.awayP].tier:'Mid'}</span>
-                  <span style="color:var(--tx3)"> xERA</span> <span style="color:var(--b)">${P[g.awayP]?P[g.awayP].xera.toFixed(2):'—'}</span>
-                  <span style="color:var(--tx3)"> ERA</span> <span style="color:${P[g.awayP]&&P[g.awayP].era<P[g.awayP].xera?'var(--r)':P[g.awayP]&&P[g.awayP].era>P[g.awayP].xera?'var(--g)':'var(--tx2)'}">${P[g.awayP]?P[g.awayP].era.toFixed(2):'—'}</span>
-                  <span style="color:var(--tx3)"> K%</span> <span style="color:var(--b)">${P[g.awayP]?P[g.awayP].kpct.toFixed(1):'—'}%</span>
+                  <span style="color:var(--tx3)"> xERA</span> <span style="color:var(--b)">${P[g.awayP]?P[g.awayP].xera.toFixed(2):'�'}</span>
+                  <span style="color:var(--tx3)"> ERA</span> <span style="color:${P[g.awayP]&&P[g.awayP].era<P[g.awayP].xera?'var(--r)':P[g.awayP]&&P[g.awayP].era>P[g.awayP].xera?'var(--g)':'var(--tx2)'}">${P[g.awayP]?P[g.awayP].era.toFixed(2):'�'}</span>
+                  <span style="color:var(--tx3)"> K%</span> <span style="color:var(--b)">${P[g.awayP]?P[g.awayP].kpct.toFixed(1):'�'}%</span>
                 </div>
                 <div style="font-size:10px;color:var(--tx3);margin-top:3px;">
-                  Off wOBA: <span style="color:var(--b);font-weight:600">${S[g.away]?.woba?.toFixed(3) || '—'}</span>
+                  Off wOBA: <span style="color:var(--b);font-weight:600">${S[g.away]?.woba?.toFixed(3) || '�'}</span>
                 </div>
                 ${mod.regA ? `<div style="margin-top:2px"><span class="reg-badge reg-${mod.regA.type}">${mod.regA.text}</span></div>` : ''}
               </div>
@@ -2371,7 +2374,7 @@ function renderApp() {
                 <div class="gc-matchup-probs">
                   <span style="color:${aPct>hPct?'var(--g)':'var(--tx2)'};font-weight:700">${aPct}%</span>
                   ${getPill(g.awayForm)}
-                  <span style="color:var(--tx3);font-size:10px;margin:0 4px">•</span>
+                  <span style="color:var(--tx3);font-size:10px;margin:0 4px">�</span>
                   ${getPill(g.homeForm)}
                   <span style="color:${hPct>aPct?'var(--g)':'var(--tx2)'};font-weight:700">${hPct}%</span>
                 </div>
@@ -2384,13 +2387,13 @@ function renderApp() {
                   <img src="${homeImgUrl}" style="width:24px;height:24px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,0.15);flex-shrink:0;" alt="${g.homeP}" />
                 </div>
                 <div style="margin-top:2px;">
-                  <span style="color:var(--b)">${P[g.homeP]?P[g.homeP].xera.toFixed(2):'—'}</span> <span style="color:var(--tx3)">xERA</span>
-                  <span style="color:${P[g.homeP]&&P[g.homeP].era<P[g.homeP].xera?'var(--r)':P[g.homeP]&&P[g.homeP].era>P[g.homeP].xera?'var(--g)':'var(--tx2)'}">${P[g.homeP]?P[g.homeP].era.toFixed(2):'—'}</span> <span style="color:var(--tx3)">ERA</span>
-                  <span style="color:var(--b)">${P[g.homeP]?P[g.homeP].kpct.toFixed(1):'—'}%</span> <span style="color:var(--tx3)">K%</span>
+                  <span style="color:var(--b)">${P[g.homeP]?P[g.homeP].xera.toFixed(2):'�'}</span> <span style="color:var(--tx3)">xERA</span>
+                  <span style="color:${P[g.homeP]&&P[g.homeP].era<P[g.homeP].xera?'var(--r)':P[g.homeP]&&P[g.homeP].era>P[g.homeP].xera?'var(--g)':'var(--tx2)'}">${P[g.homeP]?P[g.homeP].era.toFixed(2):'�'}</span> <span style="color:var(--tx3)">ERA</span>
+                  <span style="color:var(--b)">${P[g.homeP]?P[g.homeP].kpct.toFixed(1):'�'}%</span> <span style="color:var(--tx3)">K%</span>
                   <span class="tier ${P[g.homeP]?P[g.homeP].tier==='Elite'?'t-elite':P[g.homeP].tier==='Strong'?'t-strong':'t-mid':'t-mid'}">${P[g.homeP]?P[g.homeP].tier:'Mid'}</span>
                 </div>
                 <div style="font-size:10px;color:var(--tx3);margin-top:3px;">
-                  Off wOBA: <span style="color:var(--b);font-weight:600">${S[g.home]?.woba?.toFixed(3) || '—'}</span>
+                  Off wOBA: <span style="color:var(--b);font-weight:600">${S[g.home]?.woba?.toFixed(3) || '�'}</span>
                 </div>
                 ${mod.regH ? `<div style="margin-top:2px"><span class="reg-badge reg-${mod.regH.type}" style="float:right">${mod.regH.text}</span></div>` : ''}
               </div>
@@ -2406,14 +2409,14 @@ function renderApp() {
               <span style="color:var(--tx3);margin-left:4px;">&bull; Follow live pitch-by-pitch action on <b style="color:var(--b);cursor:pointer;text-decoration:underline;font-weight:700;" onclick="sw('live')">Live Scores</b></span>
             </div>` : ''}
             <div class="gc-best-banner">
-              <span style="color:var(--tx3)">★ BEST BET</span>
+              <span style="color:var(--tx3)">? BEST BET</span>
               ${dispBestSig.v > 1
                 ? `<span style="font-size:13px;color:var(--tx)">${dispBestPick}</span>
                    <span style="color:var(--b)">${!dispBestIsOU ? getOddsStr(dispMlPickLine) : '-110'}</span>`
-                : `<span style="font-size:13px;color:var(--tx3);font-style:italic">— No Bet</span>`}
+                : `<span style="font-size:13px;color:var(--tx3);font-style:italic">� No Bet</span>`}
               <span class="sig-box ${dispBestSig.c}">${dispBestSig.icon} ${dispBestSig.l}</span>
               <span style="color:${dispBestSig.v > 1 ? 'var(--g)' : 'var(--tx3)'}">+${(dispBestEV*100).toFixed(1)}% EV</span>
-              <span style="margin-left:auto;color:var(--tx3);font-weight:400">No H2H data · ${P[g.awayP]?.hand || 'RHP'} vs ${P[g.homeP]?.hand || 'RHP'}</span>
+              <span style="margin-left:auto;color:var(--tx3);font-weight:400">No H2H data � ${P[g.awayP]?.hand || 'RHP'} vs ${P[g.homeP]?.hand || 'RHP'}</span>
             </div>
 
             <div class="picks">
@@ -2422,7 +2425,7 @@ function renderApp() {
                 <div class="pv">${dispMlTeamPick} ML</div>
                 <div class="or"><span class="mo">${getOddsStr(probToAmLine(mod.evH>mod.evA ? mod.homeProb : mod.awayProb))}</span> <span style="color:var(--tx3)">mkt ${getOddsStr(dispMlTeamLine)}</span></div>
                 <div class="ev">edge <span style="color:${mlSig.v>1?'var(--g)':'var(--tx3)'}">+${(Math.max(0, dispMlTeamEV)*100).toFixed(1)}%</span></div>
-                ${mlIsBest ? '<div class="best-star">★ Best</div>' : ''}
+                ${mlIsBest ? '<div class="best-star">? Best</div>' : ''}
               </div>
               <div class="pk">
                 <div class="pt">RUN LINE</div>
@@ -2432,10 +2435,10 @@ function renderApp() {
               </div>
               <div class="pk ${ouIsBest ? 'best-pick' : ''}">
                 <div class="pt">O/U ${mkt.ou} (PROJ ${mod.projOU.toFixed(1)})</div>
-                <div class="pv" style="color:${ouSigVal.v > 1 ? 'var(--y)' : 'var(--tx3)'}">${ouSigVal.v > 1 ? `${ouPick} ${mkt.ou}` : '⬜ SKIP — No Bet'}</div>
+                <div class="pv" style="color:${ouSigVal.v > 1 ? 'var(--y)' : 'var(--tx3)'}">${ouSigVal.v > 1 ? `${ouPick} ${mkt.ou}` : '? SKIP � No Bet'}</div>
                 <div class="or"><span class="mo">${ouFairOdds}</span> <span style="color:var(--tx3)">mkt -110</span></div>
                 <div class="ev">${ouSigVal.v > 1 ? `edge <span style="color:${ouIsBest?'var(--g)':'var(--tx3)'}">+${(ouEV*100).toFixed(1)}%</span>` : '<span style="color:var(--tx3)">no edge</span>'}</div>
-                ${ouIsBest ? '<div class="best-star">★ Best</div>' : ''}
+                ${ouIsBest ? '<div class="best-star">? Best</div>' : ''}
               </div>
             </div>
         </div>
@@ -2469,7 +2472,7 @@ function renderApp() {
         <div class="bb-row" onclick="gotoGame('${g.away}','${g.home}')" title="Click to see full prediction">
           <div class="bb-grade-box ${dispBestSig.c}" style="background:transparent;display:flex;align-items:center;justify-content:center;font-size:20px;width:46px;margin:8px 12px 8px 8px;">${dispBestSig.icon}</div>
           <div class="bb-info">
-            <div class="bb-pick-title">${dispBestPick} <span class="bb-ev-tag">${hasStarted ? '🔒 Locked (T-2m)' : 'Best EV today'}</span> <span class="sig-box ${dispBestSig.c}">${dispBestSig.icon} ${dispBestSig.l}</span></div>
+            <div class="bb-pick-title">${dispBestPick} <span class="bb-ev-tag">${hasStarted ? '?? Locked (T-2m)' : 'Best EV today'}</span> <span class="sig-box ${dispBestSig.c}">${dispBestSig.icon} ${dispBestSig.l}</span></div>
             <div class="bb-sub">${g.away} @ ${g.home} &bull; ${g.t}</div>
             <div class="bb-pitchers">${awayPitcherStr} vs ${homePitcherStr}</div>
             <div style="font-size:10px;color:var(--tx3);margin-top:2px">Proj ${mod.projOU.toFixed(1)} vs mkt ${mkt.ou}</div>
@@ -2503,7 +2506,7 @@ function renderApp() {
 
   if (edgePicks.length > 0) {
     vList.innerHTML += `<div style="margin:18px 0 10px;padding:8px 14px;background:rgba(0,214,143,.07);border:1px solid rgba(0,214,143,.22);border-radius:8px;font-size:10px;font-weight:700;color:var(--g);letter-spacing:.5px;">
-      ✅ EDGE PICKS — Positive expected value, worth tracking
+      ? EDGE PICKS � Positive expected value, worth tracking
     </div>`;
     edgePicks.forEach(b => { vList.innerHTML += b.html; });
   }
@@ -2567,7 +2570,7 @@ async function runBacktest() {
     };
 
     // Process all dates newest-first so the table shows most recent at top
-    // Load real closing odds from localStorage � used as realMkt fallback for historical games
+    // Load real closing odds from localStorage ? used as realMkt fallback for historical games
     const btCachedOdds = (function() { try { return JSON.parse(localStorage.getItem('cachedOdds') || '{}' ); } catch { return {}; } })();
     [...pastRes.dates].reverse().forEach(d => {
       const dStr = new Date(d.date + 'T12:00:00').toLocaleString('en-US', { month:'short', day:'numeric' });
@@ -2625,7 +2628,7 @@ async function runBacktest() {
             const isTodayDate = d.date === formatDateStr(new Date());
             const fData = (HISTORICAL_FROZEN[d.date] && (HISTORICAL_FROZEN[d.date][fKeyAt] || HISTORICAL_FROZEN[d.date][fKeyUnd])) || dateFrozen[fKeyAt] || dateFrozen[fKeyUnd] || (isTodayDate ? (frozenPredictions[fKeyAt] || frozenPredictions[fKeyUnd]) : null);
             
-            // ─ ML pick ───────────────────────────────────────────────────────────────────
+            // - ML pick -------------------------------------------------------------------
             let mlPick, mlEV;
             const liveGame = TODAY.find(tg => tg.home === home && tg.away === away);
 
@@ -2644,7 +2647,7 @@ async function runBacktest() {
               mlEV   = mlPick === home ? mod.evH : mod.evA;
             }
 
-            const isRealOdds = !!(ODDS[home] && ODDS[home][currentBook]) || !!(btCachedOdds[home] && btCachedOdds[home][currentBook]);
+            const isRealOdds = !!(ODDS[home] && ODDS[home][currentBook]) || !!(btCachedOdds[home] && btCachedOdds[home][currentBook]) || !!(typeof window !== 'undefined' && window.HISTORICAL_ODDS && window.HISTORICAL_ODDS[d.date] && window.HISTORICAL_ODDS[d.date][home] && window.HISTORICAL_ODDS[d.date][home][currentBook]);
             const isDog      = isRealOdds ? (mlPick === home ? mod.homeDog : mod.awayDog) : false;
             const mlPickProb = mlPick === home ? mod.homeProb : mod.awayProb;
             const rawMlSig   = getSignal('ML', { ev: mlEV, mlPickProb });
@@ -2656,11 +2659,11 @@ async function runBacktest() {
               mlSig = fData.mlSig;
             } else if (fData?.bestSig && !fData?.bestIsOU) {
               mlSig = fData.bestSig;
-            } else if (isRealOdds && isTodayDate) {
+            } else if (isRealOdds) {
               mlSig = rawMlSig;
             } else {
               // For past historical games without a verified T-2m frozen pick, cap raw signal to EDGE max to prevent post-game prime inflation
-              mlSig = (rawMlSig.v === 3) ? { l: 'EDGE', c: 'sig-edge', v: 2, icon: '✅' } : rawMlSig;
+              mlSig = (rawMlSig.v === 3) ? { l: 'EDGE', c: 'sig-edge', v: 2, icon: '?' } : rawMlSig;
             }
             const mlHit      = mlPick === winner;
 
@@ -2676,7 +2679,7 @@ async function runBacktest() {
                if (mlHit) { grHits.ALL[mlSig.l].w++; grHits.ML[mlSig.l].w++; }
             }
 
-            // ─ RL pick (Display reference only — excluded from P/L calculations) ──────────
+            // - RL pick (Display reference only � excluded from P/L calculations) ----------
             let favProb = Math.max(mod.homeProb, mod.awayProb);
             let favTeam = mod.homeProb >= mod.awayProb ? home : away;
             let dogTeam = mod.homeProb >= mod.awayProb ? away : home;
@@ -2684,7 +2687,7 @@ async function runBacktest() {
             let isMinus15 = favProb >= 0.55;
             let rlHit = false;
             let rlProfit = 0;
-            let rlSig = { l: 'SKIP', c: 'sig-skip', v: 1, icon: '⬜' };
+            let rlSig = { l: 'SKIP', c: 'sig-skip', v: 1, icon: '?' };
 
             if (rlSig.l !== 'SKIP') {
                pl.ALL[rlPick] += rlProfit;
@@ -2695,7 +2698,7 @@ async function runBacktest() {
                if (rlHit) { grHits.ALL[rlSig.l].w++; grHits.RL[rlSig.l].w++; }
             }
 
-            // - O/U pick � prefer frozen direction (real-odds derived) when available --
+            // - O/U pick ? prefer frozen direction (real-odds derived) when available --
             let ouPick, ouAbsDiff, ouEV;
             if (fData?.ouPick) {
               ouPick    = fData.ouPick;
@@ -2706,7 +2709,7 @@ async function runBacktest() {
               ouAbsDiff = Math.abs(mod.projOU - mod.mkt.ou);
               ouEV      = Math.min(0.14, Math.max(0, (ouAbsDiff/0.5)*0.05 - 0.02));
             }
-            const ouSig    = fData?.ouSig || (fData?.bestSig && fData?.bestIsOU ? fData.bestSig : (hasVerifiedRealData ? getSignal('OU', { ouAbsDiff }) : getSignal('OU', { ouAbsDiff: 0 })));
+            const ouSig    = fData?.ouSig || (fData?.bestSig && fData?.bestIsOU ? fData.bestSig : (isRealOdds ? getSignal('OU', { ouAbsDiff }) : getSignal('OU', { ouAbsDiff: 0 })));
             const ouIsPush = totalScore === mod.mkt.ou;
             const ouHit    = ouPick === 'OVER' ? totalScore > mod.mkt.ou : totalScore < mod.mkt.ou;
             const ouPrice  = ouPick === 'OVER' ? (mod.mkt.ouPrice?.o || -110) : (mod.mkt.ouPrice?.u || -110);
@@ -2722,7 +2725,7 @@ async function runBacktest() {
                if (ouHit) { grHits.ALL[ouSig.l].w++; grHits.OU[ouSig.l].w++; }
             }
 
-            // - Best EV (last column) � uses frozen pick if available, else tier-first -
+            // - Best EV (last column) ? uses frozen pick if available, else tier-first -
             let bestCand;
             if (fData?.bestPick && fData?.bestSig) {
               const isFOU = fData.bestIsOU;
@@ -2740,7 +2743,7 @@ async function runBacktest() {
             }
             const bestEVStr = bestCand.sig.v > 1
               ? `<span style="font-weight:700">${bestCand.text}</span>`
-              : `<span style="color:var(--tx3)">�</span>`;
+              : `<span style="color:var(--tx3)">?</span>`;
 
             // Profit/loss coloring
             const mlProfC = mlProfit > 0 ? 'color:var(--g)' : 'color:var(--r)';
@@ -2755,18 +2758,18 @@ async function runBacktest() {
             html += `<tr class="bt-row-click bt-row-data" data-month="${mStr}" data-ml="${mlSig.l}" data-rl="${rlSig.l}" data-ou="${ouSig.l}" data-ml-pl="${mlSig.l !== 'SKIP' ? mlProfit : 0}" data-rl-pl="${rlSig.l !== 'SKIP' ? rlProfit : 0}" data-ou-pl="${ouSig.l !== 'SKIP' ? ouProfit : 0}" data-ml-hit="${mlSig.l !== 'SKIP' ? (mlHit?1:0) : 0}" data-rl-hit="${rlSig.l !== 'SKIP' ? (rlHit?1:0) : 0}" data-ou-hit="${ouSig.l !== 'SKIP' ? (ouHit?1:0) : 0}" onclick="showLineMovement('${away}','${home}','${dStr}',${mod.mkt.ml.a},${mod.mkt.ml.h},${mod.mkt.ou},${mlPickProb.toFixed(3)},${awayScore},${homeScore})">
               <td style="color:var(--tx2)">${dStr}</td>
               <td style="font-weight:700">${away} @ ${home}</td>
-              <td style="color:var(--tx2)">${awayScore}–${homeScore}</td>
+              <td style="color:var(--tx2)">${awayScore}�${homeScore}</td>
               <td style="font-weight:700;color:${mlHit&&mlPick===winner?'var(--g)':'var(--tx)'}">${winner}</td>
               <td style="font-weight:700">${mlPick} ${(isDog && mlSig.l !== 'SKIP') ? '<span class="dog-tag">DOG</span>' : ''}</td>
               <td style="color:var(--b)">${(Math.max(mod.homeProb,mod.awayProb)*100).toFixed(0)}% <span style="font-size:9px;color:var(--tx3)">(model)</span></td>
               <td><span class="sig-box ${mlSig.c}">${mlSig.icon} ${mlSig.l}</span></td>
-              <td>${mlSig.l === 'SKIP' ? `<span class="sig-box sig-skip">⬜ SKIP</span>` : `<span class="hit-box ${mlHit?'hit-w':'hit-l'}">${mlHit?'HIT':'MISS'}</span>`}</td>
-              <td style="${mlSig.l === 'SKIP' ? 'color:var(--tx3)' : mlProfC};font-weight:700">${mlSig.l === 'SKIP' ? '—' : `${mlProfit>=0?'+':''}${mlProfit.toFixed(2)}u`}</td>
+              <td>${mlSig.l === 'SKIP' ? `<span class="sig-box sig-skip">? SKIP</span>` : `<span class="hit-box ${mlHit?'hit-w':'hit-l'}">${mlHit?'HIT':'MISS'}</span>`}</td>
+              <td style="${mlSig.l === 'SKIP' ? 'color:var(--tx3)' : mlProfC};font-weight:700">${mlSig.l === 'SKIP' ? '�' : `${mlProfit>=0?'+':''}${mlProfit.toFixed(2)}u`}</td>
 
               <td style="font-weight:700">${rlPick} ${isMinus15 ? '-1.5' : '+1.5'}</td>
               <td><span class="sig-box ${rlSig.c}">${rlSig.icon} ${rlSig.l}</span></td>
-              <td>${rlSig.l === 'SKIP' ? `<span class="sig-box sig-skip">⬜ SKIP</span>` : `<span class="hit-box ${rlHit?'hit-w':'hit-l'}">${rlHit?'HIT':'MISS'}</span>`}</td>
-              <td style="${rlSig.l === 'SKIP' ? 'color:var(--tx3)' : rlProfC};font-weight:700">${rlSig.l === 'SKIP' ? '—' : `${rlProfit>=0?'+':''}${rlProfit.toFixed(2)}u`}</td>
+              <td>${rlSig.l === 'SKIP' ? `<span class="sig-box sig-skip">? SKIP</span>` : `<span class="hit-box ${rlHit?'hit-w':'hit-l'}">${rlHit?'HIT':'MISS'}</span>`}</td>
+              <td style="${rlSig.l === 'SKIP' ? 'color:var(--tx3)' : rlProfC};font-weight:700">${rlSig.l === 'SKIP' ? '�' : `${rlProfit>=0?'+':''}${rlProfit.toFixed(2)}u`}</td>
 
               <td>
                 <span style="color:var(--y);font-weight:700">${ouPick} ${mod.mkt.ou.toFixed(1)}</span>
@@ -2774,8 +2777,8 @@ async function runBacktest() {
                 <span style="font-size:9px;color:var(--tx3)">Proj: ${mod.projOU.toFixed(1)} &bull; Act: ${totalScore}</span>
               </td>
               <td><span class="sig-box ${ouSig.c}">${ouSig.icon} ${ouSig.l}</span></td>
-              <td>${ouSig.l === 'SKIP' ? `<span class="sig-box sig-skip">⬜ SKIP</span>` : `<span class="hit-box ${ouHit?'hit-w':'hit-l'}">${ouHit?'HIT':'MISS'}</span>`}</td>
-              <td style="${ouSig.l === 'SKIP' ? 'color:var(--tx3)' : ouProfC};font-weight:700">${ouSig.l === 'SKIP' ? '—' : `${ouProfit>=0?'+':''}${ouProfit.toFixed(2)}u`}</td>
+              <td>${ouSig.l === 'SKIP' ? `<span class="sig-box sig-skip">? SKIP</span>` : `<span class="hit-box ${ouHit?'hit-w':'hit-l'}">${ouHit?'HIT':'MISS'}</span>`}</td>
+              <td style="${ouSig.l === 'SKIP' ? 'color:var(--tx3)' : ouProfC};font-weight:700">${ouSig.l === 'SKIP' ? '�' : `${ouProfit>=0?'+':''}${ouProfit.toFixed(2)}u`}</td>
 
               <td>${bestEVStr}</td>
             </tr>`;
@@ -2795,7 +2798,7 @@ async function runBacktest() {
       thead.innerHTML = `<th>Date</th><th>Game</th><th>Score</th><th>Winner</th>
         <th>ML Pick</th><th>Model%</th><th>Signal</th><th>ML</th><th>ML P/L</th>
         <th>RL Pick</th><th>Signal</th><th>RL</th><th>RL P/L</th>
-        <th>O/U Pick • Mkt Line</th><th>Signal</th><th>O/U vs Line</th><th>O/U P/L</th><th>Best EV</th>`;
+        <th>O/U Pick � Mkt Line</th><th>Signal</th><th>O/U vs Line</th><th>O/U P/L</th><th>Best EV</th>`;
 
     }
 
@@ -2810,8 +2813,8 @@ async function runBacktest() {
 
 let currentPlData = {};
 let currentMonthlyPL = {};
-let currentGrHitsRaw = {}; // full grHits object — keyed [market][grade]
-let currentPlRaw     = {}; // full pl object — keyed [market][team]
+let currentGrHitsRaw = {}; // full grHits object � keyed [market][grade]
+let currentPlRaw     = {}; // full pl object � keyed [market][team]
 let currentTotalProfits = { ML: 0, RL: 0, OU: 0 };
 
 function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 0 }) {
@@ -2976,7 +2979,7 @@ function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 
     }
   });
 
-  // 4. Market P/L Chart (Moneyline & Over/Under — RL excluded)
+  // 4. Market P/L Chart (Moneyline & Over/Under � RL excluded)
   let mktLabels = ['Moneyline', 'Over/Under'];
   let totalML = currentTotalProfits.ML;
   let totalOU = currentTotalProfits.OU;
@@ -3055,7 +3058,7 @@ function updateGrFilter(val) {
   }
 }
 
-// ── KPI DASHBOARD ────────────────────────────────────────────────────────────
+// -- KPI DASHBOARD ------------------------------------------------------------
 function updateKPI() {
   const marketEl = document.getElementById('kpi-market');
   const gradeEl  = document.getElementById('kpi-grade');
@@ -3128,35 +3131,35 @@ function updateKPI() {
   const mktLabel = { ALL:'All Markets', ML:'Moneyline', RL:'Run Line', OU:'Over/Under' }[market];
   const grLabel  = signal === 'ALL' ? 'All Signals' : signal + ' signal';
 
-  set('kpi-games', totalBets > 0 ? totalBets.toLocaleString() : '—');
-  setBadge('kpi-games-badge', 'neu', mktLabel + ' · ' + grLabel);
+  set('kpi-games', totalBets > 0 ? totalBets.toLocaleString() : '�');
+  setBadge('kpi-games-badge', 'neu', mktLabel + ' � ' + grLabel);
 
-  set('kpi-hits', totalHits > 0 ? totalHits.toLocaleString() : (totalBets > 0 ? '0' : '—'));
-  setBadge('kpi-hits-badge', 'pos', totalBets > 0 ? hitRate.toFixed(1) + '% of bets' : '—');
+  set('kpi-hits', totalHits > 0 ? totalHits.toLocaleString() : (totalBets > 0 ? '0' : '�'));
+  setBadge('kpi-hits-badge', 'pos', totalBets > 0 ? hitRate.toFixed(1) + '% of bets' : '�');
 
-  set('kpi-misses', totalBets > 0 ? totalMisses.toLocaleString() : '—');
-  setBadge('kpi-misses-badge', 'neg', totalBets > 0 ? (100 - hitRate).toFixed(1) + '% miss rate' : '—');
+  set('kpi-misses', totalBets > 0 ? totalMisses.toLocaleString() : '�');
+  setBadge('kpi-misses-badge', 'neg', totalBets > 0 ? (100 - hitRate).toFixed(1) + '% miss rate' : '�');
 
   const pctEl = document.getElementById('kpi-pct');
   if (pctEl) {
-    pctEl.textContent = totalBets > 0 ? hitRate.toFixed(1) + '%' : '—';
+    pctEl.textContent = totalBets > 0 ? hitRate.toFixed(1) + '%' : '�';
     pctEl.style.color = netProfit > 0 ? 'var(--g)' : (hitRate >= 52.4 ? 'var(--y)' : 'var(--r)');
   }
   const isPos = netProfit > 0;
   setBadge('kpi-pct-badge', isPos ? 'pos' : (hitRate >= 52.4 ? 'pur' : 'neg'),
     totalBets === 0 ? 'No data' :
-    isPos           ? '↑ Above breakeven' :
-    hitRate >= 52.4 ? '≈ At breakeven' : '↓ Below breakeven');
+    isPos           ? '^ Above breakeven' :
+    hitRate >= 52.4 ? '? At breakeven' : 'v Below breakeven');
 
-  set('kpi-units', totalBets > 0 ? totalBets.toLocaleString() + 'u' : '—');
+  set('kpi-units', totalBets > 0 ? totalBets.toLocaleString() + 'u' : '�');
   setBadge('kpi-units-badge', 'neu', '1u flat staking');
 
   const netEl = document.getElementById('kpi-net');
   if (netEl) {
-    netEl.textContent = totalBets > 0 ? (netProfit >= 0 ? '+' : '') + netProfit.toFixed(2) + 'u' : '—';
+    netEl.textContent = totalBets > 0 ? (netProfit >= 0 ? '+' : '') + netProfit.toFixed(2) + 'u' : '�';
     netEl.style.color = netProfit > 0 ? 'var(--g)' : netProfit < 0 ? 'var(--r)' : 'var(--tx)';
   }
-  const roiStr = totalBets > 0 ? (roi >= 0 ? '+' : '') + roi.toFixed(1) + '% ROI' : '—';
+  const roiStr = totalBets > 0 ? (roi >= 0 ? '+' : '') + roi.toFixed(1) + '% ROI' : '�';
   setBadge('kpi-net-badge', netProfit >= 0 ? 'pos' : 'neg', roiStr);
 }
 
@@ -3211,7 +3214,7 @@ function renderPitchers() {
     const diffC   = parseFloat(diff) > 0 ? 'c-g' : 'c-r'; // lucky if ERA > xERA (regression coming)
     const babipDiff = (babip - 0.300).toFixed(3);
     const reg = calculateRegression(p);
-    let bFlag = '—';
+    let bFlag = '�';
     if (reg.text) {
       bFlag = `<span class="reg-badge reg-${reg.text.type}" style="font-size:10px">${reg.text.text}</span>`;
     }
@@ -3222,8 +3225,8 @@ function renderPitchers() {
         <div class="pc">
           <div class="pc-hdr">
             <div>
-              <div class="pc-title"><span class="pc-dot">●</span> ${p.name}</div>
-              <div class="pc-sub">${getTeamAbbr(p.team)} · ${p.hand || 'RHP'} · ${ip > 0 ? ip + ' IP' : 'No IP data'}</div>
+              <div class="pc-title"><span class="pc-dot">?</span> ${p.name}</div>
+              <div class="pc-sub">${getTeamAbbr(p.team)} � ${p.hand || 'RHP'} � ${ip > 0 ? ip + ' IP' : 'No IP data'}</div>
             </div>
             <div class="pc-score-box">
               <div class="pc-score">${score >= 0 ? '+' + score : score}</div>
@@ -3245,7 +3248,7 @@ function renderPitchers() {
 
     tbodyHtml += `
       <tr>
-        <td style="font-weight:700"><span style="color:var(--y)">●</span> ${p.name}</td>
+        <td style="font-weight:700"><span style="color:var(--y)">?</span> ${p.name}</td>
         <td><strong style="color:var(--b)">${getTeamAbbr(p.team)}</strong></td>
         <td>${p.hand || 'RHP'}</td>
         <td><span class="tier ${tClass}">${p.tier || 'Mid'}</span></td>
@@ -3256,7 +3259,7 @@ function renderPitchers() {
         <td class="${kpct > 28 ? 'c-g' : kpct < 15 ? 'c-r' : ''}">${kpct.toFixed(1)}%</td>
         <td>${bbpct.toFixed(1)}%</td>
         <td class="${swstr > 13 ? 'c-g' : swstr < 8 ? 'c-r' : ''}">${swstr.toFixed(1)}%</td>
-        <td>${ip > 0 ? ip : '—'}</td>
+        <td>${ip > 0 ? ip : '�'}</td>
         <td style="color:var(--g);font-weight:700">${score >= 0 ? '+' + score : score}</td>
         <td class="${diffC}">${parseFloat(diff) >= 0 ? '+' : ''}${diff}</td>
         <td>${bFlag}</td>
@@ -3284,36 +3287,36 @@ function sw(id, el) {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 
 
 
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// ODDS MOVEMENT TAB — 10-book comparison with best-line detection + movement
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
+// ODDS MOVEMENT TAB � 10-book comparison with best-line detection + movement
+// ===============================================================================
 let oddsData = [];          // current fetched odds
 let oddsSnapshot = {};      // previous snapshot for movement arrows
 let oddsLoaded = false;
 let oddsRefreshTimer = null;
 
 const BOOK_META = {
-  DraftKings:  { icon: '👑', color: '#00d68f' },
-  FanDuel:     { icon: '🛡️', color: '#4da6ff' },
-  BetMGM:      { icon: '🦁', color: '#ffa500' },
-  Caesars:     { icon: '🏛️', color: '#a78bfa' },
-  BetRivers:   { icon: '🌊', color: '#4da6ff' },
-  ESPNBet:     { icon: '🏈', color: '#ef476f' },
-  Fanatics:    { icon: '🦅', color: '#00d68f' },
-  bet365:      { icon: '⚽', color: '#00b900' },
-  HardRock:    { icon: '🎸', color: '#ffd100' },
-  PointsBet:   { icon: '📍', color: '#ef476f' },
+  DraftKings:  { icon: '??', color: '#00d68f' },
+  FanDuel:     { icon: '???', color: '#4da6ff' },
+  BetMGM:      { icon: '??', color: '#ffa500' },
+  Caesars:     { icon: '???', color: '#a78bfa' },
+  BetRivers:   { icon: '??', color: '#4da6ff' },
+  ESPNBet:     { icon: '??', color: '#ef476f' },
+  Fanatics:    { icon: '??', color: '#00d68f' },
+  bet365:      { icon: '?', color: '#00b900' },
+  HardRock:    { icon: '??', color: '#ffd100' },
+  PointsBet:   { icon: '??', color: '#ef476f' },
 };
 
 async function loadOddsTab(forceRefresh = false) {
   const content = document.getElementById('odds-content');
   if (!oddsLoaded || forceRefresh) {
-    content.innerHTML = '<div class="odds-empty">⏳ Fetching odds from 10 sportsbooks…</div>';
+    content.innerHTML = '<div class="odds-empty">? Fetching odds from 10 sportsbooks�</div>';
   }
 
   try {
@@ -3333,7 +3336,7 @@ async function loadOddsTab(forceRefresh = false) {
       games.forEach(g => {
         const key = `${g.away}@${g.home}`;
         if (!oddsSnapshot[key]) {
-          // Initialize with opening lines so movement arrows (▲ / ▼) show immediately vs opening line!
+          // Initialize with opening lines so movement arrows (^ / �) show immediately vs opening line!
           oddsSnapshot[key] = JSON.parse(JSON.stringify(g.openBooks || g.books || {}));
         } else if (oddsData.length > 0) {
           // On subsequent refreshes, store previous fetch as baseline
@@ -3349,13 +3352,13 @@ async function loadOddsTab(forceRefresh = false) {
     oddsLoaded = true;
 
     const now = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
-    document.getElementById('odds-last-update').textContent = `Updated ${now} · ${result.source === 'live' ? '🟢 Live' : '🟡 Simulated'}`;
+    document.getElementById('odds-last-update').textContent = `Updated ${now} � ${result.source === 'live' ? '?? Live' : '?? Simulated'}`;
     document.getElementById('odds-books-count').textContent = `Comparing ${Object.keys(BOOK_META).length} books`;
 
   } catch (e) {
     oddsData = buildSimulatedOdds();
     oddsLoaded = true;
-    document.getElementById('odds-last-update').textContent = '🟡 Simulated (API offline)';
+    document.getElementById('odds-last-update').textContent = '?? Simulated (API offline)';
   }
 
   renderOddsTab();
@@ -3400,7 +3403,7 @@ function buildSimulatedOdds() {
 }
 
 function fmtOdds(n) {
-  if (n == null) return '—';
+  if (n == null) return '�';
   const v = parseInt(n);
   return v > 0 ? `+${v}` : `${v}`;
 }
@@ -3502,15 +3505,15 @@ function renderOddsTab() {
     });
 
     // Best line summary bar
-    const summaryML = `Best ML: <strong style="color:#ffd100">${away}</strong> ${fmtOdds(bestMLAway)} · <strong style="color:#ffd100">${home}</strong> ${fmtOdds(bestMLHome)}`;
-    const summaryOU = `Best O/U line: <strong style="color:#ffd100">${lowestOU.toFixed(1)}</strong> · Best Over: <strong style="color:#ffd100">${fmtOdds(bestOUOver)}</strong>`;
+    const summaryML = `Best ML: <strong style="color:#ffd100">${away}</strong> ${fmtOdds(bestMLAway)} � <strong style="color:#ffd100">${home}</strong> ${fmtOdds(bestMLHome)}`;
+    const summaryOU = `Best O/U line: <strong style="color:#ffd100">${lowestOU.toFixed(1)}</strong> � Best Over: <strong style="color:#ffd100">${fmtOdds(bestOUOver)}</strong>`;
 
     html += `
       <div class="odds-game-block">
         <div class="odds-game-hdr">
           <div>
             <div class="odds-game-title">${away} @ ${home}</div>
-            <div style="font-size:10px;color:var(--tx3);margin-top:3px">${summaryML} &nbsp;·&nbsp; ${summaryOU}</div>
+            <div style="font-size:10px;color:var(--tx3);margin-top:3px">${summaryML} &nbsp;�&nbsp; ${summaryOU}</div>
           </div>
           <div class="odds-game-time">${time ? time + ' Local' : 'TBD'}</div>
         </div>
@@ -3555,9 +3558,9 @@ function goToToday() {
 }
 
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// NAVIGATION — Best Bets → Predictions
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
+// NAVIGATION � Best Bets > Predictions
+// ===============================================================================
 function gotoGame(away, home) {
   const predTabEl = document.querySelector('.tab[onclick*="\'pred\'"]');
   if (predTabEl) sw('pred', predTabEl);
@@ -3573,9 +3576,9 @@ function gotoGame(away, home) {
   }, 120);
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 // MODAL UTILITIES
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 function closeModal(id) {
   document.getElementById(id).classList.remove('open');
 }
@@ -3590,20 +3593,20 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 // TEAM RECENT GAMES MODAL
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 async function showTeamRecent(teamName, teamId, side) {
-  document.getElementById('team-modal-title').textContent = `${teamName} — Last 6 Games`;
-  document.getElementById('team-modal-sub').textContent = 'Recent results · Click team name in any game card';
-  document.getElementById('team-modal-body').innerHTML = '<div class="loading" style="padding:20px">Loading recent games…</div>';
+  document.getElementById('team-modal-title').textContent = `${teamName} � Last 6 Games`;
+  document.getElementById('team-modal-sub').textContent = 'Recent results � Click team name in any game card';
+  document.getElementById('team-modal-body').innerHTML = '<div class="loading" style="padding:20px">Loading recent games�</div>';
   openModal('team-modal');
 
   try {
     let games = [];
 
     if (teamId && teamId > 0) {
-      // Fetch from MLB Stats API — last 10 scheduled games for this team
+      // Fetch from MLB Stats API � last 10 scheduled games for this team
       const season = new Date().getFullYear();
       const endDate = formatDateStr(new Date());
       const startDate = formatDateStr(new Date(Date.now() - 45 * 86400000));
@@ -3660,7 +3663,7 @@ async function showTeamRecent(teamName, teamId, side) {
       return `<tr>
         <td style="color:var(--tx3)">${g.dateStr}</td>
         <td><span style="color:var(--tx3);font-size:9px">${g.hl}</span> <strong>${g.opp}</strong></td>
-        <td style="font-weight:700;color:${scoreColor}">${g.myScore}–${g.oppScore}</td>
+        <td style="font-weight:700;color:${scoreColor}">${g.myScore}�${g.oppScore}</td>
         <td class="${g.won ? 'result-w' : 'result-l'}">${g.won ? 'W' : 'L'}</td>
         <td style="color:var(--tx3);font-size:10px">${mlStr}</td>
       </tr>`;
@@ -3668,7 +3671,7 @@ async function showTeamRecent(teamName, teamId, side) {
 
     document.getElementById('team-modal-body').innerHTML = `
       <div style="margin-bottom:10px;font-size:11px;color:var(--tx2)">
-        Record (last ${recent.length}): <strong style="color:var(--g)">${wl}W</strong> – <strong style="color:var(--r)">${recent.length - wl}L</strong>
+        Record (last ${recent.length}): <strong style="color:var(--g)">${wl}W</strong> � <strong style="color:var(--r)">${recent.length - wl}L</strong>
       </div>
       <table class="recent-tbl">
         <thead><tr>
@@ -3683,18 +3686,18 @@ async function showTeamRecent(teamName, teamId, side) {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 // BACKTEST LINE MOVEMENT MODAL
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
 let oddsModalChartObj = null;
 let currentLineData   = null;
 
 function showLineMovement(away, home, dStr, mlA, mlH, ou, mlProb, awayScore, homeScore) {
-  document.getElementById('odds-modal-title').textContent = `${away} @ ${home} — Line Movement`;
-  document.getElementById('odds-modal-sub').textContent = `${dStr} · Final: ${awayScore}–${homeScore} · Click market to view`;
+  document.getElementById('odds-modal-title').textContent = `${away} @ ${home} � Line Movement`;
+  document.getElementById('odds-modal-sub').textContent = `${dStr} � Final: ${awayScore}�${homeScore} � Click market to view`;
   document.getElementById('odds-modal-mkt').value = 'ml';
 
-  // Generate realistic line movement: 6 time points (Open → T-8h → T-4h → T-2h → T-1h → Close)
+  // Generate realistic line movement: 6 time points (Open > T-8h > T-4h > T-2h > T-1h > Close)
   const LABELS = ['Open', 'T-8h', 'T-4h', 'T-2h', 'T-1h', 'Close'];
   const seed = (sfx) => seedRand(away + home + dStr + sfx);
 
@@ -3712,11 +3715,11 @@ function showLineMovement(away, home, dStr, mlA, mlH, ou, mlProb, awayScore, hom
   const mlAwayPts  = mlWalk(mlAwayOpen);
   const mlHomePts  = mlWalk(mlHomeOpen);
 
-  // RL: always ±1.5, but juice changes
+  // RL: always �1.5, but juice changes
   const rlAwayPts = LABELS.map((_, i) => -110 + Math.round((seed(`rla${i}`) - 0.5) * 10));
   const rlHomePts = LABELS.map((_, i) => -110 + Math.round((seed(`rlh${i}`) - 0.5) * 10));
 
-  // OU: total line can move ±0.5 run from open
+  // OU: total line can move �0.5 run from open
   const ouOpen  = ou + (seed('ouopen') > 0.5 ? 0.5 : -0.5);
   const ouPts   = [ouOpen];
   for (let i = 1; i < 6; i++) {
@@ -3795,9 +3798,9 @@ function updateOddsModal() {
     </div>`;
 }
 
-// ═══════════════════════════════════════════════════════════════════════════════
-// LIVE SCORES — MLB Stats API
-// ═══════════════════════════════════════════════════════════════════════════════
+// ===============================================================================
+// LIVE SCORES � MLB Stats API
+// ===============================================================================
 let liveScoresLoaded  = false;
 let liveRefreshTimer  = null;
 let liveCdTimer       = null;
@@ -3806,7 +3809,7 @@ let liveCdVal         = 30;
 async function loadLiveScores(force = false) {
   if (!liveScoresLoaded || force) {
     const el = document.getElementById('live-content');
-    if (el) el.innerHTML = '<div class="loading">Fetching live scores from MLB…</div>';
+    if (el) el.innerHTML = '<div class="loading">Fetching live scores from MLB�</div>';
   }
 
   // Reset countdown
@@ -3848,8 +3851,8 @@ function renderLiveScores(data) {
     const home  = getTeamName(g.teams.home.team.name);
     const state = g.status?.abstractGameState;  // Final / Live / Preview
     const code  = g.status?.codedGameState;
-    const aScore = g.teams.away.score ?? '—';
-    const hScore = g.teams.home.score ?? '—';
+    const aScore = g.teams.away.score ?? '�';
+    const hScore = g.teams.home.score ?? '�';
     const ls = g.linescore || {};
 
     // Status badge
@@ -3860,26 +3863,26 @@ function renderLiveScores(data) {
       badgeCls = 'badge-live'; cardCls = 'live-game';
       const inn = ls.currentInning || '?';
       const top = ls.isTopInning;
-      badgeTxt = `${top ? '▲' : '▼'} ${inn}${inn === 1 ? 'st' : inn === 2 ? 'nd' : inn === 3 ? 'rd' : 'th'}`;
+      badgeTxt = `${top ? '^' : '�'} ${inn}${inn === 1 ? 'st' : inn === 2 ? 'nd' : inn === 3 ? 'rd' : 'th'}`;
     }
 
     const inningInfo = state === 'Live'
-      ? `Outs: ${ls.outs ?? 0} · ${ls.balls ?? 0}-${ls.strikes ?? 0}`
+      ? `Outs: ${ls.outs ?? 0} � ${ls.balls ?? 0}-${ls.strikes ?? 0}`
       : state === 'Final' ? 'Final score' : `Game time: ${new Date(g.gameDate).toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit',hour12:false})} Local`;
 
     // Inning-by-inning grid
     let gridHtml = '';
     if (ls.innings && ls.innings.length > 0) {
       const innings = ls.innings;
-      const aCells = innings.map(i => `<div class="sg-cell">${i.away?.runs ?? '—'}</div>`).join('');
-      const hCells = innings.map(i => `<div class="sg-cell">${i.home?.runs ?? '—'}</div>`).join('');
+      const aCells = innings.map(i => `<div class="sg-cell">${i.away?.runs ?? '�'}</div>`).join('');
+      const hCells = innings.map(i => `<div class="sg-cell">${i.home?.runs ?? '�'}</div>`).join('');
       const iHeaders = innings.map(i => `<div class="sg-cell sg-header">${i.num}</div>`).join('');
       gridHtml = `
         <div class="score-grid" style="overflow-x:auto">
           <div style="display:flex;flex-direction:column">
             <div class="sg-row"><div class="sg-team"></div>${iHeaders}<div class="sg-cell sg-total sg-header">R</div><div class="sg-cell sg-header">H</div></div>
-            <div class="sg-row"><div class="sg-team">${away}</div>${aCells}<div class="sg-cell sg-total">${aScore}</div><div class="sg-cell">${ls.teams?.away?.hits ?? '—'}</div></div>
-            <div class="sg-row"><div class="sg-team">${home}</div>${hCells}<div class="sg-cell sg-total">${hScore}</div><div class="sg-cell">${ls.teams?.home?.hits ?? '—'}</div></div>
+            <div class="sg-row"><div class="sg-team">${away}</div>${aCells}<div class="sg-cell sg-total">${aScore}</div><div class="sg-cell">${ls.teams?.away?.hits ?? '�'}</div></div>
+            <div class="sg-row"><div class="sg-team">${home}</div>${hCells}<div class="sg-cell sg-total">${hScore}</div><div class="sg-cell">${ls.teams?.home?.hits ?? '�'}</div></div>
           </div>
         </div>`;
     }
@@ -3925,9 +3928,9 @@ function renderLiveFallback() {
       <div class="live-card">
         <div class="live-card-top">
           <div class="live-teams">
-            <div class="live-team">${getTeamLogoImg(g.away, g.awayId, 20)}<div class="live-team-name">${g.away}</div><div class="live-score" style="color:var(--tx3)">—</div></div>
+            <div class="live-team">${getTeamLogoImg(g.away, g.awayId, 20)}<div class="live-team-name">${g.away}</div><div class="live-score" style="color:var(--tx3)">�</div></div>
             <div class="live-at">@</div>
-            <div class="live-team">${getTeamLogoImg(g.home, g.homeId, 20)}<div class="live-team-name">${g.home}</div><div class="live-score" style="color:var(--tx3)">—</div></div>
+            <div class="live-team">${getTeamLogoImg(g.home, g.homeId, 20)}<div class="live-team-name">${g.home}</div><div class="live-score" style="color:var(--tx3)">�</div></div>
           </div>
           <div>
             <span class="live-status-badge badge-sched">Scheduled</span>
@@ -3980,11 +3983,11 @@ function updateThemeBtn() {
   const btn = document.getElementById('theme-toggle-btn');
   if (btn) {
     const current = document.documentElement.getAttribute('data-theme') || 'dark';
-    btn.innerHTML = current === 'dark' ? '☀️ Light' : '🌙 Dark';
+    btn.innerHTML = current === 'dark' ? '?? Light' : '?? Dark';
   }
 }
 
-// ── BETTING CALCULATOR & ODDS CONVERTER ────────────────────────
+// -- BETTING CALCULATOR & ODDS CONVERTER ------------------------
 function convertOdds(source) {
   let amEl = document.getElementById('calc-am');
   let decEl = document.getElementById('calc-dec');
@@ -4066,7 +4069,7 @@ function calculatePayoutEV() {
   }
 }
 
-// ── ACCA / PARLAY SLIP SIDEBAR ──────────────────────────────────
+// -- ACCA / PARLAY SLIP SIDEBAR ----------------------------------
 let accaLegs = [];
 
 function toggleAccaLeg(gameId, matchup, book, market, selection, price) {
@@ -4112,9 +4115,9 @@ function renderAccaSidebar() {
       <div class="acca-leg-item">
         <div>
           <div class="acca-leg-info">${leg.selection} (${fmtOdds(leg.price)})</div>
-          <div class="acca-leg-sub">${leg.matchup} · ${leg.book}</div>
+          <div class="acca-leg-sub">${leg.matchup} � ${leg.book}</div>
         </div>
-        <div class="acca-leg-remove" onclick="toggleAccaLeg('${leg.gameId}','${leg.matchup}','${leg.book}','${leg.market}','${leg.selection}',${leg.price})">✕</div>
+        <div class="acca-leg-remove" onclick="toggleAccaLeg('${leg.gameId}','${leg.matchup}','${leg.book}','${leg.market}','${leg.selection}',${leg.price})">?</div>
       </div>`;
   });
   listEl.innerHTML = html;
@@ -4190,4 +4193,10 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 
 </body>
 </html>
+
+
+
+
+
+
 
