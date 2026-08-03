@@ -52,10 +52,6 @@
                   {
                       "path":  "/api/cron",
                       "schedule":  "0 11 * * *"
-                  },
-                  {
-                      "path":  "/api/freeze",
-                      "schedule":  "0 * * * *"
                   }
               ],
     "headers":  [
