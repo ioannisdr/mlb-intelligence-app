@@ -2943,6 +2943,8 @@ function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 
       const selData = [];
 
       recentHistory.forEach(snapshot => {
+        console.log('Raw API snapshot:', snapshot);
+        
         const dateObj = new Date(snapshot.timestamp);
         timeLabels.push(dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
 
@@ -2958,6 +2960,8 @@ function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 
         const selML = snapshot.books && snapshot.books[selectedBook] && snapshot.books[selectedBook].ml;
         selData.push(selML ? parseInt(selML.h) : null);
       });
+
+      console.log('Consensus Array:', consensusData);
 
       if (trendsCharts[gId]) {
         trendsCharts[gId].data.labels = timeLabels;
