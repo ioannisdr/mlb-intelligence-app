@@ -50,6 +50,10 @@
                      {
                          "source":  "/api/history",
                          "destination":  "/api/history.js"
+                     },
+                     {
+                         "source":  "/api/cron-odds",
+                         "destination":  "/api/cron-odds.js"
                      }
                  ],
     "crons":  [
