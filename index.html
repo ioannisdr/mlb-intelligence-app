@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="historical_odds.js"></script>
+  <script src="historical_odds.js">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>MLB Betting Intelligence v14.0</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js">
 <script>
 (function() {
   const saved = localStorage.getItem('userTheme') || 'dark';
   document.documentElement.setAttribute('data-theme', saved);
 })();
-</script>
+
 <style>
 :root{
   --bg:#0f1117;--bg2:#171b26;--bg3:#1e2335;--bg4:#252b40;
@@ -3584,7 +3584,21 @@ function renderOddsTab() {
             <div class="odds-game-title">${away} @ ${home}</div>
             <div style="font-size:10px;color:var(--tx3);margin-top:3px">${summaryML} &nbsp;·&nbsp; ${summaryOU}</div>
           </div>
-          <div class="odds-game-time">${time ? time + ' Local' : 'TBD'}</div>
+          <div class="odds-game-time" style="display:flex;align-items:center;gap:10px;">
+            <div style="cursor:pointer;background:var(--bg3);padding:4px 8px;border-radius:4px;border:1px solid var(--bdr2);font-size:10px;color:var(--tx);" onclick="toggleLineTrends('${gId}', '${away}', '${home}', '${time || ''}')">📈 View Line Trends</div>
+            <div>${time ? time + ' Local' : 'TBD'}</div>
+          </div>
+        </div>
+        <div id="trends-acc-${gId}" class="trends-accordion" style="display:none;padding:12px;background:var(--bg2);border-bottom:1px solid var(--bdr);border-top:1px solid var(--bdr);">
+           <div style="display:flex;justify-content:space-between;margin-bottom:10px;align-items:center;">
+             <div style="font-size:12px;font-weight:700">Line Movement (${home} ML)</div>
+             <select id="trends-book-${gId}" onchange="renderTrendsChart('${gId}', '${away}', '${home}')" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bdr2);border-radius:4px;padding:3px 6px;font-size:10px;outline:none;cursor:pointer;">
+               ${books.map(b => `<option value="${b}">${b}</option>`).join('')}
+             </select>
+           </div>
+           <div style="height:200px;position:relative;">
+             <canvas id="trends-chart-${gId}"></canvas>
+           </div>
         </div>
         <div class="odds-wrap">
           <table class="odds-tbl">
@@ -4254,6 +4268,124 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
   document.addEventListener('DOMContentLoaded', initApp);
 }
 
+
+
+// --- ACCORDION CHART LOGIC ---
+let trendsCharts = {};
+
+function toggleLineTrends(gId, away, home, time) {
+  const acc = document.getElementById(`trends-acc-${gId}`);
+  if (acc.style.display === 'none') {
+    acc.style.display = 'block';
+    renderTrendsChart(gId, away, home);
+  } else {
+    acc.style.display = 'none';
+  }
+}
+
+function renderTrendsChart(gId, away, home) {
+  const select = document.getElementById(`trends-book-${gId}`);
+  const selectedBook = select.value;
+  const canvas = document.getElementById(`trends-chart-${gId}`);
+  
+  if (trendsCharts[gId]) {
+    trendsCharts[gId].destroy();
+  }
+
+  const LABELS = ['Open', 'T-8h', 'T-4h', 'T-2h', 'T-1h', 'Close'];
+  const dStr = new Date().toISOString().split('T')[0];
+  const seed = (sfx) => seedRand(away + home + dStr + sfx);
+
+  const mockG = { away, home, awayP: 'TBD', homeP: 'TBD', dateKey: dStr };
+  
+  let game = null;
+  if (typeof oddsData !== 'undefined' && oddsData) {
+    game = oddsData.find(g => g.away === away && g.home === home);
+  }
+  const realMkt = game?.books[selectedBook] || null;
+  const mod = calculateModel(mockG, realMkt);
+  
+  const homeFVDec = 1 / mod.homeProb;
+  const homeFV = homeFVDec >= 2 ? (homeFVDec - 1) * 100 : -100 / (homeFVDec - 1);
+
+  const mlWalk = (startA) => {
+    const pts = [startA];
+    for (let i = 1; i < 6; i++) {
+      const delta = Math.round((seed(`ml${i}`) - 0.48) * 8);
+      pts.push(pts[pts.length - 1] + delta);
+    }
+    return pts;
+  };
+  
+  let allBooksHomeML = [];
+  if (game && game.books) {
+    Object.keys(game.books).forEach(b => {
+      if (game.books[b].ml && game.books[b].ml.h) allBooksHomeML.push(parseInt(game.books[b].ml.h));
+    });
+  }
+  const avgHomeML = allBooksHomeML.length > 0 ? allBooksHomeML.reduce((a, b) => a + b, 0) / allBooksHomeML.length : -110;
+  
+  const consensusStart = avgHomeML + Math.round((seed('openH') - 0.5) * 14);
+  const consensusPts = mlWalk(consensusStart);
+  consensusPts[consensusPts.length - 1] = avgHomeML; 
+
+  const selHomeML = parseInt(game?.books[selectedBook]?.ml?.h || avgHomeML);
+  const selStart = selHomeML + Math.round((seed('openH') - 0.5) * 14) + Math.round((seed('var') - 0.5) * 6); 
+  const selPts = mlWalk(selStart);
+  selPts[selPts.length - 1] = selHomeML; 
+  
+  const modelPts = LABELS.map(() => homeFV);
+
+  trendsCharts[gId] = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: LABELS,
+      datasets: [
+        {
+          label: "Model's Fair Value",
+          data: modelPts,
+          borderColor: '#ffd100',
+          borderWidth: 2,
+          borderDash: [],
+          pointRadius: 0,
+          fill: false,
+          tension: 0.1
+        },
+        {
+          label: 'Market Consensus',
+          data: consensusPts,
+          borderColor: '#ffffff',
+          borderWidth: 3,
+          pointRadius: 3,
+          fill: false,
+          tension: 0.1
+        },
+        {
+          label: selectedBook,
+          data: selPts,
+          borderColor: '#00ccff',
+          borderWidth: 2,
+          borderDash: [5, 5],
+          pointRadius: 3,
+          fill: false,
+          tension: 0.1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: '#a0a0a0', font: { size: 10 } } },
+        tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + (ctx.raw > 0 ? '+' : '') + Math.round(ctx.raw); } } }
+      },
+      scales: {
+        x: { ticks: { color: '#888', font: { size: 10 } }, grid: { color: '#333' } },
+        y: { ticks: { color: '#888', font: { size: 10 } }, grid: { color: '#333' } }
+      }
+    }
+  });
+}
 </script>
 
 <div class="scroll-top-btn" id="scrollTopBtn" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
