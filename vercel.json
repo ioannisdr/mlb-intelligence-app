@@ -46,6 +46,10 @@
                      {
                          "source":  "/api/freeze",
                          "destination":  "/api/freeze.js"
+                     },
+                     {
+                         "source":  "/api/history",
+                         "destination":  "/api/history.js"
                      }
                  ],
     "crons":  [
