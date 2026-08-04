@@ -1549,7 +1549,10 @@ function pfLabel(pf) {
   return `🏟️ PF ${pf} 🟣 Pitchers Park`;
 }
 
-async function changeBook(b) {\n  currentBook = b;\n  try {\n    const res = await fetch(/api/latest-odds?book=);\n    const dbOdds = await res.json();\n    if (dbOdds && dbOdds.length > 0) {\n      dbOdds.forEach(dbGame => {\n        const existing = oddsData.find(o => o.home === dbGame.home);\n        if (existing) {\n          existing.books[b] = dbGame.books[b];\n        } else {\n          oddsData.push(dbGame);\n        }\n      });\n    }\n  } catch (e) {\n    console.error(Failed to fetch DB odds:, e);\n  }\n  renderApp();\n}
+function changeBook(b) {
+  currentBook = b;
+  renderApp();
+}
 
 function formatDateStr(d) {
   if (!d || isNaN(new Date(d).getTime())) d = new Date();
@@ -3422,7 +3425,7 @@ async function loadOddsTab(forceRefresh = false) {
     oddsLoaded = true;
     
     if (document.querySelector(".tab-active")?.textContent?.includes("Predictions")) {
-      renderApp();
+      renderPredictions();
     }
 
     const now = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
