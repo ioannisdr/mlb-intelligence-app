@@ -3353,18 +3353,19 @@ let oddsData = [];          // current fetched odds
 let oddsSnapshot = {};      // previous snapshot for movement arrows
 let oddsLoaded = false;
 let oddsRefreshTimer = null;
+let openAccordionGid = null;
 
 const BOOK_META = {
-  DraftKings:  { icon: "🔥", color: '#00d68f' },
-  FanDuel:     { icon: '🛡️', color: '#4da6ff' },
-  BetMGM:      { icon: "🔥", color: '#ffa500' },
-  Caesars:     { icon: '🏛️', color: '#a78bfa' },
-  BetRivers:   { icon: "🔥", color: '#4da6ff' },
-  ESPNBet:     { icon: "🔥", color: '#ef476f' },
-  Fanatics:    { icon: "🔥", color: '#00d68f' },
-  bet365:      { icon: "✅", color: '#00b900' },
-  HardRock:    { icon: "🔥", color: '#ffd100' },
-  PointsBet:   { icon: "🔥", color: '#ef476f' },
+  DraftKings:  { icon: "<img src='https://www.draftkings.com/favicon.ico' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#43a047' },
+  FanDuel:     { icon: "<img src='https://www.fanduel.com/favicon.ico' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#1976d2' },
+  BetMGM:      { icon: "<img src='https://sports.betmgm.com/favicon.ico' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#bfa15f' },
+  Caesars:     { icon: "<img src='https://www.caesars.com/favicon.ico' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#fdd835' },
+  BetRivers:   { icon: "<img src='https://betrivers.com/favicon.ico' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#ffb300' },
+  ESPNBet:     { icon: "<img src='https://espnbet.com/favicon.ico' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#ef476f' },
+  Fanatics:    { icon: "<img src='https://sportsbook.fanatics.com/favicon.ico' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#00d68f' },
+  bet365:      { icon: "<img src='https://www.bet365.com/favicon.ico' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#00b900' },
+  HardRock:    { icon: "<img src='https://hardrock.bet/favicon.ico' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#ffd100' },
+  PointsBet:   { icon: "<img src='https://pointsbet.com/favicon.ico' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#ef476f' },
 };
 
 async function loadOddsTab(forceRefresh = false) {
@@ -3623,6 +3624,11 @@ function renderOddsTab() {
       renderTrendsChart(this.dataset.gid, this.dataset.away, this.dataset.home);
     });
   });
+  
+  if (openAccordionGid) {
+    const activeBtn = document.querySelector(`.trends-toggle-btn[data-gid="${openAccordionGid}"]`);
+    if (activeBtn) activeBtn.click();
+  }
 }
 
 function toggleAbout() {
@@ -3794,15 +3800,27 @@ function showLineMovement(away, home, dStr, mlA, mlH, ou, mlProb, awayScore, hom
   document.getElementById('odds-modal-mkt').value = 'ml';
 
   // Generate realistic line movement: 6 time points (Open > T-8h > T-4h > T-2h > T-1h > Close)
-  const LABELS = ['Open', 'T-8h', 'T-4h', 'T-2h', 'T-1h', 'Close'];
+  const numPts = 60;
+  const LABELS = Array.from({length: numPts}, (_, i) => {
+    if (i === 0) return 'Open';
+    if (i === 12) return 'T-8h';
+    if (i === 24) return 'T-4h';
+    if (i === 36) return 'T-2h';
+    if (i === 48) return 'T-1h';
+    if (i === numPts - 1) return 'Close';
+    return '';
+  });
   const seed = (sfx) => seedRand(away + home + dStr + sfx);
 
   // ML: simulate opening line and walk toward closing value
+  const numPts = 60;
   const mlWalk = (startA) => {
     const pts = [startA];
-    for (let i = 1; i < 6; i++) {
-      const delta = Math.round((seed(`ml${i}`) - 0.48) * 8);
-      pts.push(pts[pts.length - 1] + delta);
+    let current = startA;
+    for (let i = 1; i < numPts; i++) {
+      const delta = Math.round((seed(`ml${i}`) - 0.48) * 6);
+      current += delta;
+      pts.push(current);
     }
     return pts;
   };
@@ -4290,9 +4308,11 @@ function toggleLineTrends(gId, away, home, time) {
   const acc = document.getElementById(`trends-acc-${gId}`);
   if (acc.style.display === 'none') {
     acc.style.display = 'block';
+    openAccordionGid = gId;
     renderTrendsChart(gId, away, home);
   } else {
     acc.style.display = 'none';
+    if (openAccordionGid === gId) openAccordionGid = null;
   }
 }
 
@@ -4347,7 +4367,7 @@ function renderTrendsChart(gId, away, home) {
   const selPts = mlWalk(selStart);
   selPts[selPts.length - 1] = selHomeML; 
   
-  const modelPts = LABELS.map(() => homeFV);
+  const modelPts = Array(numPts).fill(homeFV);
 
   trendsCharts[gId] = new Chart(canvas, {
     type: 'line',
@@ -4393,7 +4413,7 @@ function renderTrendsChart(gId, away, home) {
         tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + (ctx.raw > 0 ? '+' : '') + Math.round(ctx.raw); } } }
       },
       scales: {
-        x: { ticks: { color: '#888', font: { size: 10 } }, grid: { color: '#333' } },
+        x: { ticks: { color: '#888', font: { size: 10 }, autoSkip: false, maxRotation: 0 }, grid: { color: '#333' } },
         y: { ticks: { color: '#888', font: { size: 10 } }, grid: { color: '#333' } }
       }
     }
