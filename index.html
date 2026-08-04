@@ -3356,16 +3356,16 @@ let oddsRefreshTimer = null;
 let openAccordionGid = null;
 
 const BOOK_META = {
-  DraftKings:  { icon: "<img src='https://www.draftkings.com/favicon.ico' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#43a047' },
-  FanDuel:     { icon: "<img src='https://www.fanduel.com/favicon.ico' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#1976d2' },
-  BetMGM:      { icon: "<img src='https://sports.betmgm.com/favicon.ico' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#bfa15f' },
-  Caesars:     { icon: "<img src='https://www.caesars.com/favicon.ico' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#fdd835' },
-  BetRivers:   { icon: "<img src='https://betrivers.com/favicon.ico' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#ffb300' },
-  ESPNBet:     { icon: "<img src='https://espnbet.com/favicon.ico' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#ef476f' },
-  Fanatics:    { icon: "<img src='https://sportsbook.fanatics.com/favicon.ico' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#00d68f' },
-  bet365:      { icon: "<img src='https://www.bet365.com/favicon.ico' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#00b900' },
-  HardRock:    { icon: "<img src='https://hardrock.bet/favicon.ico' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#ffd100' },
-  PointsBet:   { icon: "<img src='https://pointsbet.com/favicon.ico' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#ef476f' },
+  DraftKings:  { icon: "<img src='https://www.google.com/s2/favicons?domain=draftkings.com&sz=32' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#43a047' },
+  FanDuel:     { icon: "<img src='https://www.google.com/s2/favicons?domain=fanduel.com&sz=32' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#1976d2' },
+  BetMGM:      { icon: "<img src='https://www.google.com/s2/favicons?domain=betmgm.com&sz=32' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#bfa15f' },
+  Caesars:     { icon: "<img src='https://www.google.com/s2/favicons?domain=caesars.com&sz=32' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#fdd835' },
+  BetRivers:   { icon: "<img src='https://www.google.com/s2/favicons?domain=betrivers.com&sz=32' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#ffb300' },
+  ESPNBet:     { icon: "<img src='https://www.google.com/s2/favicons?domain=espnbet.com&sz=32' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#ef476f' },
+  Fanatics:    { icon: "<img src='https://www.google.com/s2/favicons?domain=fanatics.com&sz=32' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#00d68f' },
+  bet365:      { icon: "<img src='https://www.google.com/s2/favicons?domain=bet365.com&sz=32' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#00b900' },
+  HardRock:    { icon: "<img src='https://www.google.com/s2/favicons?domain=hardrock.bet&sz=32' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#ffd100' },
+  PointsBet:   { icon: "<img src='https://www.google.com/s2/favicons?domain=pointsbet.com&sz=32' style='width:16px;height:16px;border-radius:3px;vertical-align:middle;object-fit:contain;' onerror=\"this.style.display='none'\">", color: '#ef476f' },
 };
 
 async function loadOddsTab(forceRefresh = false) {
@@ -4409,7 +4409,23 @@ function renderTrendsChart(gId, away, home) {
       maintainAspectRatio: false,
       plugins: {
         legend: { labels: { color: '#a0a0a0', font: { size: 10 } } },
-        tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + (ctx.raw > 0 ? '+' : '') + Math.round(ctx.raw); } } }
+        tooltip: { 
+          callbacks: { 
+            label: function(ctx) { 
+              const homeVal = Math.round(ctx.raw);
+              let oppOdds;
+              if (homeVal >= 100) {
+                oppOdds = -(homeVal + 20);
+              } else if (homeVal <= -120) {
+                oppOdds = Math.abs(homeVal) - 20;
+              } else {
+                oppOdds = -220 - homeVal;
+              }
+              const fmt = v => (v > 0 ? '+' : '') + Math.round(v);
+              return `${ctx.dataset.label}: ${home} ${fmt(homeVal)} | ${away} ${fmt(oppOdds)}`; 
+            } 
+          } 
+        }
       },
       scales: {
         x: { ticks: { color: '#888', font: { size: 10 }, autoSkip: false, maxRotation: 0 }, grid: { color: '#333' } },
