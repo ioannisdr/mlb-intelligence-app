@@ -3800,20 +3800,10 @@ function showLineMovement(away, home, dStr, mlA, mlH, ou, mlProb, awayScore, hom
   document.getElementById('odds-modal-mkt').value = 'ml';
 
   // Generate realistic line movement: 6 time points (Open > T-8h > T-4h > T-2h > T-1h > Close)
-  const numPts = 60;
-  const LABELS = Array.from({length: numPts}, (_, i) => {
-    if (i === 0) return 'Open';
-    if (i === 12) return 'T-8h';
-    if (i === 24) return 'T-4h';
-    if (i === 36) return 'T-2h';
-    if (i === 48) return 'T-1h';
-    if (i === numPts - 1) return 'Close';
-    return '';
-  });
+  const LABELS = ['Open', 'T-8h', 'T-4h', 'T-2h', 'T-1h', 'Close'];
   const seed = (sfx) => seedRand(away + home + dStr + sfx);
 
   // ML: simulate opening line and walk toward closing value
-  const numPts = 60;
   const mlWalk = (startA) => {
     const pts = [startA];
     let current = startA;
@@ -4325,7 +4315,16 @@ function renderTrendsChart(gId, away, home) {
     trendsCharts[gId].destroy();
   }
 
-  const LABELS = ['Open', 'T-8h', 'T-4h', 'T-2h', 'T-1h', 'Close'];
+  const numPts = 60;
+  const LABELS = Array.from({length: numPts}, (_, i) => {
+    if (i === 0) return 'Open';
+    if (i === 12) return 'T-8h';
+    if (i === 24) return 'T-4h';
+    if (i === 36) return 'T-2h';
+    if (i === 48) return 'T-1h';
+    if (i === numPts - 1) return 'Close';
+    return '';
+  });
   const dStr = new Date().toISOString().split('T')[0];
   const seed = (sfx) => seedRand(away + home + dStr + sfx);
 
