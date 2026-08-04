@@ -2082,6 +2082,9 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   const cFreezeKey = `${g.away}@${g.home}`;
   const histOverrideEarly = (cDateStr && typeof HISTORICAL_FROZEN !== 'undefined') ? (HISTORICAL_FROZEN[cDateStr] && HISTORICAL_FROZEN[cDateStr][cFreezeKey]) : null;
 
+  const frontEndOddsGame = typeof oddsData !== "undefined" ? oddsData.find(od => od.home === g.home) : null;
+  const currentFrontEndOdds = frontEndOddsGame && frontEndOddsGame.books ? frontEndOddsGame.books[currentBook] : null;
+
   let mkt;
   if (overrideMkt) {
     mkt = JSON.parse(JSON.stringify(overrideMkt));
@@ -2091,6 +2094,8 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
     mkt = JSON.parse(JSON.stringify(window.HISTORICAL_ODDS[cDateStr][g.home][currentBook]));
   } else if (liveMkt) {
     mkt = JSON.parse(JSON.stringify(liveMkt));
+  } else if (currentFrontEndOdds) {
+    mkt = JSON.parse(JSON.stringify(currentFrontEndOdds));
   } else if (ODDS[g.home] && ODDS[g.home][currentBook]) {
     mkt = JSON.parse(JSON.stringify(ODDS[g.home][currentBook]));
   } else {
@@ -2668,7 +2673,12 @@ async function runBacktest() {
 
             let realMkt = null;
             const isTodaySlate = TODAY.some(tg => tg.home === home && tg.away === away);
-            if (isTodaySlate && ODDS[home] && ODDS[home][currentBook]) {
+            const frontEndOddsGame = typeof oddsData !== "undefined" ? oddsData.find(od => od.home === home) : null;
+            const currentFrontEndOdds = frontEndOddsGame && frontEndOddsGame.books ? frontEndOddsGame.books[currentBook] : null;
+            
+            if (isTodaySlate && currentFrontEndOdds) {
+               realMkt = currentFrontEndOdds;
+            } else if (isTodaySlate && ODDS[home] && ODDS[home][currentBook]) {
                realMkt = ODDS[home][currentBook];  // live odds for today
             } else if (btCachedOdds[home] && btCachedOdds[home][currentBook]) {
                realMkt = btCachedOdds[home][currentBook]; // stored closing odds from localStorage
@@ -2702,7 +2712,7 @@ async function runBacktest() {
               mlEV   = mlPick === home ? mod.evH : mod.evA;
             }
 
-            const isRealOdds = !!(ODDS[home] && ODDS[home][currentBook]) || !!(btCachedOdds[home] && btCachedOdds[home][currentBook]) || !!(typeof window !== 'undefined' && window.HISTORICAL_ODDS && window.HISTORICAL_ODDS[d.date] && window.HISTORICAL_ODDS[d.date][home] && window.HISTORICAL_ODDS[d.date][home][currentBook]);
+            const isRealOdds = !!currentFrontEndOdds || !!(ODDS[home] && ODDS[home][currentBook]) || !!(btCachedOdds[home] && btCachedOdds[home][currentBook]) || !!(typeof window !== 'undefined' && window.HISTORICAL_ODDS && window.HISTORICAL_ODDS[d.date] && window.HISTORICAL_ODDS[d.date][home] && window.HISTORICAL_ODDS[d.date][home][currentBook]);
             const isDog      = isRealOdds ? (mlPick === home ? mod.homeDog : mod.awayDog) : false;
             const mlPickProb = mlPick === home ? mod.homeProb : mod.awayProb;
             const rawMlSig   = getSignal('ML', { ev: mlEV, mlPickProb });
