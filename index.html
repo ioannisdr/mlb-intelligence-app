@@ -3133,22 +3133,26 @@ function updateKPI() {
     if (market === 'ALL') {
       ['ml','ou'].forEach(m => {
         let sig = tr.getAttribute('data-' + m);
-        if (signal === 'ALL' ? (sig === 'PRIME' || sig === 'EDGE') : sig === signal) {
+        if (signal === 'ALL' ? (sig === 'PRIME' || sig === 'EDGE' || sig === 'SKIP') : sig === signal) {
           hasSignal = true;
-          bCount++;
-          hCount += parseInt(tr.getAttribute('data-' + m + '-hit'));
-          uCount += parseFloat(tr.getAttribute('data-' + m + '-pl'));
+          if (sig !== 'SKIP') {
+            bCount++;
+            hCount += parseInt(tr.getAttribute('data-' + m + '-hit'));
+            uCount += parseFloat(tr.getAttribute('data-' + m + '-pl'));
+          }
         }
       });
     } else {
       let m = market.toLowerCase();
       let sig = tr.getAttribute('data-' + m);
-      if (signal === 'ALL' ? (sig === 'PRIME' || sig === 'EDGE') : sig === signal) {
-        hasSignal = true;
-        bCount++;
-        hCount += parseInt(tr.getAttribute('data-' + m + '-hit'));
-        uCount += parseFloat(tr.getAttribute('data-' + m + '-pl'));
-      }
+      if (signal === 'ALL' ? (sig === 'PRIME' || sig === 'EDGE' || sig === 'SKIP') : sig === signal) {
+          hasSignal = true;
+          if (sig !== 'SKIP') {
+            bCount++;
+            hCount += parseInt(tr.getAttribute('data-' + m + '-hit'));
+            uCount += parseFloat(tr.getAttribute('data-' + m + '-pl'));
+          }
+        }
     }
 
     if (!hasSignal) show = false;
