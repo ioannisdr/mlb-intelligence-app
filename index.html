@@ -1437,6 +1437,26 @@ const _todayStr = () => formatDateStr(new Date());
 // Key: mlb_frozen_YYYY-MM-DD  > { "away@home": { bestPick, ... }, ... }
 
 // -- Hard-anchored historical picks for verified dates (e.g. July 29, 2026) --
+
+window.HISTORICAL_ODDS = window.HISTORICAL_ODDS || {};
+window.HISTORICAL_ODDS['2026-08-03'] = {};
+const Aug3Games = {
+  'Phillies': { ml: { a: +135, h: -160 }, ou: 9, ouPrice: { o: -125, u: +105 } },
+  'Yankees': { ml: { a: +205, h: -250 }, ou: 8, ouPrice: { o: +100, u: -120 } },
+  'Brewers': { ml: { a: -110, h: -110 }, ou: 8.5, ouPrice: { o: -120, u: +100 } },
+  'Cubs': { ml: { a: -125, h: +105 }, ou: 7.5, ouPrice: { o: -115, u: -105 } },
+  'Rangers': { ml: { a: +110, h: -130 }, ou: 8, ouPrice: { o: -110, u: -110 } },
+  'Rockies': { ml: { a: -170, h: +145 }, ou: 11.5, ouPrice: { o: -105, u: -115 } },
+  'Diamondbacks': { ml: { a: -110, h: -110 }, ou: 8.5, ouPrice: { o: -120, u: +100 } }
+};
+const books = ['DraftKings', 'ESPNBet', 'FanDuel', 'BetMGM', 'Caesars', 'BetRivers', 'Fanatics', 'bet365', 'HardRock', 'PointsBet'];
+for (const home in Aug3Games) {
+  window.HISTORICAL_ODDS['2026-08-03'][home] = {};
+  for (const book of books) {
+    window.HISTORICAL_ODDS['2026-08-03'][home][book] = Aug3Games[home];
+  }
+}
+
 const HISTORICAL_FROZEN = {
   "2026-07-29": {
     "Royals@Twins": {
@@ -1705,6 +1725,18 @@ async function fetchAllData() {
       // The user screenshot also showed Pirates@Reds and Nationals@Braves as PRIME today
       HISTORICAL_FROZEN[d]["Pirates@Reds"] = skipObj;
       HISTORICAL_FROZEN[d]["Nationals@Braves"] = skipObj;
+    // INJECTED OVERRIDES
+    if (HISTORICAL_FROZEN['2026-08-03']) {
+      delete HISTORICAL_FROZEN['2026-08-03']['Nationals@Phillies'];
+      delete HISTORICAL_FROZEN['2026-08-03']['Cardinals@Yankees'];
+      delete HISTORICAL_FROZEN['2026-08-03']['Pirates@Brewers'];
+      delete HISTORICAL_FROZEN['2026-08-03']['Dodgers@Cubs'];
+      delete HISTORICAL_FROZEN['2026-08-03']['Giants@Rangers'];
+      delete HISTORICAL_FROZEN['2026-08-03']['Rays@Rockies'];
+      delete HISTORICAL_FROZEN['2026-08-03']['Padres@Diamondbacks'];
+    }
+    try { localStorage.removeItem('mlb_frozen_2026-08-03'); } catch(e){}
+
     });
 
     // -- Team batting stats (real wOBA from MLB Stats API) ------------------
@@ -2040,11 +2072,17 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
     }
   }
 
+  const cDateStr = g.dateKey || (typeof formatDateStr !== 'undefined' ? formatDateStr(g.gameDate ? new Date(g.gameDate) : new Date()) : null);
+  const cFreezeKey = `${g.away}@${g.home}`;
+  const histOverrideEarly = (cDateStr && typeof HISTORICAL_FROZEN !== 'undefined') ? (HISTORICAL_FROZEN[cDateStr] && HISTORICAL_FROZEN[cDateStr][cFreezeKey]) : null;
+
   let mkt;
   if (overrideMkt) {
     mkt = JSON.parse(JSON.stringify(overrideMkt));
-  } else if (g.dateKey && typeof window !== 'undefined' && window.HISTORICAL_ODDS && window.HISTORICAL_ODDS[g.dateKey] && window.HISTORICAL_ODDS[g.dateKey][g.home] && window.HISTORICAL_ODDS[g.dateKey][g.home][currentBook]) {
-    mkt = JSON.parse(JSON.stringify(window.HISTORICAL_ODDS[g.dateKey][g.home][currentBook]));
+  } else if (histOverrideEarly && histOverrideEarly.mkt) {
+    mkt = JSON.parse(JSON.stringify(histOverrideEarly.mkt));
+  } else if (cDateStr && typeof window !== 'undefined' && window.HISTORICAL_ODDS && window.HISTORICAL_ODDS[cDateStr] && window.HISTORICAL_ODDS[cDateStr][g.home] && window.HISTORICAL_ODDS[cDateStr][g.home][currentBook]) {
+    mkt = JSON.parse(JSON.stringify(window.HISTORICAL_ODDS[cDateStr][g.home][currentBook]));
   } else if (liveMkt) {
     mkt = JSON.parse(JSON.stringify(liveMkt));
   } else if (ODDS[g.home] && ODDS[g.home][currentBook]) {
@@ -2376,7 +2414,7 @@ function renderApp() {
                     ${getTeamLogoImg(g.away, g.awayId, 28)}
                     <span class="gc-team-name">${g.away}</span>
                   </div>
-                  <span class="gc-vs-badge">VS</span>
+                  <span class="gc-vs-badge">@</span>
                   <div class="gc-matchup-team team-btn" onclick="showTeamRecent('${g.home}',${g.homeId || 0},'home')">
                     <span class="gc-team-name">${g.home}</span>
                     ${getTeamLogoImg(g.home, g.homeId, 28)}
