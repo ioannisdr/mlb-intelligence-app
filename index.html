@@ -2084,14 +2084,14 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   let mkt;
   if (overrideMkt) {
     mkt = JSON.parse(JSON.stringify(overrideMkt));
+  } else if (histOverrideEarly && histOverrideEarly.mkt) {
+    mkt = JSON.parse(JSON.stringify(histOverrideEarly.mkt));
+  } else if (cDateStr && typeof window !== 'undefined' && window.HISTORICAL_ODDS && window.HISTORICAL_ODDS[cDateStr] && window.HISTORICAL_ODDS[cDateStr][g.home] && window.HISTORICAL_ODDS[cDateStr][g.home][currentBook]) {
+    mkt = JSON.parse(JSON.stringify(window.HISTORICAL_ODDS[cDateStr][g.home][currentBook]));
   } else if (liveMkt) {
     mkt = JSON.parse(JSON.stringify(liveMkt));
   } else if (ODDS[g.home] && ODDS[g.home][currentBook]) {
     mkt = JSON.parse(JSON.stringify(ODDS[g.home][currentBook]));
-  } else if (cDateStr && typeof window !== 'undefined' && window.HISTORICAL_ODDS && window.HISTORICAL_ODDS[cDateStr] && window.HISTORICAL_ODDS[cDateStr][g.home] && window.HISTORICAL_ODDS[cDateStr][g.home][currentBook]) {
-    mkt = JSON.parse(JSON.stringify(window.HISTORICAL_ODDS[cDateStr][g.home][currentBook]));
-  } else if (histOverrideEarly && histOverrideEarly.mkt) {
-    mkt = JSON.parse(JSON.stringify(histOverrideEarly.mkt));
   } else {
     // Simulate realistic market: market is usually within +/- 5% of true prob
     // but adds bookmaker vig (~4.5% juice split across both sides)
@@ -2366,11 +2366,10 @@ function renderApp() {
       const dispBestEV      =  finalFrozen ? (finalFrozen.bestEV ?? bestEV) : bestEV;
       const dispBestIsOU    =  finalFrozen ? (finalFrozen.bestIsOU ?? bestIsOU) : bestIsOU;
       const dispBestSig     = (finalFrozen ? (finalFrozen.bestSig || bestSig) : bestSig) || getSignal('ML', { ev: 0, mlPickProb: 0.5 });
-      const isToday = d.date === formatDateStr(new Date());
-      const dispMlPickLine  =  (finalFrozen && !isToday) ? (finalFrozen.mlPickLine ?? mlPickLine) : mlPickLine;
+      const dispMlPickLine  =  finalFrozen ? (finalFrozen.mlPickLine ?? mlPickLine) : mlPickLine;
       const dispMlTeamPick  = (finalFrozen ? (finalFrozen.mlTeamPick || mlTeamPick) : mlTeamPick) || mlTeamPick;
       const dispMlTeamEV    =  finalFrozen ? (finalFrozen.mlTeamEV ?? finalFrozen.mlEV ?? mlTeamEV) : mlTeamEV;
-      const dispMlTeamLine  =  (finalFrozen && !isToday) ? (finalFrozen.mlTeamLine ?? mlTeamLine) : mlTeamLine;
+      const dispMlTeamLine  =  finalFrozen ? (finalFrozen.mlTeamLine ?? mlTeamLine) : mlTeamLine;
       const dispIsDog       =  finalFrozen ? (finalFrozen.isDog ?? isDog) : isDog;
 
       // Count stats for ALL games displayed on the selected date
