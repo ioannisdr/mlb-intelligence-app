@@ -188,7 +188,7 @@ export default async function handler(req, res) {
       const gameId = `${today}-${g.teams.away.team.id}-${g.teams.home.team.id}`;
       
       await query(`
-        INSERT INTO games (id, game_date, away_team, home_team, game_time, status, away_score, home_score)
+        INSERT INTO games (id, game_date, away, home, game_time, status, away_score, home_score)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         ON CONFLICT (id) DO UPDATE SET 
           status = EXCLUDED.status, away_score = EXCLUDED.away_score, home_score = EXCLUDED.home_score;
