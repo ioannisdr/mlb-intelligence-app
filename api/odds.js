@@ -69,9 +69,17 @@ export default async function handler(req, res) {
         const oPOpen = parseInt(tot.over?.open?.odds || oP);
         const uPOpen = parseInt(tot.under?.open?.odds || uP);
 
+        function getTeamName(fullName) {
+          if(!fullName) return "UNK";
+          if(fullName.includes("Red Sox")) return "Red Sox";
+          if(fullName.includes("White Sox")) return "White Sox";
+          if(fullName.includes("Blue Jays")) return "Blue Jays";
+          return fullName.split(' ').pop();
+        }
+
         const match = {
-          away: awayTeam.split(' ').pop(),
-          home: homeTeam.split(' ').pop(),
+          away: getTeamName(awayTeam),
+          home: getTeamName(homeTeam),
           books: {
             DraftKings: {
               ml: { h: hML, a: aML },
