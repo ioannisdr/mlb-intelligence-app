@@ -1544,7 +1544,7 @@ function pfLabel(pf) {
   if (pf >= 110) return `🏟️ PF ${pf} 🔥 Extreme Hitters Park`;
   if (pf >= 105) return `🏟️ PF ${pf} 🔴 Hitters Park`;
   if (pf >= 102) return `🏟️ PF ${pf} 🟠 Slight Hitters`;
-  if (pf >= 99)  return `🏟️ PF ${pf} ⚪ Neutral`;
+  if (pf >= 99)  return `🏟️ PF ${pf} ⬜ Neutral`;
   if (pf >= 96)  return `🏟️ PF ${pf} 🔵 Slight Pitchers`;
   return `🏟️ PF ${pf} 🟣 Pitchers Park`;
 }
@@ -1685,7 +1685,7 @@ async function fetchAllData() {
     const parseDB_Sig = (sigStr) => {
       if(sigStr === 'PRIME') return { l: 'PRIME', c: 'sig-prime', v: 3, icon: "🔥" };
       if(sigStr === 'EDGE')  return { l: 'EDGE',  c: 'sig-edge',  v: 2, icon: "✅" };
-      return { l: 'SKIP', c: 'sig-skip', v: 1, icon: "✅" };
+      return { l: 'SKIP', c: 'sig-skip', v: 1, icon: "⬜" };
     };
 
     if (picksRes && picksRes.picks && picksRes.picks.length > 0) {
@@ -2091,12 +2091,12 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   let mkt;
   if (overrideMkt) {
     mkt = JSON.parse(JSON.stringify(overrideMkt));
+  } else if (liveMkt) {
+    mkt = JSON.parse(JSON.stringify(liveMkt));
   } else if (histOverrideEarly && histOverrideEarly.mkt) {
     mkt = JSON.parse(JSON.stringify(histOverrideEarly.mkt));
   } else if (cDateStr && typeof window !== 'undefined' && window.HISTORICAL_ODDS && window.HISTORICAL_ODDS[cDateStr] && window.HISTORICAL_ODDS[cDateStr][g.home] && window.HISTORICAL_ODDS[cDateStr][g.home][currentBook]) {
     mkt = JSON.parse(JSON.stringify(window.HISTORICAL_ODDS[cDateStr][g.home][currentBook]));
-  } else if (liveMkt) {
-    mkt = JSON.parse(JSON.stringify(liveMkt));
   } else if (ODDS[g.home] && ODDS[g.home][currentBook]) {
     mkt = JSON.parse(JSON.stringify(ODDS[g.home][currentBook]));
   } else {
@@ -2199,7 +2199,7 @@ function getSignal(market, { ev = 0, mlPickProb = 0.5, isMinus15 = true, ouAbsDi
   if (ev === -99) return { l: "SKIP", c: "sig-skip", v: 1, icon: "⬜" };
   const PRIME = { l: 'PRIME', c: 'sig-prime', v: 3, icon: "🔥" };
   const EDGE  = { l: 'EDGE',  c: 'sig-edge',  v: 2, icon: "✅" };
-  const SKIP  = { l: 'SKIP',  c: 'sig-skip',  v: 1, icon: "✅" };
+  const SKIP  = { l: 'SKIP',  c: 'sig-skip',  v: 1, icon: "⬜" };
   if (market === 'ML') {
     if ((mlPickProb >= 0.525 && ev >= 0.020) || (mlPickProb >= 0.515 && ev >= 0.100) || ev >= 0.150) return PRIME; // Dual-Path PRIME or Massive EV Dog
     if ((mlPickProb >= 0.505 && ev >= 0.010) || ev >= 0.050) return EDGE;
@@ -2748,7 +2748,7 @@ async function runBacktest() {
             let isMinus15 = favProb >= 0.55;
             let rlHit = false;
             let rlProfit = 0;
-            let rlSig = { l: 'SKIP', c: 'sig-skip', v: 1, icon: "✅" };
+            let rlSig = { l: 'SKIP', c: 'sig-skip', v: 1, icon: "⬜" };
 
             if (rlSig.l !== 'SKIP') {
                pl.ALL[rlPick] += rlProfit;
