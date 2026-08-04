@@ -3,7 +3,6 @@
   "version": "9.0.0",
   "description": "MLB Betting Intelligence — real wOBA, live weather, park factors, lineup data",
   "main": "index.html",
-  "type": "module",
   "dependencies": {
     "axios": "^1.19.0",
     "cheerio": "^1.2.0",
