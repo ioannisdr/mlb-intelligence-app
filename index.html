@@ -2084,14 +2084,14 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   let mkt;
   if (overrideMkt) {
     mkt = JSON.parse(JSON.stringify(overrideMkt));
-  } else if (histOverrideEarly && histOverrideEarly.mkt) {
-    mkt = JSON.parse(JSON.stringify(histOverrideEarly.mkt));
-  } else if (cDateStr && typeof window !== 'undefined' && window.HISTORICAL_ODDS && window.HISTORICAL_ODDS[cDateStr] && window.HISTORICAL_ODDS[cDateStr][g.home] && window.HISTORICAL_ODDS[cDateStr][g.home][currentBook]) {
-    mkt = JSON.parse(JSON.stringify(window.HISTORICAL_ODDS[cDateStr][g.home][currentBook]));
   } else if (liveMkt) {
     mkt = JSON.parse(JSON.stringify(liveMkt));
   } else if (ODDS[g.home] && ODDS[g.home][currentBook]) {
     mkt = JSON.parse(JSON.stringify(ODDS[g.home][currentBook]));
+  } else if (cDateStr && typeof window !== 'undefined' && window.HISTORICAL_ODDS && window.HISTORICAL_ODDS[cDateStr] && window.HISTORICAL_ODDS[cDateStr][g.home] && window.HISTORICAL_ODDS[cDateStr][g.home][currentBook]) {
+    mkt = JSON.parse(JSON.stringify(window.HISTORICAL_ODDS[cDateStr][g.home][currentBook]));
+  } else if (histOverrideEarly && histOverrideEarly.mkt) {
+    mkt = JSON.parse(JSON.stringify(histOverrideEarly.mkt));
   } else {
     // Simulate realistic market: market is usually within +/- 5% of true prob
     // but adds bookmaker vig (~4.5% juice split across both sides)
