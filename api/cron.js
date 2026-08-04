@@ -10,8 +10,9 @@ export default async function handler(req, res) {
     }
 
     if (job === 'odds') {
-      // 1. Fetch live odds from ESPN (duplicate logic from odds.js for safety)
-      const url = 'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard';
+      // 1. Fetch live odds from ESPN (append dates parameter to force today's slate)
+      const espnDate = today.replace(/-/g, '');
+      const url = `https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?dates=${espnDate}`;
       const resp = await fetch(url, {
         headers: { 'User-Agent': 'Mozilla/5.0' },
         signal: AbortSignal.timeout(8000)

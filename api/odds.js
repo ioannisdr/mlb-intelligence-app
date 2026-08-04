@@ -21,7 +21,8 @@ export default async function handler(req, res) {
   };
 
   try {
-    const url = 'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard';
+    const todayStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
+    const url = `https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?dates=${todayStr}`;
     const resp = await fetch(url, {
       headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36' },
       signal: AbortSignal.timeout(8000)
