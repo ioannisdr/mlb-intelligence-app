@@ -2366,10 +2366,11 @@ function renderApp() {
       const dispBestEV      =  finalFrozen ? (finalFrozen.bestEV ?? bestEV) : bestEV;
       const dispBestIsOU    =  finalFrozen ? (finalFrozen.bestIsOU ?? bestIsOU) : bestIsOU;
       const dispBestSig     = (finalFrozen ? (finalFrozen.bestSig || bestSig) : bestSig) || getSignal('ML', { ev: 0, mlPickProb: 0.5 });
-      const dispMlPickLine  =  finalFrozen ? (finalFrozen.mlPickLine ?? mlPickLine) : mlPickLine;
+      const isToday = d.date === formatDateStr(new Date());
+      const dispMlPickLine  =  (finalFrozen && !isToday) ? (finalFrozen.mlPickLine ?? mlPickLine) : mlPickLine;
       const dispMlTeamPick  = (finalFrozen ? (finalFrozen.mlTeamPick || mlTeamPick) : mlTeamPick) || mlTeamPick;
       const dispMlTeamEV    =  finalFrozen ? (finalFrozen.mlTeamEV ?? finalFrozen.mlEV ?? mlTeamEV) : mlTeamEV;
-      const dispMlTeamLine  =  finalFrozen ? (finalFrozen.mlTeamLine ?? mlTeamLine) : mlTeamLine;
+      const dispMlTeamLine  =  (finalFrozen && !isToday) ? (finalFrozen.mlTeamLine ?? mlTeamLine) : mlTeamLine;
       const dispIsDog       =  finalFrozen ? (finalFrozen.isDog ?? isDog) : isDog;
 
       // Count stats for ALL games displayed on the selected date
@@ -2667,7 +2668,10 @@ async function runBacktest() {
 
             let realMkt = null;
             const isTodaySlate = TODAY.some(tg => tg.home === home && tg.away === away);
-            if (isTodaySlate && ODDS[home] && ODDS[home][currentBook]) {
+            const snapKey = `${away}@${home}`;
+            if (isTodaySlate && typeof oddsSnapshot !== 'undefined' && oddsSnapshot[snapKey] && oddsSnapshot[snapKey][currentBook]) {
+               realMkt = oddsSnapshot[snapKey][currentBook]; // Use odds movement snapshot data
+            } else if (isTodaySlate && ODDS[home] && ODDS[home][currentBook]) {
                realMkt = ODDS[home][currentBook];  // live odds for today
             } else if (btCachedOdds[home] && btCachedOdds[home][currentBook]) {
                realMkt = btCachedOdds[home][currentBook]; // stored closing odds from localStorage
