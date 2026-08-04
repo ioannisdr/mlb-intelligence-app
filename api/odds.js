@@ -42,6 +42,7 @@ export default async function handler(req, res) {
         if (!homeTeam || !awayTeam || !odds) return;
 
         const ml = odds.moneyline || {};
+        if (Object.keys(ml).length === 0) return; // Skip if no real moneyline odds exist!
         const sp = odds.pointSpread || {};
         const tot = odds.total || {};
 

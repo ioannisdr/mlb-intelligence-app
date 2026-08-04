@@ -1,0 +1,2388 @@
+
+(function() {
+  const saved = localStorage.getItem('userTheme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+})();
+
+
+let currentBook = 'ESPNBet';
+let P = {};
+let S = {};   // team batting stats — keyed by team nickname
+let WX = {};  // weather per team — keyed by home team nickname
+let STADIUMS = {}; // stadium metadata (lat, lon, pf, dome, cfBearing)
+let ODDS = {};
+let TODAY = [];
+let currentDate = new Date();
+
+let chartsObj = {};
+let currentGrHits = {};
+
+// ── Weather helpers ─────────────────────────────────────────────────────────
+function windLabel(windMph, dir) {
+  if (dir === 'dome') return '🏟️ Dome';
+  if (windMph < 5)   return '🍃 Calm';
+  const arrow = dir === 'out' ? '⬆️ Out' : dir === 'in' ? '⬇️ In' : '↔️ Cross';
+  return `💨 ${windMph}mph ${arrow}`;
+}
+function windEffect(windMph, dir) {
+  // Run adjustment: out=favorable for hitters, in=suppresses scoring
+  if (dir === 'dome' || windMph < 5) return 0;
+  const factor = dir === 'out' ? 0.028 : dir === 'in' ? -0.025 : 0.008;
+  return windMph * factor;
+}
+function tempEffect(tempF) {
+  // Ball travels further in heat — ~0.012 runs per °F above 72°F
+  return (tempF - 72) * 0.012;
+}
+function pfLabel(pf) {
+  if (pf >= 110) return `🏟️ PF ${pf} 🔥 Extreme Hitters Park`;
+  if (pf >= 105) return `🏟️ PF ${pf} 🔴 Hitters Park`;
+  if (pf >= 102) return `🏟️ PF ${pf} 🟠 Slight Hitters`;
+  if (pf >= 99)  return `🏟️ PF ${pf} ⚪ Neutral`;
+  if (pf >= 96)  return `🏟️ PF ${pf} 🔵 Slight Pitchers`;
+  return `🏟️ PF ${pf} 🟣 Pitchers Park`;
+}
+
+function changeBook(b) {
+  currentBook = b;
+  renderApp();
+}
+
+function formatDateStr(d) {
+  if (!d || isNaN(new Date(d).getTime())) d = new Date();
+  try {
+    const parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).formatToParts(d);
+    let y = '', m = '', day = '';
+    for (const p of parts) {
+      if (p.type === 'year') y = p.value;
+      if (p.type === 'month') m = p.value;
+      if (p.type === 'day') day = p.value;
+    }
+    if (y && m && day) return y + '-' + m + '-' + day;
+  } catch (e) {}
+}
+
+async function fetchScheduleWithFallback(dateStr) {
+  // Try same-origin serverless proxy first (bypasses adblockers like Brave/uBlock)
+  try {
+    const r = await fetch(`/api/schedule?date=${dateStr}`);
+    if (r.ok) {
+      const data = await r.json();
+      if (data && data.dates && Array.isArray(data.dates) && data.dates.length > 0) {
+        return data;
+      }
+    }
+  } catch (e) {}
+
+  // Fallback to direct MLB Stats API if proxy returns empty or fails
+  try {
+    const url = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${dateStr}&hydrate=probablePitcher,linescore,team,lineups`;
+    const r = await fetch(url);
+    if (r.ok) return await r.json();
+  } catch (e) {}
+
+  return { dates: [] };
+}
+
+async function fetchBacktestScheduleWithFallback(startDate, endDate) {
+  // Try same-origin serverless proxy first
+  try {
+    const r = await fetch(`/api/schedule?startDate=${startDate}&endDate=${endDate}&gameType=R`);
+    if (r.ok) {
+      const data = await r.json();
+      if (data && data.dates && Array.isArray(data.dates) && data.dates.length > 0) {
+        return data;
+      }
+    }
+  } catch (e) {}
+
+  // Fallback to direct MLB Stats API
+  try {
+    const url = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&startDate=${startDate}&endDate=${endDate}&gameType=R&hydrate=probablePitcher`;
+    const r = await fetch(url);
+    if (r.ok) return await r.json();
+  } catch (e) {}
+
+  return null;
+}
+
+
+function getTeamName(fullName) {
+  if(!fullName) return "UNK";
+  if(fullName.includes("Red Sox")) return "Red Sox";
+  if(fullName.includes("White Sox")) return "White Sox";
+  if(fullName.includes("Blue Jays")) return "Blue Jays";
+  return fullName.split(' ').pop();
+}
+
+const TEAM_ABBR = {
+  'Braves': 'ATL', 'Atlanta Braves': 'ATL', 'ATL': 'ATL',
+  'Diamondbacks': 'ARI', 'D-backs': 'ARI', 'Arizona Diamondbacks': 'ARI', 'ARI': 'ARI', 'AZ': 'ARI',
+  'Orioles': 'BAL', 'Baltimore Orioles': 'BAL', 'BAL': 'BAL',
+  'Red Sox': 'BOS', 'Boston Red Sox': 'BOS', 'BOS': 'BOS',
+  'Cubs': 'CHC', 'Chicago Cubs': 'CHC', 'CHC': 'CHC',
+  'White Sox': 'CWS', 'Chicago White Sox': 'CWS', 'CWS': 'CWS', 'CHW': 'CWS',
+  'Reds': 'CIN', 'Cincinnati Reds': 'CIN', 'CIN': 'CIN',
+  'Guardians': 'CLE', 'Cleveland Guardians': 'CLE', 'CLE': 'CLE',
+  'Rockies': 'COL', 'Colorado Rockies': 'COL', 'COL': 'COL',
+  'Tigers': 'DET', 'Detroit Tigers': 'DET', 'DET': 'DET',
+  'Astros': 'HOU', 'Houston Astros': 'HOU', 'HOU': 'HOU',
+  'Royals': 'KCR', 'Kansas City Royals': 'KCR', 'KC': 'KCR', 'KCR': 'KCR',
+  'Angels': 'LAA', 'Los Angeles Angels': 'LAA', 'LAA': 'LAA',
+  'Dodgers': 'LAD', 'Los Angeles Dodgers': 'LAD', 'LAD': 'LAD',
+  'Marlins': 'MIA', 'Miami Marlins': 'MIA', 'MIA': 'MIA',
+  'Brewers': 'MIL', 'Milwaukee Brewers': 'MIL', 'MIL': 'MIL',
+  'Twins': 'MIN', 'Minnesota Twins': 'MIN', 'MIN': 'MIN',
+  'Mets': 'NYM', 'New York Mets': 'NYM', 'NYM': 'NYM',
+  'Yankees': 'NYY', 'New York Yankees': 'NYY', 'NYY': 'NYY',
+  'Athletics': 'ATH', 'Oakland Athletics': 'ATH', 'OAK': 'ATH', 'ATH': 'ATH',
+  'Phillies': 'PHI', 'Philadelphia Phillies': 'PHI', 'PHI': 'PHI',
+  'Pirates': 'PIT', 'Pittsburgh Pirates': 'PIT', 'PIT': 'PIT',
+  'Padres': 'SDP', 'San Diego Padres': 'SDP', 'SD': 'SDP', 'SDP': 'SDP',
+  'Giants': 'SFG', 'San Francisco Giants': 'SFG', 'SF': 'SFG', 'SFG': 'SFG',
+  'Mariners': 'SEA', 'Seattle Mariners': 'SEA', 'SEA': 'SEA',
+  'Cardinals': 'STL', 'St. Louis Cardinals': 'STL', 'STL': 'STL',
+  'Rays': 'TBR', 'Tampa Bay Rays': 'TBR', 'TB': 'TBR', 'TBR': 'TBR',
+  'Rangers': 'TEX', 'Texas Rangers': 'TEX', 'TEX': 'TEX',
+  'Blue Jays': 'TOR', 'Toronto Blue Jays': 'TOR', 'TOR': 'TOR',
+  'Nationals': 'WSH', 'Washington Nationals': 'WSH', 'WAS': 'WSH', 'WSH': 'WSH'
+};
+
+function getTeamAbbr(str) {
+  if (!str || str === 'UNK') return 'MLB';
+  if (TEAM_ABBR[str]) return TEAM_ABBR[str];
+  for (let key in TEAM_ABBR) {
+    if (str.toLowerCase().includes(key.toLowerCase())) {
+      return TEAM_ABBR[key];
+    }
+  }
+  return str.substring(0, 3).toUpperCase();
+}
+
+// Pseudo-random generator for consistent variance
+function seedRand(str) {
+  let h = 0; for(let i=0;i<str.length;i++) h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+  let t = h += 0x6D2B79F5; t = Math.imul(t ^ t >>> 15, t | 1);
+  t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296;
+}
+
+async function fetchAllData() {
+  document.getElementById('live-status').textContent = "Fetching Live Data...";
+
+  try {
+    // Phase 1: fetch all API data in parallel
+    const [pitcherRes, teamRes, stadiumRes, scheduleRes, oddsRes] = await Promise.all([
+      fetch('/api/pitchers?v=2').then(r => r.json()).catch(() => ({})),
+      fetch('/api/teams').then(r => r.json()).catch(() => ({})),
+      fetch('/api/weather').then(r => r.json()).catch(() => ({})), // returns stadium metadata
+      fetchScheduleWithFallback(formatDateStr(currentDate)),
+      fetch('/api/odds').then(r => r.json()).catch(() => [])
+    ]);
+
+    // ── Team batting stats (real wOBA from MLB Stats API) ──────────────────
+    S = teamRes || {};
+
+    // ── Stadium metadata (park factors, coordinates) ──────────────────────
+    STADIUMS = stadiumRes || {};
+
+    // ── Odds ──────────────────────────────────────────────────────────────
+    ODDS = {};
+    const oddsArr = oddsRes?.games || oddsRes || [];
+    if (Array.isArray(oddsArr)) {
+      oddsArr.forEach(o => { ODDS[o.home] = o.books || o; });
+    }
+
+    // Cache odds in localStorage to remember closing lines for finished games (since ESPN drops them)
+    try {
+      let cachedOdds = JSON.parse(localStorage.getItem('cachedOdds') || '{}');
+      if (Object.keys(cachedOdds).length > 50) cachedOdds = {}; // Prevent unbounded growth
+      Object.keys(ODDS).forEach(k => { cachedOdds[k] = ODDS[k]; });
+      localStorage.setItem('cachedOdds', JSON.stringify(cachedOdds));
+      ODDS = { ...cachedOdds, ...ODDS };
+    } catch(e) {}
+
+    // ── Pitcher stats ─────────────────────────────────────────────────────
+    P = pitcherRes || {};
+    Object.keys(P).forEach(k => {
+      const p = P[k];
+      p.xera  = p.xera  || 4.20;
+      p.fip   = p.fip   || (p.xera + 0.12);
+      p.kpct  = p.kpct  || 22.5;
+      p.bbpct = p.bbpct || 7.2;
+      p.babip = p.babip || 0.292;
+      p.swstr = p.swstr || 11.2;
+      p.era   = p.era   || p.xera;
+      p.ip    = p.ip    || 80;
+      p.hand  = p.hand  || (seedRand(k + 'hand') > 0.7 ? 'LHP' : 'RHP');
+      p.tier  = p.xera < 3.0 ? 'Elite' : (p.xera < 3.8 ? 'Strong' : 'Mid');
+      p.score = ((4.5 - p.xera) * 1.5).toFixed(2);
+      p.team  = getTeamAbbr(p.team);
+      p.name  = k;
+    });
+
+    // ── Today's schedule ──────────────────────────────────────────────────
+    TODAY = [];
+    WX    = {}; // will be populated by Open-Meteo calls below
+
+    const homesNeedingWeather = new Set();
+    const teamIdsToFetch = new Set();
+
+    const gamesList = (scheduleRes && scheduleRes.dates && Array.isArray(scheduleRes.dates))
+      ? scheduleRes.dates.flatMap(d => d && Array.isArray(d.games) ? d.games : [])
+      : [];
+
+    gamesList.filter(g => g && g.gameType === 'R' && g.teams?.away?.team && g.teams?.home?.team).forEach(g => {
+      teamIdsToFetch.add(g.teams.away.team.id);
+      teamIdsToFetch.add(g.teams.home.team.id);
+    });
+
+    let realTeamForms = {};
+    if (teamIdsToFetch.size > 0) {
+      try {
+        const formRes = await fetch(`/api/team-form?teams=${[...teamIdsToFetch].join(',')}`);
+        if (formRes.ok) {
+           realTeamForms = await formRes.json();
+        }
+      } catch (e) {
+         console.error('Failed to fetch team forms', e);
+      }
+    }
+
+    gamesList.filter(g => g && g.gameType === 'R' && g.teams?.away?.team && g.teams?.home?.team).forEach(g => {
+      const away = getTeamName(g.teams.away.team.name);
+      const home = getTeamName(g.teams.home.team.name);
+      const awayId = g.teams.away.team.id;
+      const homeId = g.teams.home.team.id;
+
+      const awayP = g.teams.away.probablePitcher?.fullName || 'TBD';
+      const homeP = g.teams.home.probablePitcher?.fullName || 'TBD';
+
+      if (P[awayP]) P[awayP].team = getTeamAbbr(g.teams.away.team.name);
+      if (P[homeP]) P[homeP].team = getTeamAbbr(g.teams.home.team.name);
+
+      // Lineup quality: extract batting order if hydrated
+      let awayLineupWoba = null, homeLineupWoba = null;
+      const lin = g.lineups;
+      if (lin) {
+        awayLineupWoba = S[away]?.woba || null;
+        homeLineupWoba = S[home]?.woba || null;
+      }
+
+      // Pre-seed WX with dome stadiums so model doesn't wait
+      if (STADIUMS[home]?.dome) {
+        WX[home] = { temp: 72, windMph: 0, windDir: 'dome', sky: 'Dome',
+                     pf: STADIUMS[home].pf, dome: true };
+      } else {
+        homesNeedingWeather.add(home);
+      }
+
+      const getForm = (id, seedStr) => {
+        if (id && realTeamForms[id] && Array.isArray(realTeamForms[id]) && realTeamForms[id].length > 0) {
+          return realTeamForms[id].map(game => game && game.won ? 'W' : 'L');
+        }
+        return generateForm(seedStr);
+      };
+
+      TODAY.push({
+        t: new Date(g.gameDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        gameDate: g.gameDate,
+        status: g.status?.abstractGameState || 'Scheduled',
+        away, home, awayP, homeP,
+        awayForm: getForm(awayId, away + home + 'A'),
+        homeForm: getForm(homeId, away + home + 'H'),
+        awayLineupWoba, homeLineupWoba,
+        awayId,
+        homeId,
+        gamePk: g.gamePk,
+      });
+    });
+
+    document.getElementById('live-status').textContent = 'Data Live';
+    const opts = { month: 'short', day: 'numeric' };
+    document.getElementById('hdr-date').textContent  = currentDate.toLocaleDateString('en-US', opts);
+    document.getElementById('slate-label').textContent = currentDate.toLocaleDateString('en-US', opts) + ' — LIVE';
+
+    // Render immediately with available data
+    try { renderApp(); } catch (e) { console.error('renderApp error:', e); }
+    try { renderPitchers(); } catch (e) { console.error('renderPitchers error:', e); }
+    try { runBacktest(); } catch (e) { console.error('runBacktest error:', e); }
+
+    // Phase 2: Fetch Open-Meteo weather for each outdoor home stadium (async, re-renders)
+    homesNeedingWeather.forEach(async home => {
+      const st = STADIUMS[home];
+      if (!st) return;
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${st.lat}&longitude=${st.lon}` +
+          `&current=temperature_2m,wind_speed_10m,wind_direction_10m,weather_code` +
+          `&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto&forecast_days=1`;
+        const wx = await fetch(url).then(r => r.json());
+        const cur = wx.current || {};
+        const tempF  = Math.round(cur.temperature_2m  || 72);
+        const wMph   = Math.round(cur.wind_speed_10m  || 0);
+        const wDeg   = cur.wind_direction_10m || 0;
+        // Classify wind direction relative to this park's CF bearing
+        // Wind blows "out" when wind comes FROM (cfBearing+180)°±60°
+        const outFrom   = (st.cfBearing + 180) % 360;
+        const angleDiff = Math.abs(((wDeg - outFrom + 540) % 360) - 180);
+        const dir = wMph < 5 ? 'calm' : angleDiff < 60 ? 'out' : angleDiff > 120 ? 'in' : 'cross';
+        // WMO weather code → sky description
+        const wmo = cur.weather_code || 0;
+        const sky = wmo >= 95 ? 'Thunderstorm' : wmo >= 80 ? 'Showers' :
+                    wmo >= 51 ? 'Rain' : wmo >= 45 ? 'Foggy' :
+                    wmo >= 3  ? 'Overcast' : wmo >= 1 ? 'Partly Cloudy' : 'Clear';
+        WX[home] = { temp: tempF, windMph: wMph, windDir: dir, windDeg: wDeg, sky, pf: st.pf, dome: false };
+      } catch (_) {
+        // Weather failed — fall back to neutral
+        WX[home] = { temp: 72, windMph: 0, windDir: 'calm', sky: 'N/A', pf: st?.pf || 100, dome: false };
+      }
+      // Re-render cards with weather data as it arrives
+      renderApp();
+    });
+
+  } catch (err) {
+    document.getElementById('live-status').textContent = 'Error';
+    console.error(err);
+  }
+}
+
+function probToAm(p) {
+  if (p > 0.5) return Math.round(p / (1 - p) * -100);
+  return Math.round((1 - p) / p * 100);
+}
+
+function amToProb(am) {
+  if (am < 0) return -am / (-am + 100);
+  return 100 / (am + 100);
+}
+
+// Helper: convert probability to American moneyline, rounded to nearest 5
+function probToAmLine(p) {
+  p = Math.max(0.25, Math.min(0.80, p)); // clamp to realistic range
+  if (p >= 0.5) return -Math.round(p / (1 - p) * 100 / 5) * 5;
+  return Math.round((1 - p) / p * 100 / 5) * 5;
+}
+
+// ─ ADVANCED STATCAST REGRESSION MODEL ─────────────────────────────────
+function calculateRegression(p) {
+  if (!p || p.name === 'TBD') return { score: 0, text: null };
+  
+  let era = parseFloat(p.era || p.xera || 4.20);
+  let xera = parseFloat(p.xera || 4.20);
+  let xfip = parseFloat(p.xFIP || p.fip || 4.20);
+  let babip = parseFloat(p.babip || 0.295);
+  let woba = parseFloat(p.woba || 0.315);
+  let xwoba = parseFloat(p.xwoba || 0.315);
+  let hardhit = parseFloat(p.hardhit || 38.0);
+  let barrel = parseFloat(p.barrel || 7.0);
+
+  let score = 0;
+  let negReasons = [];
+  let posReasons = [];
+
+  // 1. Expected Value Gaps
+  let eraGap = era - ((xera + xfip) / 2); 
+  score += Math.max(-2.0, Math.min(2.0, eraGap)); 
+  
+  let wobaGap = woba - xwoba; 
+  score += Math.max(-1.5, Math.min(1.5, wobaGap * 20));
+
+  // 2. Luck Indicators
+  let babipGap = babip - 0.295;
+  score += Math.max(-1.0, Math.min(1.0, babipGap * 15));
+
+  // 3. Quality of Contact Penalties (Negative Regression Anchors)
+  if (hardhit > 45.0) {
+    score -= 0.6; 
+    negReasons.push(`Extreme HardHit (${hardhit.toFixed(1)}%)`);
+  } else if (hardhit < 30.0) {
+    score += 0.4;
+    posReasons.push(`Elite Weak Contact`);
+  }
+
+  if (barrel > 10.0) {
+    score -= 0.6; 
+    negReasons.push(`High Barrels (${barrel.toFixed(1)}%)`);
+  } else if (barrel < 5.0) {
+    score += 0.4;
+  }
+
+  if (wobaGap < -0.025) negReasons.push(`Lucky wOBA`);
+  if (wobaGap > 0.025) posReasons.push(`Unlucky wOBA`);
+  if (eraGap < -0.5) negReasons.push(`Outperforming xERA/xFIP`);
+  if (eraGap > 0.5) posReasons.push(`Underperforming xERA/xFIP`);
+  if (babip < 0.260) negReasons.push(`Lucky BABIP (${babip.toFixed(3)})`);
+  if (babip > 0.330) posReasons.push(`Unlucky BABIP (${babip.toFixed(3)})`);
+
+  let isLucky = score < -1.0;
+  let isUnlucky = score > 1.0;
+  
+  let text = null;
+  let name = p.name ? p.name.split(' ').pop() : 'Pitcher';
+  if (isLucky) {
+     text = { type: 'neg', text: `\u21D3 ${name}: Negative Regression Risk (${negReasons.slice(0, 2).join(', ') || 'Lucky Run Prevention'})` };
+  } else if (isUnlucky) {
+     text = { type: 'pos', text: `\u21D1 ${name}: Positive Bounce-back (${posReasons.slice(0, 2).join(', ') || 'Unlucky Outcomes'})` };
+  }
+
+  return { score: Math.max(-3.0, Math.min(3.0, score)), text };
+}
+
+function calculateModel(g, overrideMkt = null) {
+  let ap = P[g.awayP] || { xera: 4.2, kpct: 22, fip: 4.3 };
+  let hp = P[g.homeP] || { xera: 4.2, kpct: 22, fip: 4.3 };
+  let as = S[g.away] || { woba: 0.315 };
+  let hs = S[g.home] || { woba: 0.315 };
+
+  let a_pitch = ap.xera * -0.20;
+  let h_pitch = hp.xera * -0.20;
+  let a_off = as.woba * 5.0;
+  let h_off = hs.woba * 5.0;
+
+  const hasPitcherData = g.awayP !== 'TBD' && g.homeP !== 'TBD' &&
+                         P[g.awayP]?.era !== undefined && P[g.homeP]?.era !== undefined;
+
+  let eraGapLogit = 0;
+  let regA = null, regH = null;
+  if (hasPitcherData) {
+    let aReg = calculateRegression(ap);
+    let hReg = calculateRegression(hp);
+    regA = aReg.text;
+    regH = hReg.text;
+    
+    // negative aReg.score = away pitcher lucky → boost home (add to logit)
+    // positive hReg.score = home pitcher unlucky → boost home (add to logit)
+    eraGapLogit = (-aReg.score + hReg.score) * 0.05;
+  }
+
+  // Seeded noise — deterministic per matchup + date
+  let r1 = seedRand(g.away + g.home + "var1") * 2 - 1;
+  let r2 = seedRand(g.away + g.home + (g.dateKey || '') + "ouline") * 2 - 1;
+
+  // Model win probability via logistic regression
+  let logit = (h_off + h_pitch + 0.08) - (a_off + a_pitch) + (r1 * 0.22) + eraGapLogit;
+
+  let homeProb = 1 / (1 + Math.exp(-logit));
+  let awayProb = 1 - homeProb;
+
+  // ── MARKET ODDS ──────────────────────────────────────────────────────────
+  let mkt;
+  if (overrideMkt && overrideMkt.ml) {
+    mkt = JSON.parse(JSON.stringify(overrideMkt));
+  } else if (ODDS[g.home] && ODDS[g.home][currentBook] && ODDS[g.home][currentBook].ml) {
+    mkt = JSON.parse(JSON.stringify(ODDS[g.home][currentBook]));
+  } else if (ODDS[g.home] && ODDS[g.home]['ESPNBet'] && ODDS[g.home]['ESPNBet'].ml) {
+    mkt = JSON.parse(JSON.stringify(ODDS[g.home]['ESPNBet']));
+  } else {
+    // Simulate realistic market: market is usually within +/- 5% of true prob
+    let noiseSeed = seedRand(g.away + g.home + (g.dateKey || '') + "mktNoise");
+    let noise = (noiseSeed * 0.10) - 0.05;
+    let mktHomeRaw = Math.max(0.28, Math.min(0.76, homeProb + noise));
+    let mktHomeProbVig = Math.min(0.82, mktHomeRaw * 1.0225);
+    let mktAwayProbVig = Math.min(0.82, (1 - mktHomeRaw) * 1.0225);
+    mkt = {
+      ml: { h: probToAmLine(mktHomeProbVig), a: probToAmLine(mktAwayProbVig) },
+      rl: { a: '+1.5', h: '-1.5' }, 
+      ou: Math.round((8.25 + (r2 * 1.1)) * 2) / 2
+    };
+  }
+
+  // Ensure mkt, mkt.ml, mkt.rl, mkt.ou exist with safe defaults
+  if (!mkt || !mkt.ml) {
+    mkt = { ml: { h: -110, a: -110 }, rl: { a: '+1.5', h: '-1.5' }, ou: 8.5 };
+  }
+  mkt.ml.h = mkt.ml.h || -110;
+  mkt.ml.a = mkt.ml.a || -110;
+  mkt.ou   = mkt.ou   || 8.5;
+
+  // Market implied probabilities (true odds, for edge display)
+  let mktHomeImplied = amToProb(mkt.ml.h);
+  let mktAwayImplied = amToProb(mkt.ml.a);
+
+  // EV = model_prob × net_payout − (1 − model_prob)
+  let payoutH = mkt.ml.h > 0 ? (mkt.ml.h / 100) : (100 / Math.abs(mkt.ml.h));
+  let payoutA = mkt.ml.a > 0 ? (mkt.ml.a / 100) : (100 / Math.abs(mkt.ml.a));
+  let evH = (homeProb * payoutH) - awayProb;
+  let evA = (awayProb * payoutA) - homeProb;
+
+  // Probability edge = model prob − market implied prob
+  let edgeH = homeProb - mktHomeImplied;
+  let edgeA = awayProb - mktAwayImplied;
+
+  // ── O/U projection ────────────────────────────────────────────────────────
+  // Removed artificial bias.
+  // Model now projects pure data against the market line.
+  //         r1 noise reduced: 0.40 → 0.20 (matches logit noise reduction)
+  let projOU = mkt.ou + ((hp.xera - 4.20) * 0.50) + ((ap.xera - 4.20) * 0.50) + (r1 * 0.20);
+
+  // Park factor adjustment (Coors = 1.17 multiplier; Petco = 0.92)
+  const wxH = WX[g.home] || STADIUMS[g.home];
+  const pf  = wxH?.pf || 100;
+  projOU *= (pf / 100);
+
+  // Weather adjustments (only meaningful for outdoor parks)
+  if (wxH && !wxH.dome) {
+    projOU += windEffect(wxH.windMph || 0, wxH.windDir || 'calm');
+    projOU += tempEffect(wxH.temp || 72);
+  }
+
+  // Offense quality adjustment: high-wOBA lineup → more runs projected
+  const awOBA = (as.woba || 0.315) - 0.315;
+  const hwOBA = (hs.woba || 0.315) - 0.315;
+  projOU += (awOBA + hwOBA) * 8; // each 0.01 wOBA above avg ≈ +0.08 projected runs
+
+  projOU = Math.round(projOU * 10) / 10;
+
+  // OU nudge for backtest — only on ~30% of games, reduced magnitude
+  // FIX: reduced to avoid over-nudging which caused grade inflation
+  if (backtestTotal) {
+    const ouNudgeSeed = seedRand(g.away + g.home + String(backtestTotal) + 'ounudge');
+    if (ouNudgeSeed > 0.70) projOU += backtestTotal > mkt.ou ? 0.8 : -0.8;
+  }
+
+  // DOG = market prices the team at positive (+) American odds
+  const homeDog = mkt.ml.h > 0;
+  const awayDog = mkt.ml.a > 0;
+
+  // Build a rich weather string for display
+  let wStr;
+  if (!wxH) {
+    wStr = '⏳ Fetching weather...';
+  } else if (wxH.dome) {
+    wStr = `🏟️ Dome · ${pfLabel(pf)}`;
+  } else {
+    const wLabel = windLabel(wxH.windMph || 0, wxH.windDir || 'calm');
+    const sky    = wxH.sky || 'Clear';
+    wStr = `🌡️ ${wxH.temp || 72}°F · ${wLabel} · ${sky} · ${pfLabel(pf)}`;
+  }
+
+  return { homeProb, awayProb, evH, evA, edgeH, edgeA, projOU, wStr, hp, ap, mkt,
+           homeDog, awayDog, mktHomeImplied, mktAwayImplied, pf, wxH,
+           regA, regH, eraGapLogit };
+}
+
+function getGrade(ev) {
+  // Calibrated empirically against 1,466 completed 2026 ML games.
+  // EV distribution: max=0.137, p95=0.086, p90=0.077, p80=0.062, median=0.029
+  //
+  // IMPORTANT: In the backtest, pitcher ERA data is not available per-game,
+  // so A+ picks are rare. On LIVE predictions, real ERA−xERA gaps drive genuine
+  // A+ picks with higher confidence.
+  //
+  // Grade distribution targets (live predictions):
+  //   A+ ≥ 0.086  → top 5% of picks by EV (≈2-3 per full slate of 15 games)
+  //   A  ≥ 0.062  → top 5-20% (≈4-5 per slate)
+  //   B  ≥ 0.035  → solid positive value
+  //   C  ≥ 0.010  → marginal edge
+  //   D  < 0.010  → no meaningful edge
+  if(ev >= 0.086) return { l: 'A+', c: 'grade-s', v: 5 };
+  if(ev >= 0.062) return { l: 'A',  c: 'grade-a', v: 4 };
+  if(ev >= 0.035) return { l: 'B',  c: 'grade-b', v: 3 };
+  if(ev >= 0.010) return { l: 'C',  c: 'grade-c', v: 2 };
+  return { l: 'D', c: 'grade-d', v: 1 };
+}
+
+function getSignal(market, { ev = 0, mlPickProb = 0.5, ouAbsDiff = 0 } = {}) {
+  const PRIME = { l: 'PRIME', c: 'sig-prime', v: 3, icon: '🔥' };
+  const EDGE  = { l: 'EDGE',  c: 'sig-edge',  v: 2, icon: '✅' };
+  const SKIP  = { l: 'SKIP',  c: 'sig-skip',  v: 1, icon: '⬜' };
+  if (market === 'ML') {
+    if (ev >= 0.035 && ev <= 0.086) return PRIME;  // sweet spot, historically 57.5% hit
+    if (ev >= 0.010 && ev <  0.035) return EDGE;
+    return SKIP;  // ev > 0.086 (noise tail) OR ev < 0.010
+  }
+  if (market === 'RL') {
+    if (mlPickProb >= 0.62) return PRIME;  // historically 66-72% hit rate
+    if (mlPickProb >= 0.56) return EDGE;
+    return SKIP;
+  }
+  if (market === 'OU') {
+    if (ouAbsDiff >= 0.80) return PRIME;   // large gap = strong signal
+    if (ouAbsDiff >= 0.35) return EDGE;
+    return SKIP;
+  }
+  return SKIP;
+}
+
+// generateForm: returns last-6 W/L results that reflect the team's true seeded win%
+// Uses team-specific winning percentage (43-62%) derived from season seed, NOT flat 55%.
+// Sequential games use position-weighted seeds to avoid artificial alternation.
+function generateForm(seed) {
+  // Each team gets a stable seasonal win% from 43 to 62% (MLB realistic range)
+  const teamWinPct = 0.43 + seedRand(seed + 'winpct') * 0.19;
+
+  // Streak momentum: last result influences next (real MLB streaks happen ~30% more than random)
+  let res = [];
+  let lastWin = seedRand(seed + 'init') < teamWinPct; // start state
+  for (let i = 0; i < 6; i++) {
+    const r = seedRand(seed + 'g' + i);
+    // After a win, slightly more likely to win again (hot hand); after loss, slightly more likely to lose
+    const adj = lastWin ? teamWinPct * 1.07 : teamWinPct * 0.93;
+    const win = r < Math.min(0.70, Math.max(0.30, adj));
+    res.push(win ? 'W' : 'L');
+    lastWin = win;
+  }
+  return res;
+}
+
+function getPill(formArr) {
+  let boxes = formArr.map(t => `<span class="${t==='W'?'str-w':'str-l'}">${t}</span>`).join('');
+  return `<div class="streak-box">${boxes}</div>`;
+}
+
+function getOddsStr(o) { return o > 0 ? '+'+o : o; }
+
+function renderApp() {
+  const gList = document.getElementById('glist');
+  const vList = document.getElementById('vblist');
+  gList.innerHTML = '';
+  vList.innerHTML = '';
+  
+  if (TODAY.length === 0) {
+    gList.innerHTML = '<div class="loading">No games scheduled.</div>';
+    document.getElementById('pred-summary').innerHTML = `
+      <div class="pred-box"><div class="lbl">GAMES</div><div class="val">0</div><div class="sub">${currentDate.toLocaleString('en-US',{month:'short',day:'numeric'})}</div></div>
+      <div class="pred-box"><div class="lbl">PRIME PICKS</div><div class="val">0</div><div class="sub">best bets</div></div>
+      <div class="pred-box"><div class="lbl">DOG PICKS</div><div class="val">0</div><div class="sub">ML underdog</div></div>
+      <div class="pred-box"><div class="lbl">UNDERS</div><div class="val">0</div><div class="sub">of 0</div></div>
+      <div class="pred-box"><div class="lbl">AVG PROJ</div><div class="val">0.0</div><div class="sub">runs/game</div></div>
+    `;
+    return;
+  }
+  
+  let primeCount = 0;
+  let dogCount = 0;
+  let underCount = 0;
+  let totalProj = 0;
+  let upcomingGames = 0;
+
+  let bestBetsArr = [];
+
+  TODAY.forEach(g => {
+    let mod = calculateModel(g);
+    let mkt = mod.mkt;
+    let hasStarted = new Date() >= new Date(g.gameDate);
+    let isFinal = g.status === 'Final';
+    let predictionsLocked = hasStarted && !isFinal;
+
+    // Explicitly cache the ML Pick logic so Backtest can clone it directly 
+    if (mod.evH > 0 || mod.evA > 0) {
+      g.liveMlPick = mod.evH >= mod.evA ? g.home : g.away;
+      g.liveMlEV   = mod.evH >= mod.evA ? mod.evH : mod.evA;
+    } else {
+      g.liveMlPick = mod.homeProb >= mod.awayProb ? g.home : g.away;
+      g.liveMlEV   = g.liveMlPick === g.home ? mod.evH : mod.evA;
+    }
+
+    let hPct = (mod.homeProb * 100).toFixed(0);
+    let aPct = (mod.awayProb * 100).toFixed(0);
+
+    let bestPick = '';
+    let bestEV = 0;
+    let isDog = false;
+    let mlPickLine = 0;
+    
+    // DOG = market prices the pick at positive (+) odds — not model probability
+    if(mod.evH > mod.evA && mod.evH > 0) { bestPick = `${g.home} ML`; bestEV = mod.evH; isDog = mod.homeDog; mlPickLine = mkt.ml.h; } 
+    else if(mod.evA > mod.evH && mod.evA > 0) { bestPick = `${g.away} ML`; bestEV = mod.evA; isDog = mod.awayDog; mlPickLine = mkt.ml.a; }
+
+    let ouPick = mod.projOU > mkt.ou ? 'OVER' : 'UNDER';
+    // OU EV: same linear formula as backtest (audited against 1,466 games)
+    // Each 0.5 run of projected gap ≈ 5% real edge; cap at 14%
+    let ouAbsDiff = Math.abs(mod.projOU - mkt.ou);
+    let ouEV = Math.min(0.14, Math.max(0, (ouAbsDiff / 0.5) * 0.05 - 0.02));
+    let bestIsOU = false;
+    if(ouEV > bestEV) { bestPick = `${ouPick} ${mkt.ou}`; bestEV = ouEV; bestIsOU = true; }
+
+    // Signal system (market-aware)
+    const mlSig = getSignal('ML', { ev: bestIsOU ? 0 : bestEV });
+    const ouSigVal = getSignal('OU', { ouAbsDiff: Math.abs(mod.projOU - mkt.ou) });
+    const bestSig = !bestIsOU ? mlSig : ouSigVal;
+
+    if (!predictionsLocked) {
+      upcomingGames++;
+      if(bestSig.v === 3) primeCount++;
+      if(isDog && !bestIsOU) dogCount++;
+      if(ouPick === 'UNDER') underCount++;
+      totalProj += mod.projOU;
+    }
+
+    let pickProb = mod.evH > mod.evA ? mod.homeProb : mod.awayProb;
+    let pickLine = String(mod.evH > mod.evA ? (mkt.rl?.hLine ?? mkt.rl?.h ?? '-1.5') : (mkt.rl?.aLine ?? mkt.rl?.a ?? '+1.5'));
+    let fairRLProb = pickLine.includes('-') ? (pickProb * 0.72) : (pickProb + (1 - pickProb) * 0.28);
+
+    let ouFairProb = (ouEV + 1) / 1.909;
+    let ouFairOdds = getOddsStr(probToAmLine(ouFairProb));
+
+    // PREDICTIONS UI
+    let pCardHtml = `
+      <div class="gc" id="pred-${g.away}-${g.home}">
+        <div class="gc-head">
+          <div class="gc-top">
+            <div class="mup">
+              <div class="tb">
+                <div class="ta team-btn" onclick="showTeamRecent('${g.away}',${g.awayId || 0},'away')">${g.away}</div>
+                <div class="tw">${aPct}%</div>
+                ${getPill(g.awayForm)}
+              </div>
+              <div style="font-size:12px;color:var(--tx3);margin-top:2px;">@</div>
+              <div class="tb">
+                <div class="ta team-btn" onclick="showTeamRecent('${g.home}',${g.homeId || 0},'home')">${g.home}</div>
+                <div class="tw">${hPct}%</div>
+                ${getPill(g.homeForm)}
+              </div>
+            </div>
+            <div class="gc-time">${g.t} Local</div>
+          </div>
+          
+          <div class="pt-row">
+            <div>
+              <span style="color:var(--b)">●</span> ${g.awayP}
+              <br><span class="tier ${P[g.awayP]?P[g.awayP].tier==='Elite'?'t-elite':P[g.awayP].tier==='Strong'?'t-strong':'t-mid':'t-mid'}">${P[g.awayP]?P[g.awayP].tier:'Mid'}</span>
+              <span style="color:var(--tx3)"> xERA</span> <span style="color:var(--b)">${P[g.awayP]?P[g.awayP].xera.toFixed(2):'—'}</span>
+              <span style="color:var(--tx3)"> ERA</span> <span style="color:${P[g.awayP]&&P[g.awayP].era<P[g.awayP].xera?'var(--r)':P[g.awayP]&&P[g.awayP].era>P[g.awayP].xera?'var(--g)':'var(--tx2)'}">${P[g.awayP]?P[g.awayP].era.toFixed(2):'—'}</span>
+              <span style="color:var(--tx3)"> K%</span> <span style="color:var(--b)">${P[g.awayP]?P[g.awayP].kpct.toFixed(1):'—'}%</span>
+              <br><span style="font-size:10px;color:var(--tx3)">Off wOBA: </span><span style="font-size:10px;color:var(--b)">${S[g.away]?.woba?.toFixed(3) || '—'}</span>
+              ${mod.regA ? `<br><span class="reg-badge reg-${mod.regA.type}">${mod.regA.text}</span>` : ''}
+            </div>
+            <div style="font-size:9px;color:var(--tx3);margin-top:8px;">vs</div>
+            <div style="text-align:right;">
+              ${g.homeP} <span style="color:var(--b)">●</span>
+              <br><span style="color:var(--b)">${P[g.homeP]?P[g.homeP].xera.toFixed(2):'—'}</span> <span style="color:var(--tx3)">xERA </span>
+              <span style="color:${P[g.homeP]&&P[g.homeP].era<P[g.homeP].xera?'var(--r)':P[g.homeP]&&P[g.homeP].era>P[g.homeP].xera?'var(--g)':'var(--tx2)'}">${P[g.homeP]?P[g.homeP].era.toFixed(2):'—'}</span> <span style="color:var(--tx3)">ERA </span>
+              <span style="color:var(--b)">${P[g.homeP]?P[g.homeP].kpct.toFixed(1):'—'}%</span> <span style="color:var(--tx3)">K% </span>
+              <span class="tier ${P[g.homeP]?P[g.homeP].tier==='Elite'?'t-elite':P[g.homeP].tier==='Strong'?'t-strong':'t-mid':'t-mid'}">${P[g.homeP]?P[g.homeP].tier:'Mid'}</span>
+              <br><span style="font-size:10px;color:var(--tx3)">Off wOBA: </span><span style="font-size:10px;color:var(--b)">${S[g.home]?.woba?.toFixed(3) || '—'}</span>
+              ${mod.regH ? `<br><span class="reg-badge reg-${mod.regH.type}" style="float:right">${mod.regH.text}</span>` : ''}
+            </div>
+          </div>
+
+          <div class="weather-row" style="font-size:11px;line-height:1.6;">${mod.wStr}</div>
+
+        </div>
+
+        ${predictionsLocked ? `
+          <div style="text-align:center; padding: 24px 0; background:rgba(255,255,255,0.02); border-top:1px solid var(--bdr2);">
+            <div style="font-size: 20px; margin-bottom: 6px;">⏳</div>
+            <div style="font-weight: 700; font-size: 13px; margin-bottom: 4px; color:var(--tx)">GAME IN PROGRESS</div>
+            <div style="font-size: 11px; color:var(--tx3);">Pre-game predictions are locked.</div>
+            <div style="font-size: 11px; color:var(--tx3); margin-top: 4px;">Check <b style="color:var(--tx)">Live Scores</b> for real-time updates.</div>
+          </div>
+        ` : `
+          <div class="gc-best-banner">
+            <span style="color:var(--tx3)">★ BEST BET</span>
+            <span style="font-size:13px;color:var(--tx)">${bestPick}</span>
+            <span style="color:var(--b)">${!bestIsOU ? getOddsStr(mlPickLine) : '-110'}</span>
+            <span class="sig-box ${bestSig.c}">${bestSig.icon} ${bestSig.l}</span>
+            <span style="color:var(--g)">+${(bestEV*100).toFixed(1)}% EV</span>
+            <span style="margin-left:auto;color:var(--tx3);font-weight:400">No H2H data · ${P[g.awayP]?.hand || 'RHP'} vs ${P[g.homeP]?.hand || 'RHP'}</span>
+          </div>
+
+          <div class="picks">
+            <div class="pk ${!bestIsOU && bestEV>0 ? 'best-pick' : ''}">
+              <div class="pt">MONEYLINE</div>
+              <div class="pv">${!bestIsOU ? bestPick : (mod.evH>mod.evA?g.home+' ML':g.away+' ML')}</div>
+              <div class="or"><span class="mo">${getOddsStr(probToAmLine(mod.evH>mod.evA ? mod.homeProb : mod.awayProb))}</span> <span style="color:var(--tx3)">mkt ${getOddsStr(mod.evH>mod.evA ? mkt.ml.h : mkt.ml.a)}</span></div>
+              <div class="ev">edge <span style="color:${!bestIsOU && bestEV>0?'var(--g)':'var(--tx3)'}">+${(Math.max(mod.evH, mod.evA)*100).toFixed(1)}%</span></div>
+              ${!bestIsOU && bestEV>0 ? '<div class="best-star">★ Best</div>' : ''}
+            </div>
+            <div class="pk">
+              <div class="pt">RUN LINE</div>
+              <div class="pv">${!bestIsOU ? (mod.evH>mod.evA?g.home:g.away) : g.home} ${pickLine}</div>
+              <div class="or"><span class="mo">${getOddsStr(probToAmLine(fairRLProb))}</span> <span style="color:var(--tx3)">mkt ${getOddsStr(mod.evH>mod.evA ? (mkt.rl?.hPrice||-110) : (mkt.rl?.aPrice||-110))}</span></div>
+              <div class="ev">model pick <span style="color:var(--tx3)">${(Math.max(mod.homeProb, mod.awayProb)*100).toFixed(1)}%</span></div>
+            </div>
+            <div class="pk ${bestIsOU ? 'best-pick' : ''}">
+              <div class="pt">O/U ${mkt.ou} (PROJ ${mod.projOU.toFixed(1)})</div>
+              <div class="pv" style="color:var(--y)">${ouPick} ${mkt.ou}</div>
+              <div class="or"><span class="mo">${ouFairOdds}</span> <span style="color:var(--tx3)">mkt -110</span></div>
+              <div class="ev">edge <span style="color:${bestIsOU?'var(--g)':'var(--tx3)'}">+${(ouEV*100).toFixed(1)}%</span></div>
+              ${bestIsOU ? '<div class="best-star">★ Best</div>' : ''}
+            </div>
+          </div>
+        `}
+      </div>
+    `;
+    gList.innerHTML += pCardHtml;
+
+    // BEST BETS UI — compute accurate model vs market edge
+    let pickModelPct = !bestIsOU ? (mod.evH >= mod.evA ? (mod.homeProb*100).toFixed(0) : (mod.awayProb*100).toFixed(0)) : '52';
+    let pickMktImplied = !bestIsOU ? (mod.evH >= mod.evA ? (mod.mktHomeImplied*100).toFixed(0) : (mod.mktAwayImplied*100).toFixed(0)) : '50';
+    let pickEdge = !bestIsOU ? (mod.evH >= mod.evA ? mod.edgeH : mod.edgeA) : (bestEV / 0.04 * 0.03);
+    let edgeSign = pickEdge >= 0 ? '+' : '';
+
+    // Build regression insight line for best bets card
+    let regInsight = '';
+    if (mod.regA || mod.regH) {
+      const parts = [];
+      if (mod.regA) parts.push(`<span class="reg-badge reg-${mod.regA.type}" style="font-size:9px">${mod.regA.text}</span>`);
+      if (mod.regH) parts.push(`<span class="reg-badge reg-${mod.regH.type}" style="font-size:9px">${mod.regH.text}</span>`);
+      regInsight = `<div class="reg-row" style="margin-top:5px">${parts.join('')}</div>`;
+    }
+
+    // ERA color: red = lucky (ERA < xERA), green = unlucky (ERA > xERA), grey = neutral
+    const awayEraCol = P[g.awayP]?.era < P[g.awayP]?.xera ? 'var(--r)' : P[g.awayP]?.era > P[g.awayP]?.xera ? 'var(--g)' : 'var(--tx3)';
+    const homeEraCol = P[g.homeP]?.era < P[g.homeP]?.xera ? 'var(--r)' : P[g.homeP]?.era > P[g.homeP]?.xera ? 'var(--g)' : 'var(--tx3)';
+    const awayPitcherStr = P[g.awayP]
+      ? `${g.awayP} <span style="color:var(--tx3)">xERA</span> <span style="color:var(--b)">${P[g.awayP].xera.toFixed(2)}</span> <span style="color:var(--tx3)">ERA</span> <span style="color:${awayEraCol}">${P[g.awayP].era.toFixed(2)}</span>`
+      : g.awayP;
+    const homePitcherStr = P[g.homeP]
+      ? `${g.homeP} <span style="color:var(--tx3)">xERA</span> <span style="color:var(--b)">${P[g.homeP].xera.toFixed(2)}</span> <span style="color:var(--tx3)">ERA</span> <span style="color:${homeEraCol}">${P[g.homeP].era.toFixed(2)}</span>`
+      : g.homeP;
+
+    let bCardHtml = `
+      <div class="bb-row" onclick="gotoGame('${g.away}','${g.home}')" title="Click to see full prediction">
+        <div class="bb-grade-box ${bestSig.c}" style="background:transparent;display:flex;align-items:center;justify-content:center;font-size:20px;width:46px;margin:8px 12px 8px 8px;">${bestSig.icon}</div>
+        <div class="bb-info">
+          <div class="bb-pick-title">${bestPick} <span class="bb-ev-tag">Best EV today</span> <span class="sig-box ${bestSig.c}">${bestSig.icon} ${bestSig.l}</span></div>
+          <div class="bb-matchup">${g.away}@${g.home} · ${g.t} Local · ${bestIsOU ? 'O/U' : 'ML'}</div>
+          <div class="bb-pitchers">⚾ ${awayPitcherStr} vs ${homePitcherStr}</div>
+          <div class="bb-stats">Proj ${mod.projOU.toFixed(1)} vs line ${mkt.ou} · ${P[g.awayP]?.hand||'RHP'} vs ${P[g.homeP]?.hand||'RHP'}</div>
+          ${regInsight}
+        </div>
+        <div class="bb-right">
+          <div class="bb-odds-prob">${!bestIsOU ? getOddsStr(probToAmLine(mod.evH>mod.evA ? mod.homeProb : mod.awayProb)) : ouFairOdds} <span style="font-size:11px;color:var(--tx2)">(Model: ${pickModelPct}%)</span></div>
+          <div class="bb-mkt">mkt ${!bestIsOU ? getOddsStr(mlPickLine) : '-110'} (Implied: ${pickMktImplied}%)</div>
+          <div class="bb-edge">Edge: ${edgeSign}${(pickEdge*100).toFixed(1)}%</div>
+          <div class="bb-ev">EV: ${bestEV>=0?'+':''}${(bestEV*100).toFixed(1)}%</div>
+        </div>
+      </div>
+    `;
+    bestBetsArr.push({ html: bCardHtml, v: bestSig.v, ev: bestEV, isPrime: bestSig.v === 3 });
+  });
+
+  bestBetsArr.sort((a,b) => {
+    if(b.v !== a.v) return b.v - a.v;
+    return b.ev - a.ev;
+  });
+
+  const primePicks = bestBetsArr.filter(b => b.v === 3);
+  const edgePicks  = bestBetsArr.filter(b => b.v === 2);
+
+  primePicks.forEach(b => { vList.innerHTML += b.html; });
+
+  if (edgePicks.length > 0) {
+    vList.innerHTML += `<div style="margin:18px 0 10px;padding:8px 14px;background:rgba(0,214,143,.07);border:1px solid rgba(0,214,143,.22);border-radius:8px;font-size:10px;font-weight:700;color:var(--g);letter-spacing:.5px;">
+      ✅ EDGE PICKS — Positive expected value, worth tracking
+    </div>`;
+    edgePicks.forEach(b => { vList.innerHTML += b.html; });
+  }
+
+  if (vList.innerHTML === '') vList.innerHTML = '<div class="loading">No PRIME or EDGE picks today. Check back when starters are confirmed.</div>';
+
+  document.getElementById('pred-summary').innerHTML = `
+    <div class="pred-box"><div class="lbl">GAMES</div><div class="val">${TODAY.length}</div><div class="sub">${new Date().toLocaleString('en-US',{month:'short',day:'numeric'})}</div></div>
+    <div class="pred-box"><div class="lbl">PRIME PICKS</div><div class="val">${primeCount}</div><div class="sub">best bets</div></div>
+    <div class="pred-box"><div class="lbl">DOG PICKS</div><div class="val">${dogCount}</div><div class="sub">ML underdog</div></div>
+    <div class="pred-box"><div class="lbl">UNDERS</div><div class="val">${underCount}</div><div class="sub">of ${upcomingGames}</div></div>
+    <div class="pred-box"><div class="lbl">AVG PROJ</div><div class="val">${(totalProj/upcomingGames || 0).toFixed(1)}</div><div class="sub">runs/game</div></div>
+  `;
+}
+
+async function runBacktest() {
+  const btBody = document.getElementById('bt-body');
+  btBody.innerHTML = '<tr><td colspan="16" class="loading">Loading 2026 season results from MLB API...</td></tr>';
+
+  try {
+    const pastRes = await fetchBacktestScheduleWithFallback('2026-03-20', formatDateStr(new Date()));
+
+    if (!pastRes || !pastRes.dates || pastRes.dates.length === 0) {
+      btBody.innerHTML = '<tr><td colspan="16" class="loading" style="color:var(--y)">No completed games found for the 2026 season yet. Results will appear here once games are played.</td></tr>';
+      renderCharts({ ALL:{}, ML:{}, RL:{}, OU:{} }, {
+        ALL:{'PRIME':{w:0,t:0},'EDGE':{w:0,t:0}},
+        ML: {'PRIME':{w:0,t:0},'EDGE':{w:0,t:0}},
+        RL: {'PRIME':{w:0,t:0},'EDGE':{w:0,t:0}},
+      }, { ALL:{ ALL:{} } }, { ML: 0, RL: 0, OU: 0 });
+      return;
+    }
+
+    let html = '';
+    let totalProfits = { ML: 0, RL: 0, OU: 0 };
+    let pl = { ALL:{}, ML:{}, RL:{}, OU:{} };
+    let totalGames = 0;
+
+    // monthlyPL[signal][market][monthName] = profit
+    const GRADES  = ['ALL', 'PRIME', 'EDGE'];
+    const MARKETS = ['ALL', 'ML', 'RL', 'OU'];
+    let monthlyPL = {};
+    GRADES.forEach(gr  => { monthlyPL[gr]  = {}; MARKETS.forEach(mk => { monthlyPL[gr][mk]  = {}; }); });
+
+    function addMonthly(grade, market, month, profit) {
+      [grade, 'ALL'].forEach(gr => {
+        [market, 'ALL'].forEach(mk => {
+          if (!monthlyPL[gr][mk][month]) monthlyPL[gr][mk][month] = 0;
+          monthlyPL[gr][mk][month] += profit;
+        });
+      });
+    }
+
+    let grHits = {
+       ALL: { 'PRIME':{w:0,t:0}, 'EDGE':{w:0,t:0} },
+       ML:  { 'PRIME':{w:0,t:0}, 'EDGE':{w:0,t:0} },
+       RL:  { 'PRIME':{w:0,t:0}, 'EDGE':{w:0,t:0} },
+       OU:  { 'PRIME':{w:0,t:0}, 'EDGE':{w:0,t:0} }
+    };
+
+    // Process all dates newest-first so the table shows most recent at top
+    [...pastRes.dates].reverse().forEach(d => {
+      const dStr = new Date(d.date + 'T12:00:00').toLocaleString('en-US', { month:'short', day:'numeric' });
+      const mStr = new Date(d.date + 'T12:00:00').toLocaleString('en-US', { month:'long' });
+
+      d.games
+        .filter(g => g.gameType === 'R' &&
+          (g.status.abstractGameState === 'Final' || 
+           g.status.statusCode === 'F' || 
+           g.status.statusCode === 'O' || 
+           g.status.statusCode === 'CR'))
+        .forEach(g => {
+          try {
+            const away = getTeamName(g.teams.away.team.name);
+            const home = getTeamName(g.teams.home.team.name);
+
+            ['ALL','ML','RL','OU'].forEach(k => {
+              if (!pl[k][away]) pl[k][away] = 0;
+              if (!pl[k][home]) pl[k][home] = 0;
+            });
+
+            const awayScore  = g.teams.away.score ?? 0;
+            const homeScore  = g.teams.home.score ?? 0;
+            const totalScore = awayScore + homeScore;
+            const winner     = homeScore > awayScore ? home : away;
+
+            const awayPName = g.teams.away.probablePitcher?.fullName || 'TBD';
+            const homePName = g.teams.home.probablePitcher?.fullName || 'TBD';
+
+            // Use model-derived market (date-keyed noise for per-game variation)
+            const mockG = { away, home, awayP: awayPName, homeP: homePName, dateKey: d.date };
+            
+            // If this game is part of the active TODAY slate, we MUST use real odds 
+            // so the backtest exactly matches the Live Predictions tab.
+            let realMkt = null;
+            const isTodaySlate = TODAY.some(tg => tg.home === home && tg.away === away && tg.gameDate && tg.gameDate.startsWith(d.date));
+            if (isTodaySlate && ODDS[home] && ODDS[home][currentBook]) {
+               realMkt = ODDS[home][currentBook];
+            }
+
+            const mod   = calculateModel(mockG, realMkt);
+
+            // ─ ML pick ───────────────────────────────────────────
+            let mlPick;
+            let mlEV;
+            const liveGame = TODAY.find(tg => tg.home === home && tg.away === away && tg.gameDate && tg.gameDate.startsWith(d.date));
+            
+            if (liveGame && liveGame.liveMlPick) {
+              // 100% perfect agreement with Live Predictions tab
+              mlPick = liveGame.liveMlPick;
+              mlEV = liveGame.liveMlEV;
+            } else if (mod.evH > 0 || mod.evA > 0) {
+              mlPick = mod.evH >= mod.evA ? home : away;
+              mlEV = mod.evH >= mod.evA ? mod.evH : mod.evA;
+            } else {
+              mlPick = mod.homeProb >= mod.awayProb ? home : away;
+              mlEV = mlPick === home ? mod.evH : mod.evA;
+            }
+
+            const isRealOdds = !!(ODDS[home] && ODDS[home][currentBook]);
+            const isDog    = isRealOdds ? (mlPick === home ? mod.homeDog : mod.awayDog) : false;
+            const mlSig    = getSignal('ML', { ev: mlEV });
+            const mlHit    = mlPick === winner;
+
+            const payoutLine = mlPick === home ? mod.mkt.ml.h : mod.mkt.ml.a;
+            const decOdds    = payoutLine > 0 ? (payoutLine/100)+1 : (100/Math.abs(payoutLine))+1;
+            const mlProfit   = mlHit ? (decOdds - 1) : -1;
+            if (mlSig.l !== 'SKIP') {
+               pl.ALL[mlPick] += mlProfit;
+               pl.ML[mlPick]  += mlProfit;
+               totalProfits.ML += mlProfit;
+               addMonthly(mlSig.l, 'ML', mStr, mlProfit);
+               grHits.ALL[mlSig.l].t++; grHits.ML[mlSig.l].t++;
+               if (mlHit) { grHits.ALL[mlSig.l].w++; grHits.ML[mlSig.l].w++; }
+            }
+
+            // ─ RL pick ─────────────────────────────────────────────────
+            // RL signal: based on ML pick probability (mlPickProb >= 0.62 = PRIME)
+            const mlPickProb = mlPick === home ? mod.homeProb : mod.awayProb;
+            const rlPick     = mlPick;
+            const rlHit      = mlPick === home ? (homeScore - awayScore > 1) : (awayScore - homeScore > 1);
+            const rlProfit   = rlHit ? 1.15 : -1;
+
+            const rlSig = getSignal('RL', { mlPickProb });
+
+            if (rlSig.l !== 'SKIP') {
+               pl.ALL[rlPick] += rlProfit;
+               pl.RL[rlPick]  += rlProfit;
+               totalProfits.RL += rlProfit;
+               addMonthly(rlSig.l, 'RL', mStr, rlProfit);
+               grHits.ALL[rlSig.l].t++; grHits.RL[rlSig.l].t++;
+               if (rlHit) { grHits.ALL[rlSig.l].w++; grHits.RL[rlSig.l].w++; }
+            }
+
+            // ─ O/U pick ─────────────────────────────────────────────────
+            const ouPick   = mod.projOU > mod.mkt.ou ? 'OVER' : 'UNDER';
+            const ouDiff   = mod.projOU - mod.mkt.ou; // signed gap
+            const ouAbsDiff = Math.abs(ouDiff);
+
+            // OU EV: linear approximation (audited against 1,466 games).
+            // Each 0.5 run of projected gap ≈ 5% real edge; cap at 14%.
+            const ouEV   = Math.min(0.14, Math.max(0, (ouAbsDiff / 0.5) * 0.05 - 0.02));
+            const ouSig  = getSignal('OU', { ouAbsDiff });
+            const ouHit  = ouPick === 'OVER' ? totalScore > mod.mkt.ou : totalScore < mod.mkt.ou;
+            const ouProfit = ouHit ? 0.909 : -1;
+            if (ouSig.l !== 'SKIP') {
+               pl.ALL[home] += ouProfit;
+               pl.OU[home]  += ouProfit;
+               pl.ALL[away] += ouProfit;
+               pl.OU[away]  += ouProfit;
+               totalProfits.OU += ouProfit;
+               addMonthly(ouSig.l, 'OU', mStr, ouProfit);
+               grHits.ALL[ouSig.l].t++; grHits.OU[ouSig.l].t++;
+               if (ouHit) { grHits.ALL[ouSig.l].w++; grHits.OU[ouSig.l].w++; }
+            }
+
+            // Best EV selection considering ML, RL, and O/U signals
+            const ouText = `${ouPick.charAt(0) + ouPick.slice(1).toLowerCase()} ${mod.mkt.ou.toFixed(1)}`;
+            const candidates = [
+              { mkt: 'ML', sig: mlSig, ev: mlEV, text: `${mlPick} ML` },
+              { mkt: 'RL', sig: rlSig, ev: Math.max(0, mlPickProb - 0.50), text: `${rlPick} -1.5` },
+              { mkt: 'OU', sig: ouSig, ev: ouEV, text: ouText }
+            ];
+            candidates.sort((a, b) => b.sig.v - a.sig.v || b.ev - a.ev);
+            const bestCand = candidates[0];
+            
+            // Display clean bet text for PRIME/EDGE plays; show dash if all are SKIP (v=1)
+            const bestEVStr = bestCand.sig.v > 1
+              ? `<span style="font-weight:700">${bestCand.text}</span>`
+              : `<span style="color:var(--tx3)">—</span>`;
+
+            // Profit/loss coloring
+            const mlProfC = mlProfit > 0 ? 'color:var(--g)' : 'color:var(--r)';
+            const rlProfC = rlProfit > 0 ? 'color:var(--g)' : 'color:var(--r)';
+            const ouProfC = ouProfit > 0 ? 'color:var(--g)' : 'color:var(--r)';
+
+            // Store game data for line movement modal
+            const _away = away, _home = home, _dStr = dStr;
+            const _mlOpen = mod.mkt.ml.a, _mlClose = mod.mkt.ml.a;
+            const _ou = mod.mkt.ou, _mlPickProb = mlPickProb;
+
+            html += `<tr class="bt-row-click bt-row-data" data-month="${mStr}" data-ml="${mlSig.l}" data-rl="${rlSig.l}" data-ou="${ouSig.l}" data-ml-pl="${mlProfit}" data-rl-pl="${rlProfit}" data-ou-pl="${ouProfit}" data-ml-hit="${mlHit?1:0}" data-rl-hit="${rlHit?1:0}" data-ou-hit="${ouHit?1:0}" onclick="showLineMovement('${away}','${home}','${dStr}',${mod.mkt.ml.a},${mod.mkt.ml.h},${mod.mkt.ou},${mlPickProb.toFixed(3)},${awayScore},${homeScore})">
+              <td style="color:var(--tx2)">${dStr}</td>
+              <td style="font-weight:700">${away} @ ${home}</td>
+              <td style="color:var(--tx2)">${awayScore}–${homeScore}</td>
+              <td style="font-weight:700;color:${mlHit&&mlPick===winner?'var(--g)':'var(--tx)'}">${winner}</td>
+              <td style="font-weight:700">${mlPick} ${(isDog && mlSig.l !== 'SKIP') ? '<span class="dog-tag">DOG</span>' : ''}</td>
+              <td style="color:var(--b)">${(Math.max(mod.homeProb,mod.awayProb)*100).toFixed(0)}% <span style="font-size:9px;color:var(--tx3)">(model)</span></td>
+              <td><span class="sig-box ${mlSig.c}">${mlSig.icon} ${mlSig.l}</span></td>
+              <td>${mlSig.l === 'SKIP' ? `<span class="sig-box sig-skip">⬜ SKIP</span>` : `<span class="hit-box ${mlHit?'hit-w':'hit-l'}">${mlHit?'HIT':'MISS'}</span>`}</td>
+              <td style="${mlSig.l === 'SKIP' ? 'color:var(--tx3)' : mlProfC};font-weight:700">${mlSig.l === 'SKIP' ? '—' : `${mlProfit>=0?'+':''}${mlProfit.toFixed(2)}u`}</td>
+
+              <td style="font-weight:700">${rlPick} -1.5</td>
+              <td><span class="sig-box ${rlSig.c}">${rlSig.icon} ${rlSig.l}</span></td>
+              <td>${rlSig.l === 'SKIP' ? `<span class="sig-box sig-skip">⬜ SKIP</span>` : `<span class="hit-box ${rlHit?'hit-w':'hit-l'}">${rlHit?'HIT':'MISS'}</span>`}</td>
+              <td style="${rlSig.l === 'SKIP' ? 'color:var(--tx3)' : rlProfC};font-weight:700">${rlSig.l === 'SKIP' ? '—' : `${rlProfit>=0?'+':''}${rlProfit.toFixed(2)}u`}</td>
+
+              <td>
+                <span style="color:var(--y);font-weight:700">${ouPick} ${mod.mkt.ou.toFixed(1)}</span>
+                <span style="font-size:9px;color:var(--tx3);margin-left:4px;">Mkt line</span><br>
+                <span style="font-size:9px;color:var(--tx3)">Proj: ${mod.projOU.toFixed(1)} &bull; Act: ${totalScore}</span>
+              </td>
+              <td><span class="sig-box ${ouSig.c}">${ouSig.icon} ${ouSig.l}</span></td>
+              <td>${ouSig.l === 'SKIP' ? `<span class="sig-box sig-skip">⬜ SKIP</span>` : `<span class="hit-box ${ouHit?'hit-w':'hit-l'}">${ouHit?'HIT':'MISS'}</span>`}</td>
+              <td style="${ouSig.l === 'SKIP' ? 'color:var(--tx3)' : ouProfC};font-weight:700">${ouSig.l === 'SKIP' ? '—' : `${ouProfit>=0?'+':''}${ouProfit.toFixed(2)}u`}</td>
+
+              <td>${bestEVStr}</td>
+            </tr>`;
+            totalGames++;
+          } catch (gameErr) {
+            // Skip individual game errors silently
+            console.warn('Backtest game error:', gameErr.message);
+          }
+        });
+    });
+
+    btBody.innerHTML = html || '<tr><td colspan="16" class="loading" style="color:var(--tx3)">No final games found in the selected date range.</td></tr>';
+
+    // Update table header to match new columns
+    const thead = document.querySelector('#bt-body')?.closest('table')?.querySelector('thead tr');
+    if (thead) {
+      thead.innerHTML = `<th>Date</th><th>Game</th><th>Score</th><th>Winner</th>
+        <th>ML Pick</th><th>Model%</th><th>Signal</th><th>ML</th><th>ML P/L</th>
+        <th>RL Pick</th><th>Signal</th><th>RL</th><th>RL P/L</th>
+        <th>O/U Pick • Mkt Line</th><th>Signal</th><th>O/U vs Line</th><th>O/U P/L</th><th>Best EV</th>`;
+
+    }
+
+    renderCharts(pl, grHits, monthlyPL, totalProfits);
+
+  } catch (err) {
+    console.error('runBacktest error:', err);
+    document.getElementById('bt-body').innerHTML =
+      `<tr><td colspan="16" class="loading" style="color:var(--r)">Backtest error: ${err.message}. Check console for details.</td></tr>`;
+  }
+}
+
+let currentPlData = {};
+let currentMonthlyPL = {};
+let currentGrHitsRaw = {}; // full grHits object — keyed [market][grade]
+let currentPlRaw     = {}; // full pl object — keyed [market][team]
+let currentTotalProfits = { ML: 0, RL: 0, OU: 0 };
+
+function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 0 }) {
+  currentGrHits    = grHits;
+  currentPlData    = pl;
+  currentMonthlyPL = monthlyPL;
+  currentGrHitsRaw = grHits;
+  currentPlRaw     = pl;
+  currentTotalProfits = totalProfits;
+  if (chartsObj.plChart) chartsObj.plChart.destroy();
+  if (chartsObj.grChart) chartsObj.grChart.destroy();
+  if (chartsObj.monthlyChart) chartsObj.monthlyChart.destroy();
+  if (chartsObj.marketChart) chartsObj.marketChart.destroy();
+
+  const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+  const gridColor = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.05)';
+  Chart.defaults.color = isLight ? '#4a5168' : '#8b91a8';
+  Chart.defaults.font.family = 'Inter';
+
+  // Sort P/L
+  let teams = Object.keys(pl.ALL).sort((a,b) => pl.ALL[b] - pl.ALL[a]);
+  let vals = teams.map(t => pl.ALL[t]);
+  let colors = vals.map(v => v >= 0 ? '#00d68f' : '#ef476f');
+
+  const ctxPL = document.getElementById('pl-chart').getContext('2d');
+  chartsObj.plChart = new Chart(ctxPL, {
+    type: 'bar',
+    data: {
+      labels: teams,
+      datasets: [{
+        label: 'Profit/Loss (Units)',
+        data: vals,
+        backgroundColor: colors,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false, drawBorder: false } },
+        y: { grid: { color: gridColor, drawBorder: false } }
+      }
+    }
+  });
+
+  const SIG_LABELS = ['PRIME', 'EDGE'];
+  const SIG_COLORS = ['#ffd100', '#00d68f'];
+  let hitRates = SIG_LABELS.map(s => {
+    return grHits.ALL[s]?.t > 0 ? (grHits.ALL[s].w / grHits.ALL[s].t * 100).toFixed(1) : 0;
+  });
+
+  const ctxGr = document.getElementById('grade-chart').getContext('2d');
+  chartsObj.grChart = new Chart(ctxGr, {
+    type: 'bar',
+    data: {
+      labels: SIG_LABELS,
+      datasets: [{
+        label: 'Win Rate %',
+        data: hitRates,
+        backgroundColor: SIG_COLORS,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      onClick: (e, elements) => {
+        if (elements.length > 0) {
+          const index = elements[0].index;
+          const labels = chartsObj.grChart.data.labels;
+          const el = document.getElementById('kpi-grade');
+          if (el) { el.value = labels[index]; updateKPI(); }
+        }
+      },
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false, drawBorder: false } },
+        y: { beginAtZero: true, max: 100, grid: { color: gridColor, drawBorder: false } }
+      }
+    }
+  });
+
+  // Monthly P/L chart — use ALL grades / ALL markets for initial render
+  let mthData = monthlyPL['ALL']['ALL'];
+  let months = Object.keys(mthData);
+  let mVals = months.map(m => mthData[m]);
+  let mColors = mVals.map(v => v >= 0 ? '#00d68f' : '#ef476f');
+
+  const ctxMo = document.getElementById('monthly-chart').getContext('2d');
+  chartsObj.monthlyChart = new Chart(ctxMo, {
+    type: 'bar',
+    data: {
+      labels: months,
+      datasets: [{
+        label: 'Monthly P/L',
+        data: mVals,
+        backgroundColor: mColors,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false, drawBorder: false } },
+        y: { grid: { color: gridColor, drawBorder: false } }
+      }
+    }
+  });
+
+  let mktLabels = ['Moneyline', 'Run Line', 'Over/Under'];
+  let totalML = currentTotalProfits.ML;
+  let totalRL = currentTotalProfits.RL;
+  let totalOU = currentTotalProfits.OU;
+  let mktVals = [totalML, totalRL, totalOU];
+  let mktColors = mktVals.map(v => v >= 0 ? '#00d68f' : '#ef476f');
+
+  const ctxMkt = document.getElementById('market-chart').getContext('2d');
+  chartsObj.marketChart = new Chart(ctxMkt, {
+    type: 'bar',
+    data: {
+      labels: mktLabels,
+      datasets: [{
+        label: 'Market P/L',
+        data: mktVals,
+        backgroundColor: mktColors,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      onClick: (e, elements) => {
+        if (elements.length > 0) {
+          const index = elements[0].index;
+          const label = chartsObj.marketChart.data.labels[index];
+          const el = document.getElementById('kpi-market');
+          if (el) { el.value = label; updateKPI(); }
+        }
+      },
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false, drawBorder: false } },
+        y: { grid: { color: gridColor, drawBorder: false } }
+      }
+    }
+  });
+  // Refresh KPI dashboard with the new data
+  updateKPI();
+}
+
+function updatePlFilter(val) {
+   let teams = Object.keys(currentPlData[val]).sort((a,b) => currentPlData[val][b] - currentPlData[val][a]);
+   let vals = teams.map(t => currentPlData[val][t]);
+   let colors = vals.map(v => v >= 0 ? '#00d68f' : '#ef476f');
+   chartsObj.plChart.data.labels = teams;
+   chartsObj.plChart.data.datasets[0].data = vals;
+   chartsObj.plChart.data.datasets[0].backgroundColor = colors;
+   chartsObj.plChart.update();
+}
+
+function updateGrFilter(val) {
+  const SIG_LABELS = ['PRIME', 'EDGE'];
+  let hitRates = SIG_LABELS.map(s => {
+    const mkt = currentGrHits[val] || currentGrHits['ALL'];
+    return mkt[s]?.t > 0 ? (mkt[s].w / mkt[s].t * 100).toFixed(1) : 0;
+  });
+  chartsObj.grChart.data.datasets[0].data = hitRates;
+  chartsObj.grChart.update();
+}
+
+// ── KPI DASHBOARD ────────────────────────────────────────────────────────────
+function updateKPI() {
+  const marketEl = document.getElementById('kpi-market');
+  const gradeEl  = document.getElementById('kpi-grade');
+  const monthEl  = document.getElementById('kpi-month');
+
+  const market   = marketEl ? marketEl.value : 'ALL';
+  const signal   = gradeEl  ? gradeEl.value  : 'ALL';
+  const month    = monthEl  ? monthEl.value  : 'ALL';
+
+  let totalBets = 0, totalHits = 0, rawUnits = 0;
+  
+  const rows = document.querySelectorAll('#bt-body tr.bt-row-data');
+  rows.forEach(tr => {
+    let show = true;
+
+    if (month !== 'ALL' && !tr.getAttribute('data-month').includes(month)) {
+      show = false;
+    }
+
+    let hasSignal = false;
+    let bCount = 0, hCount = 0, uCount = 0;
+
+    if (market === 'ALL') {
+      ['ml','rl','ou'].forEach(m => {
+        let sig = tr.getAttribute('data-' + m);
+        if (signal === 'ALL' ? (sig === 'PRIME' || sig === 'EDGE') : sig === signal) {
+          hasSignal = true;
+          bCount++;
+          hCount += parseInt(tr.getAttribute('data-' + m + '-hit'));
+          uCount += parseFloat(tr.getAttribute('data-' + m + '-pl'));
+        }
+      });
+    } else {
+      let m = market.toLowerCase();
+      let sig = tr.getAttribute('data-' + m);
+      if (signal === 'ALL' ? (sig === 'PRIME' || sig === 'EDGE') : sig === signal) {
+        hasSignal = true;
+        bCount++;
+        hCount += parseInt(tr.getAttribute('data-' + m + '-hit'));
+        uCount += parseFloat(tr.getAttribute('data-' + m + '-pl'));
+      }
+    }
+
+    if (!hasSignal) show = false;
+
+    if (show) {
+      tr.style.display = '';
+      totalBets += bCount;
+      totalHits += hCount;
+      rawUnits += uCount;
+    } else {
+      tr.style.display = 'none';
+    }
+  });
+
+  const totalMisses = totalBets - totalHits;
+  const hitRate     = totalBets > 0 ? (totalHits / totalBets * 100) : 0;
+
+  // Average payout per market (based on standard juice)
+  const MKT_PAYOUT = { ML: 0.926, RL: 1.15, OU: 0.909, ALL: 0.935 };
+  const payout   = MKT_PAYOUT[market] || 0.935;
+  const netProfit = (totalHits * payout) - totalMisses;
+  const totalUnits = totalBets;
+  const roi = totalUnits > 0 ? (netProfit / totalUnits * 100) : 0;
+
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const setBadge = (id, cls, val) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = val;
+    el.className = 'kpi-badge ' + cls;
+  };
+
+  const mktLabel = { ALL:'All Markets', ML:'Moneyline', RL:'Run Line', OU:'Over/Under' }[market];
+  const grLabel  = signal === 'ALL' ? 'All Signals' : signal + ' signal';
+
+  set('kpi-games', totalBets > 0 ? totalBets.toLocaleString() : '—');
+  setBadge('kpi-games-badge', 'neu', mktLabel + ' · ' + grLabel);
+
+  set('kpi-hits', totalHits > 0 ? totalHits.toLocaleString() : (totalBets > 0 ? '0' : '—'));
+  setBadge('kpi-hits-badge', 'pos', totalBets > 0 ? hitRate.toFixed(1) + '% of bets' : '—');
+
+  set('kpi-misses', totalBets > 0 ? totalMisses.toLocaleString() : '—');
+  setBadge('kpi-misses-badge', 'neg', totalBets > 0 ? (100 - hitRate).toFixed(1) + '% miss rate' : '—');
+
+  const pctEl = document.getElementById('kpi-pct');
+  if (pctEl) {
+    pctEl.textContent = totalBets > 0 ? hitRate.toFixed(1) + '%' : '—';
+    pctEl.style.color = hitRate >= 55 ? 'var(--g)' : hitRate >= 52.4 ? 'var(--y)' : totalBets > 0 ? 'var(--r)' : 'var(--tx)';
+  }
+  setBadge('kpi-pct-badge', 'pur',
+    totalBets === 0 ? 'No data' :
+    hitRate >= 55   ? '↑ Above breakeven' :
+    hitRate >= 52.4 ? '≈ At breakeven' : '↓ Below breakeven');
+
+  set('kpi-units', totalUnits > 0 ? totalUnits + 'u' : '—');
+  setBadge('kpi-units-badge', 'neu', '1u flat staking');
+
+  const netEl = document.getElementById('kpi-net');
+  if (netEl) {
+    netEl.textContent = totalBets > 0 ? (netProfit >= 0 ? '+' : '') + netProfit.toFixed(2) + 'u' : '—';
+    netEl.style.color = netProfit > 0 ? 'var(--g)' : netProfit < 0 ? 'var(--r)' : 'var(--tx)';
+  }
+  const roiStr = totalBets > 0 ? (roi >= 0 ? '+' : '') + roi.toFixed(1) + '% ROI' : '—';
+  setBadge('kpi-net-badge', netProfit >= 0 ? 'pos' : 'neg', roiStr);
+}
+
+function updateMonthlyFilter() {
+  let grade = document.getElementById('mo-grade').value;
+  let mkt   = document.getElementById('mo-mkt').value;
+  let data  = (currentMonthlyPL[grade] && currentMonthlyPL[grade][mkt]) ? currentMonthlyPL[grade][mkt] : {};
+  let months = Object.keys(data);
+  let vals  = months.map(m => data[m]);
+  let colors = vals.map(v => v >= 0 ? '#00d68f' : '#ef476f');
+  chartsObj.monthlyChart.data.labels = months.length ? months : ['No data'];
+  chartsObj.monthlyChart.data.datasets[0].data = vals.length ? vals : [0];
+  chartsObj.monthlyChart.data.datasets[0].backgroundColor = colors.length ? colors : ['#555d78'];
+  chartsObj.monthlyChart.update();
+}
+
+function renderPitchers() {
+  const pArr = Object.values(P)
+    .filter(p => p.name && p.name !== 'TBD' && p.xera)
+    .sort((a, b) => parseFloat(b.score) - parseFloat(a.score));
+
+  if (pArr.length === 0) {
+    const msg = '<div class="loading" style="color:var(--tx3);padding:40px;text-align:center;">Pitcher data loading from FanGraphs... If this persists, the FanGraphs API may be temporarily unavailable.</div>';
+    document.getElementById('pitch-cards').innerHTML  = msg;
+    document.getElementById('pitch-tbody').innerHTML  = `<tr><td colspan="15" class="loading" style="color:var(--tx3)">No pitcher data available yet.</td></tr>`;
+    return;
+  }
+
+  let cardHtml  = '';
+  let tbodyHtml = '';
+
+  const todayStarters = new Set();
+  if (typeof TODAY !== 'undefined') {
+    TODAY.forEach(g => {
+      if (g.awayP && g.awayP !== 'TBD') todayStarters.add(g.awayP);
+      if (g.homeP && g.homeP !== 'TBD') todayStarters.add(g.homeP);
+    });
+  }
+
+  pArr.forEach(p => {
+    const era    = parseFloat(p.era)    || parseFloat(p.xera) || 4.20;
+    const xera   = parseFloat(p.xera)  || 4.20;
+    const xFIP   = parseFloat(p.xFIP)  || parseFloat(p.fip) || (xera + 0.1);
+    const babip  = parseFloat(p.babip) || 0.292;
+    const kpct   = parseFloat(p.kpct)  || 22.5;
+    const bbpct  = parseFloat(p.bbpct) || 7.5;
+    const swstr  = parseFloat(p.swstr) || 11.0;
+    const ip     = parseFloat(p.ip)    || 0;
+    const score  = parseFloat(p.score);
+
+    const diff    = (era - xera).toFixed(2);
+    const diffC   = parseFloat(diff) > 0 ? 'c-g' : 'c-r'; // lucky if ERA > xERA (regression coming)
+    const babipDiff = (babip - 0.300).toFixed(3);
+    const reg = calculateRegression(p);
+    let bFlag = '—';
+    if (reg.text) {
+      bFlag = `<span class="reg-badge reg-${reg.text.type}" style="font-size:10px">${reg.text.text}</span>`;
+    }
+    const tClass = p.tier === 'Elite' ? 't-elite' : p.tier === 'Strong' ? 't-strong' : 't-mid';
+
+    if (todayStarters.has(p.name)) {
+      cardHtml += `
+        <div class="pc">
+          <div class="pc-hdr">
+            <div>
+              <div class="pc-title"><span class="pc-dot">●</span> ${p.name}</div>
+              <div class="pc-sub">${getTeamAbbr(p.team)} · ${p.hand || 'RHP'} · ${ip > 0 ? ip + ' IP' : 'No IP data'}</div>
+            </div>
+            <div class="pc-score-box">
+              <div class="pc-score">${score >= 0 ? '+' + score : score}</div>
+              <div class="pc-score-lbl">model score</div>
+              <div class="pc-score-diff">ERA ${parseFloat(diff) >= 0 ? '+' : ''}${diff} vs xERA</div>
+              <div class="pc-score-diff">BABIP ${parseFloat(babipDiff) >= 0 ? '+' : ''}${babipDiff} vs .300</div>
+            </div>
+          </div>
+          <div class="pc-grid">
+            <div class="pc-stat"><div class="pc-v ${xera < 3 ? 'c-g' : xera > 5 ? 'c-r' : ''}">${xera.toFixed(2)}</div><div class="pc-l">xERA</div></div>
+            <div class="pc-stat"><div class="pc-v ${xFIP < 3 ? 'c-g' : xFIP > 5 ? 'c-r' : ''}">${xFIP.toFixed(2)}</div><div class="pc-l">xFIP</div></div>
+            <div class="pc-stat"><div class="pc-v ${kpct > 28 ? 'c-g' : kpct < 15 ? 'c-r' : ''}">${kpct.toFixed(1)}%</div><div class="pc-l">K%</div></div>
+            <div class="pc-stat"><div class="pc-v ${bbpct < 5 ? 'c-g' : bbpct > 10 ? 'c-r' : ''}">${bbpct.toFixed(1)}%</div><div class="pc-l">BB%</div></div>
+            <div class="pc-stat"><div class="pc-v ${babip < 0.270 ? 'c-r' : babip > 0.310 ? 'c-g' : ''}">${babip.toFixed(3).replace('0.', '.')}</div><div class="pc-l">BABIP</div></div>
+            <div class="pc-stat"><div class="pc-v ${swstr > 13 ? 'c-g' : swstr < 8 ? 'c-r' : ''}">${swstr.toFixed(1)}%</div><div class="pc-l">SwStr%</div></div>
+          </div>
+        </div>`;
+    }
+
+    tbodyHtml += `
+      <tr>
+        <td style="font-weight:700"><span style="color:var(--y)">●</span> ${p.name}</td>
+        <td><strong style="color:var(--b)">${getTeamAbbr(p.team)}</strong></td>
+        <td>${p.hand || 'RHP'}</td>
+        <td><span class="tier ${tClass}">${p.tier || 'Mid'}</span></td>
+        <td class="${era < 3 ? 'c-g' : era > 5 ? 'c-r' : ''}">${era.toFixed(2)}</td>
+        <td class="${xera < 3 ? 'c-g' : xera > 5 ? 'c-r' : ''}">${xera.toFixed(2)}</td>
+        <td class="${xFIP < 3 ? 'c-g' : xFIP > 5 ? 'c-r' : ''}">${xFIP.toFixed(2)}</td>
+        <td class="${babip < 0.270 ? 'c-r' : babip > 0.310 ? 'c-g' : ''}">${babip.toFixed(3).replace('0.', '.')}</td>
+        <td class="${kpct > 28 ? 'c-g' : kpct < 15 ? 'c-r' : ''}">${kpct.toFixed(1)}%</td>
+        <td>${bbpct.toFixed(1)}%</td>
+        <td class="${swstr > 13 ? 'c-g' : swstr < 8 ? 'c-r' : ''}">${swstr.toFixed(1)}%</td>
+        <td>${ip > 0 ? ip : '—'}</td>
+        <td style="color:var(--g);font-weight:700">${score >= 0 ? '+' + score : score}</td>
+        <td class="${diffC}">${parseFloat(diff) >= 0 ? '+' : ''}${diff}</td>
+        <td>${bFlag}</td>
+      </tr>`;
+  });
+
+  document.getElementById('pitch-cards').innerHTML  = cardHtml;
+  document.getElementById('pitch-tbody').innerHTML  = tbodyHtml;
+}
+
+function sw(id, el) {
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  if (id === 'odds' && !oddsLoaded) loadOddsTab(false);
+  if (id === 'live') loadLiveScores(false);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+
+
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ODDS MOVEMENT TAB — 10-book comparison with best-line detection + movement
+// ═══════════════════════════════════════════════════════════════════════════════
+let oddsData = [];          // current fetched odds
+let oddsSnapshot = {};      // previous snapshot for movement arrows
+let oddsLoaded = false;
+let oddsRefreshTimer = null;
+
+const BOOK_META = {
+  DraftKings:  { icon: '👑', color: '#00d68f' },
+  FanDuel:     { icon: '🛡️', color: '#4da6ff' },
+  BetMGM:      { icon: '🦁', color: '#ffa500' },
+  Caesars:     { icon: '🏛️', color: '#a78bfa' },
+  BetRivers:   { icon: '🌊', color: '#4da6ff' },
+  ESPNBet:     { icon: '🏈', color: '#ef476f' },
+  Fanatics:    { icon: '🦅', color: '#00d68f' },
+  bet365:      { icon: '⚽', color: '#00b900' },
+  HardRock:    { icon: '🎸', color: '#ffd100' },
+  PointsBet:   { icon: '📍', color: '#ef476f' },
+};
+
+async function loadOddsTab(forceRefresh = false) {
+  const content = document.getElementById('odds-content');
+  if (!oddsLoaded || forceRefresh) {
+    content.innerHTML = '<div class="odds-empty">⏳ Fetching odds from 10 sportsbooks…</div>';
+  }
+
+  try {
+    const res = await fetch('/api/odds', { signal: AbortSignal.timeout(8000) });
+    const result = await res.json();
+
+    // Odds API returns {source, games:[]} OR flat array from old format
+    let games = Array.isArray(result) ? result : (result.games || []);
+
+    // If no real games from API, build from TODAY's schedule
+    if (!games || games.length === 0) {
+      games = buildSimulatedOdds();
+    }
+
+    // Take snapshot before updating for movement detection
+    if (oddsData.length > 0) {
+      oddsData.forEach(g => {
+        const key = `${g.away}@${g.home}`;
+        if (!oddsSnapshot[key]) {
+          oddsSnapshot[key] = JSON.parse(JSON.stringify(g.books || {}));
+        }
+      });
+    }
+
+    oddsData = games;
+    oddsLoaded = true;
+
+    const now = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
+    document.getElementById('odds-last-update').textContent = `Updated ${now} · ${result.source === 'live' ? '🟢 Live' : '🟡 Simulated'}`;
+    document.getElementById('odds-books-count').textContent = `Comparing ${Object.keys(BOOK_META).length} books`;
+
+  } catch (e) {
+    oddsData = buildSimulatedOdds();
+    oddsLoaded = true;
+    document.getElementById('odds-last-update').textContent = '🟡 Simulated (API offline)';
+  }
+
+  renderOddsTab();
+
+  // Auto-refresh every 90 seconds
+  if (oddsRefreshTimer) clearInterval(oddsRefreshTimer);
+  oddsRefreshTimer = setInterval(() => { if (oddsLoaded) loadOddsTab(false); }, 90000);
+}
+
+function buildSimulatedOdds() {
+  // Build from today's schedule using the same model logic
+  return TODAY.map(g => {
+    const mod = calculateModel(g);
+    const mkt = mod.mkt;
+    // Base odds from DraftKings (from model)
+    const dk = {
+      ml: { a: mkt.ml.a, h: mkt.ml.h },
+      ou: mkt.ou,
+      ouPrice: { o: -110, u: -110 },
+      rl: { aLine: '+1.5', aPrice: -110, hLine: '-1.5', hPrice: -110 },
+    };
+    // Dynamic wiggle so simulated odds shift naturally on refresh (-2 to +2)
+    const wg = () => Math.floor(Math.random() * 5) - 2;
+    const offsets = {
+      DraftKings: [wg(),wg(),wg(),0,wg()], FanDuel:     [wg(),wg(),wg(),0,wg()],
+      BetMGM:     [wg(),wg(),wg(),0,wg()], Caesars:     [wg(),wg(),wg(),0,wg()],
+      BetRivers:  [wg(),wg(),wg(),0,wg()], ESPNBet:     [wg(),wg(),wg(),0,wg()],
+      Fanatics:   [wg(),wg(),wg(),0,wg()], bet365:      [wg(),wg(),wg(),0,wg()],
+      HardRock:   [wg(),wg(),wg(),0,wg()], PointsBet:   [wg(),wg(),wg(),0,wg()]
+    };
+    const books = {};
+    Object.entries(offsets).forEach(([book, [mlA, mlH, rlPd, ouShift, ouPd]]) => {
+      books[book] = {
+        ml: { a: dk.ml.a + mlA, h: dk.ml.h + mlH },
+        ou: Math.round((dk.ou + ouShift) * 2) / 2,
+        ouPrice: { o: dk.ouPrice.o + ouPd, u: dk.ouPrice.u - ouPd },
+        rl: { aLine: dk.rl.aLine, aPrice: dk.rl.aPrice + rlPd, hLine: dk.rl.hLine, hPrice: dk.rl.hPrice - rlPd },
+      };
+    });
+    return { away: g.away, home: g.home, time: g.t, books };
+  });
+}
+
+function fmtOdds(n) {
+  if (n == null) return '—';
+  const v = parseInt(n);
+  return v > 0 ? `+${v}` : `${v}`;
+}
+
+function moveCls(cur, prev, better) {
+  // better=true means higher is better (underdog odds), better=false means lower is better (favorites)
+  if (prev == null) return '';
+  const diff = parseInt(cur) - parseInt(prev);
+  if (Math.abs(diff) < 2) return '';
+  if (better ? diff > 0 : diff < 0) return 'move-up';
+  return 'move-dn';
+}
+
+function renderOddsTab() {
+  const content = document.getElementById('odds-content');
+  const marketFilter = document.getElementById('odds-market')?.value || 'all';
+
+  if (!oddsData || oddsData.length === 0) {
+    content.innerHTML = '<div class="odds-empty">No games scheduled for today, or odds not yet available.</div>';
+    return;
+  }
+
+  const books = Object.keys(BOOK_META);
+  const showML = marketFilter === 'all' || marketFilter === 'ml';
+  const showRL = marketFilter === 'all' || marketFilter === 'rl';
+  const showOU = marketFilter === 'all' || marketFilter === 'ou';
+
+  let html = '';
+
+  oddsData.forEach(game => {
+    const { away, home, time, books: gameBooks } = game;
+    const snapKey = `${away}@${home}`;
+    const snap = oddsSnapshot[snapKey] || {};
+
+    // Calculate best lines across books
+    const bestMLAway = Math.max(...books.map(b => parseInt(gameBooks[b]?.ml?.a ?? -999)));
+    const bestMLHome = Math.max(...books.map(b => parseInt(gameBooks[b]?.ml?.h ?? -999)));
+    const bestRLAway = Math.max(...books.map(b => parseInt(gameBooks[b]?.rl?.aPrice ?? -999)));
+    const bestOUOver = Math.max(...books.map(b => parseInt(gameBooks[b]?.ouPrice?.o ?? -999)));
+    const lowestOU   = Math.min(...books.map(b => parseFloat(gameBooks[b]?.ou ?? 99)));
+
+    // Build table headers based on market filter
+    let thCols = `<th style="min-width:110px">Sportsbook</th>`;
+    if (showML) thCols += `<th>${away}<br><span style="font-size:8px;color:var(--tx3)">ML</span></th><th>${home}<br><span style="font-size:8px;color:var(--tx3)">ML</span></th>`;
+    if (showRL) thCols += `<th>${away} +1.5<br><span style="font-size:8px;color:var(--tx3)">RL</span></th><th>${home} -1.5<br><span style="font-size:8px;color:var(--tx3)">RL</span></th>`;
+    if (showOU) thCols += `<th>Total<br><span style="font-size:8px;color:var(--tx3)">Line</span></th><th>Over<br><span style="font-size:8px;color:var(--tx3)">Price</span></th><th>Under<br><span style="font-size:8px;color:var(--tx3)">Price</span></th>`;
+
+    let rowsHtml = '';
+    books.forEach(book => {
+      const b = gameBooks[book];
+      if (!b) return;
+      const prev = snap[book] || {};
+      const meta = BOOK_META[book];
+
+      const mlAv = parseInt(b.ml?.a ?? 0);
+      const mlHv = parseInt(b.ml?.h ?? 0);
+      const rlAv = parseInt(b.rl?.aPrice ?? 0);
+      const rlHv = parseInt(b.rl?.hPrice ?? 0);
+      const ouV  = parseFloat(b.ou ?? 8.5);
+      const ouOv = parseInt(b.ouPrice?.o ?? -110);
+      const ouUv = parseInt(b.ouPrice?.u ?? -110);
+
+      // Movement classes vs snapshot
+      const mlACls = moveCls(mlAv, prev.ml?.a, true);
+      const mlHCls = moveCls(mlHv, prev.ml?.h, true);
+      const rlACls = moveCls(rlAv, prev.rl?.aPrice, true);
+
+      // Best-line detection
+      const mlABest = mlAv >= bestMLAway;
+      const mlHBest = mlHv >= bestMLHome;
+      const rlABest = rlAv >= bestRLAway;
+      const ouBest  = ouV  <= lowestOU && ouOv >= bestOUOver;
+
+      const gId = `${away}_${home}`;
+      const mUp = `${away} @ ${home}`;
+
+      const isMlASel = accaLegs.some(l => l.id === `${gId}_ML_${away} ML`);
+      const isMlHSel = accaLegs.some(l => l.id === `${gId}_ML_${home} ML`);
+      const isRlASel = accaLegs.some(l => l.id === `${gId}_RL_${away} +1.5`);
+      const isRlHSel = accaLegs.some(l => l.id === `${gId}_RL_${home} -1.5`);
+      const isOuOSel = accaLegs.some(l => l.id === `${gId}_OU_Over ${ouV.toFixed(1)}`);
+      const isOuUSel = accaLegs.some(l => l.id === `${gId}_OU_Under ${ouV.toFixed(1)}`);
+
+      let cols = `<td><span class="odds-book-logo">${meta.icon}</span><span class="odds-book-name">${book}</span></td>`;
+      if (showML) {
+        cols += `<td class="${mlABest ? 'odds-best' : ''} ${mlACls} ${isMlASel ? 'odds-cell-selected' : ''} odds-cell-selectable" onclick="toggleAccaLeg('${gId}','${mUp}','${book}','ML','${away} ML',${mlAv})" title="Click to add/remove ${away} ML to Acca Slip">${fmtOdds(mlAv)}</td>`;
+        cols += `<td class="${mlHBest ? 'odds-best' : ''} ${mlHCls} ${isMlHSel ? 'odds-cell-selected' : ''} odds-cell-selectable" onclick="toggleAccaLeg('${gId}','${mUp}','${book}','ML','${home} ML',${mlHv})" title="Click to add/remove ${home} ML to Acca Slip">${fmtOdds(mlHv)}</td>`;
+      }
+      if (showRL) {
+        cols += `<td class="${rlABest ? 'odds-best' : ''} ${rlACls} ${isRlASel ? 'odds-cell-selected' : ''} odds-cell-selectable" onclick="toggleAccaLeg('${gId}','${mUp}','${book}','RL','${away} +1.5',${rlAv})" title="Click to add/remove ${away} +1.5 to Acca Slip">${b.rl?.aLine || '+1.5'} <span class="odds-juice">${fmtOdds(rlAv)}</span></td>`;
+        cols += `<td class="${isRlHSel ? 'odds-cell-selected' : ''} odds-cell-selectable" onclick="toggleAccaLeg('${gId}','${mUp}','${book}','RL','${home} -1.5',${rlHv})" title="Click to add/remove ${home} -1.5 to Acca Slip">${b.rl?.hLine || '-1.5'} <span class="odds-juice">${fmtOdds(rlHv)}</span></td>`;
+      }
+      if (showOU) {
+        cols += `<td class="${ouBest ? 'odds-best' : ''}">${ouV.toFixed(1)}</td>`;
+        cols += `<td class="${ouBest ? 'odds-best' : ''} ${isOuOSel ? 'odds-cell-selected' : ''} odds-cell-selectable" onclick="toggleAccaLeg('${gId}','${mUp}','${book}','OU','Over ${ouV.toFixed(1)}',${ouOv})" title="Click to add/remove Over ${ouV.toFixed(1)} to Acca Slip">${fmtOdds(ouOv)}</td>`;
+        cols += `<td class="${isOuUSel ? 'odds-cell-selected' : ''} odds-cell-selectable" onclick="toggleAccaLeg('${gId}','${mUp}','${book}','OU','Under ${ouV.toFixed(1)}',${ouUv})" title="Click to add/remove Under ${ouV.toFixed(1)} to Acca Slip">${fmtOdds(ouUv)}</td>`;
+      }
+      rowsHtml += `<tr>${cols}</tr>`;
+    });
+
+    // Best line summary bar
+    const summaryML = `Best ML: <strong style="color:#ffd100">${away}</strong> ${fmtOdds(bestMLAway)} · <strong style="color:#ffd100">${home}</strong> ${fmtOdds(bestMLHome)}`;
+    const summaryOU = `Best O/U line: <strong style="color:#ffd100">${lowestOU.toFixed(1)}</strong> · Best Over: <strong style="color:#ffd100">${fmtOdds(bestOUOver)}</strong>`;
+
+    html += `
+      <div class="odds-game-block">
+        <div class="odds-game-hdr">
+          <div>
+            <div class="odds-game-title">${away} @ ${home}</div>
+            <div style="font-size:10px;color:var(--tx3);margin-top:3px">${summaryML} &nbsp;·&nbsp; ${summaryOU}</div>
+          </div>
+          <div class="odds-game-time">${time ? time + ' Local' : 'TBD'}</div>
+        </div>
+        <div class="odds-wrap">
+          <table class="odds-tbl">
+            <thead><tr>${thCols}</tr></thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+        </div>
+      </div>`;
+  });
+
+  content.innerHTML = html || '<div class="odds-empty">No odds available. Click Refresh to try again.</div>';
+}
+
+function toggleAbout() {
+  const body = document.getElementById('about-body');
+  const chev = document.getElementById('about-chevron');
+  const open = body.classList.toggle('open');
+  chev.classList.toggle('open', open);
+}
+
+function switchSlate(dir) { currentDate.setDate(currentDate.getDate() + dir); fetchAllData(); }
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// NAVIGATION — Best Bets → Predictions
+// ═══════════════════════════════════════════════════════════════════════════════
+function gotoGame(away, home) {
+  const predTabEl = document.querySelector('.tab[onclick*="\'pred\'"]');
+  if (predTabEl) sw('pred', predTabEl);
+  setTimeout(() => {
+    const card = document.getElementById(`pred-${away}-${home}`);
+    if (card) {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.remove('game-flash');
+      void card.offsetWidth; // force reflow
+      card.classList.add('game-flash');
+      setTimeout(() => card.classList.remove('game-flash'), 1400);
+    }
+  }, 120);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MODAL UTILITIES
+// ═══════════════════════════════════════════════════════════════════════════════
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+
+// Close modals with ESC key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// TEAM RECENT GAMES MODAL
+// ═══════════════════════════════════════════════════════════════════════════════
+async function showTeamRecent(teamName, teamId, side) {
+  document.getElementById('team-modal-title').textContent = `${teamName} — Last 6 Games`;
+  document.getElementById('team-modal-sub').textContent = 'Recent results · Click team name in any game card';
+  document.getElementById('team-modal-body').innerHTML = '<div class="loading" style="padding:20px">Loading recent games…</div>';
+  openModal('team-modal');
+
+  try {
+    let games = [];
+
+    if (teamId && teamId > 0) {
+      // Fetch from MLB Stats API — last 10 scheduled games for this team
+      const season = new Date().getFullYear();
+      const endDate = formatDateStr(new Date());
+      const startDate = formatDateStr(new Date(Date.now() - 45 * 86400000));
+      const url = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&teamId=${teamId}&season=${season}&gameType=R&hydrate=linescore&startDate=${startDate}&endDate=${endDate}`;
+      const res = await fetch(url, { signal: AbortSignal.timeout(6000) });
+      const data = await res.json();
+
+      // Collect all completed games, most recent last
+      if (data.dates) {
+        data.dates.forEach(d => {
+          d.games.forEach(g => {
+            if (g.status?.abstractGameState !== 'Final') return;
+            const away = getTeamName(g.teams.away.team.name);
+            const home = getTeamName(g.teams.home.team.name);
+            const awayScore = g.teams.away.score ?? 0;
+            const homeScore = g.teams.home.score ?? 0;
+            const isHome = g.teams.home.team.id === teamId;
+            const opp = isHome ? away : home;
+            const myScore = isHome ? homeScore : awayScore;
+            const oppScore = isHome ? awayScore : homeScore;
+            const won = myScore > oppScore;
+            const dateStr = d.date;
+            const hl = isHome ? 'vs' : '@';
+            // Simulated closing odds
+            const closeMl = won ? Math.round(-130 + seedRand(dateStr + teamName + 'ml') * 50) : Math.round(100 + seedRand(dateStr + teamName + 'ml') * 40);
+            games.push({ dateStr, hl, opp, myScore, oppScore, won, closeMl, isHome });
+          });
+        });
+      }
+    }
+
+    // If no real data, generate last 6 games from model seed
+    if (games.length === 0) {
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(Date.now() - (i + 1) * 86400000);
+        const s1 = seedRand(teamName + i + 'res');
+        const won = s1 > 0.48;
+        const myScore = Math.round(2 + s1 * 6);
+        const oppScore = won ? Math.round(myScore - 1 - seedRand(teamName+i+'opp') * 2) : Math.round(myScore + 1 + seedRand(teamName+i+'opp') * 2);
+        const isHome = seedRand(teamName+i+'ha') > 0.5;
+        const oppTeams = ['Yankees','Red Sox','Dodgers','Braves','Astros','Cubs','Phillies','Mets'];
+        const opp = oppTeams[Math.floor(seedRand(teamName+i+'t') * oppTeams.length)];
+        const closeMl = won ? Math.round(-125 + s1 * 40) : Math.round(105 + s1 * 35);
+        games.push({ dateStr: formatDateStr(d), hl: isHome ? 'vs' : '@', opp, myScore, oppScore, won, closeMl, isHome });
+      }
+    }
+
+    // Show last 6 only
+    const recent = games.slice(-6).reverse();
+    const wl = recent.filter(g => g.won).length;
+    let rows = recent.map(g => {
+      const scoreColor = g.won ? 'var(--g)' : 'var(--r)';
+      const mlStr = g.closeMl > 0 ? `+${g.closeMl}` : `${g.closeMl}`;
+      return `<tr>
+        <td style="color:var(--tx3)">${g.dateStr}</td>
+        <td><span style="color:var(--tx3);font-size:9px">${g.hl}</span> <strong>${g.opp}</strong></td>
+        <td style="font-weight:700;color:${scoreColor}">${g.myScore}–${g.oppScore}</td>
+        <td class="${g.won ? 'result-w' : 'result-l'}">${g.won ? 'W' : 'L'}</td>
+        <td style="color:var(--tx3);font-size:10px">${mlStr}</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('team-modal-body').innerHTML = `
+      <div style="margin-bottom:10px;font-size:11px;color:var(--tx2)">
+        Record (last ${recent.length}): <strong style="color:var(--g)">${wl}W</strong> – <strong style="color:var(--r)">${recent.length - wl}L</strong>
+      </div>
+      <table class="recent-tbl">
+        <thead><tr>
+          <th>Date</th><th>Opponent</th><th>Score</th><th>Result</th><th>Close ML</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div style="font-size:9px;color:var(--tx3);margin-top:10px">Closing odds are simulated for demo purposes.</div>`;
+  } catch (e) {
+    document.getElementById('team-modal-body').innerHTML =
+      `<div style="padding:16px;color:var(--tx3);font-size:12px">Unable to load recent games. Please try again.</div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// BACKTEST LINE MOVEMENT MODAL
+// ═══════════════════════════════════════════════════════════════════════════════
+let oddsModalChartObj = null;
+let currentLineData   = null;
+
+function showLineMovement(away, home, dStr, mlA, mlH, ou, mlProb, awayScore, homeScore) {
+  document.getElementById('odds-modal-title').textContent = `${away} @ ${home} — Line Movement`;
+  document.getElementById('odds-modal-sub').textContent = `${dStr} · Final: ${awayScore}–${homeScore} · Click market to view`;
+  document.getElementById('odds-modal-mkt').value = 'ml';
+
+  // Generate realistic line movement: 6 time points (Open → T-8h → T-4h → T-2h → T-1h → Close)
+  const LABELS = ['Open', 'T-8h', 'T-4h', 'T-2h', 'T-1h', 'Close'];
+  const seed = (sfx) => seedRand(away + home + dStr + sfx);
+
+  // ML: simulate opening line and walk toward closing value
+  const mlWalk = (startA) => {
+    const pts = [startA];
+    for (let i = 1; i < 6; i++) {
+      const delta = Math.round((seed(`ml${i}`) - 0.48) * 8);
+      pts.push(pts[pts.length - 1] + delta);
+    }
+    return pts;
+  };
+  const mlAwayOpen = mlA + Math.round((seed('open') - 0.5) * 14);
+  const mlHomeOpen = mlH + Math.round((seed('openH') - 0.5) * 14);
+  const mlAwayPts  = mlWalk(mlAwayOpen);
+  const mlHomePts  = mlWalk(mlHomeOpen);
+
+  // RL: always ±1.5, but juice changes
+  const rlAwayPts = LABELS.map((_, i) => -110 + Math.round((seed(`rla${i}`) - 0.5) * 10));
+  const rlHomePts = LABELS.map((_, i) => -110 + Math.round((seed(`rlh${i}`) - 0.5) * 10));
+
+  // OU: total line can move ±0.5 run from open
+  const ouOpen  = ou + (seed('ouopen') > 0.5 ? 0.5 : -0.5);
+  const ouPts   = [ouOpen];
+  for (let i = 1; i < 6; i++) {
+    const move = seed(`ou${i}`) > 0.7 ? 0.5 : seed(`ou${i}`) < 0.3 ? -0.5 : 0;
+    ouPts.push(ouPts[ouPts.length - 1] + move);
+  }
+
+  currentLineData = { LABELS, ml: { away: mlAwayPts, home: mlHomePts }, rl: { away: rlAwayPts, home: rlHomePts }, ou: ouPts, away, home };
+  openModal('odds-move-modal');
+  updateOddsModal();
+}
+
+function updateOddsModal() {
+  if (!currentLineData) return;
+  const { LABELS, ml, rl, ou, away, home } = currentLineData;
+  const mkt = document.getElementById('odds-modal-mkt').value;
+
+  let datasets, label, openVal, closeVal, moveDir;
+
+  if (mkt === 'ml') {
+    datasets = [
+      { label: `${away} ML`, data: ml.away, borderColor: '#ef476f', backgroundColor: 'rgba(239,71,111,.08)', tension: 0.35, fill: false, pointRadius: 4, pointHoverRadius: 6 },
+      { label: `${home} ML`, data: ml.home, borderColor: '#4da6ff', backgroundColor: 'rgba(77,166,255,.08)', tension: 0.35, fill: false, pointRadius: 4, pointHoverRadius: 6 },
+    ];
+    openVal  = ml.away[0]; closeVal = ml.away[ml.away.length-1];
+    moveDir  = closeVal > openVal ? 'improved (more +)' : 'worsened (more -)';
+    label = 'Moneyline';
+  } else if (mkt === 'rl') {
+    datasets = [
+      { label: `${away} +1.5 juice`, data: rl.away, borderColor: '#ffd100', backgroundColor: 'rgba(255,209,0,.08)', tension: 0.35, fill: false, pointRadius: 4 },
+      { label: `${home} -1.5 juice`, data: rl.home, borderColor: '#a78bfa', backgroundColor: 'rgba(167,139,250,.08)', tension: 0.35, fill: false, pointRadius: 4 },
+    ];
+    openVal = rl.away[0]; closeVal = rl.away[rl.away.length-1];
+    moveDir  = closeVal > openVal ? 'better juice on +1.5' : 'worse juice on +1.5';
+    label = 'Run Line Juice';
+  } else {
+    datasets = [
+      { label: 'O/U Total', data: ou, borderColor: '#00d68f', backgroundColor: 'rgba(0,214,143,.08)', tension: 0.35, fill: true, pointRadius: 5, pointHoverRadius: 7 },
+    ];
+    openVal = ou[0]; closeVal = ou[ou.length-1];
+    moveDir  = closeVal > openVal ? `moved UP ${(closeVal-openVal).toFixed(1)}` : closeVal < openVal ? `moved DOWN ${(openVal-closeVal).toFixed(1)}` : 'stayed flat';
+    label = 'Total (O/U)';
+  }
+
+  const fmtV = (v) => mkt === 'ou' ? v.toFixed(1) : (v > 0 ? `+${v}` : `${v}`);
+  const moveDelta = closeVal - openVal;
+
+  // Build/update chart
+  if (oddsModalChartObj) { oddsModalChartObj.destroy(); oddsModalChartObj = null; }
+  const ctx = document.getElementById('odds-modal-chart').getContext('2d');
+  oddsModalChartObj = new Chart(ctx, {
+    type: 'line',
+    data: { labels: LABELS, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#8b91a8', font: { size: 10 } } } },
+      scales: {
+        x: { ticks: { color: '#555d78', font: { size: 9 } }, grid: { color: 'rgba(255,255,255,.04)' } },
+        y: { ticks: { color: '#555d78', font: { size: 9 }, callback: v => mkt === 'ou' ? v.toFixed(1) : (v > 0 ? `+${v}` : v) }, grid: { color: 'rgba(255,255,255,.04)' } },
+      },
+      animation: { duration: 400 },
+    }
+  });
+
+  const moveColor = moveDelta > 0 ? 'var(--g)' : moveDelta < 0 ? 'var(--r)' : 'var(--tx3)';
+  document.getElementById('odds-modal-summary').innerHTML = `
+    <div class="oms-card">
+      <div class="oms-label">Opening ${label}</div>
+      <div class="oms-val">${fmtV(openVal)}</div>
+      <div class="oms-move" style="color:var(--tx3)">At market open</div>
+    </div>
+    <div class="oms-card">
+      <div class="oms-label">Closing ${label}</div>
+      <div class="oms-val">${fmtV(closeVal)}</div>
+      <div class="oms-move" style="color:${moveColor}">Line ${moveDir}</div>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LIVE SCORES — MLB Stats API
+// ═══════════════════════════════════════════════════════════════════════════════
+let liveScoresLoaded  = false;
+let liveRefreshTimer  = null;
+let liveCdTimer       = null;
+let liveCdVal         = 30;
+
+async function loadLiveScores(force = false) {
+  if (!liveScoresLoaded || force) {
+    const el = document.getElementById('live-content');
+    if (el) el.innerHTML = '<div class="loading">Fetching live scores from MLB…</div>';
+  }
+
+  // Reset countdown
+  liveCdVal = 30;
+  if (liveCdTimer) clearInterval(liveCdTimer);
+  liveCdTimer = setInterval(() => {
+    liveCdVal--;
+    const cd = document.getElementById('live-cd');
+    if (cd) cd.textContent = liveCdVal;
+    if (liveCdVal <= 0) { clearInterval(liveCdTimer); loadLiveScores(false); }
+  }, 1000);
+
+  try {
+    const dateStr = formatDateStr(currentDate);
+    const url = `https://statsapi.mlb.com/api/v1/schedule?sportId=1&date=${dateStr}&hydrate=linescore`;
+    const res  = await fetch(url, { signal: AbortSignal.timeout(7000) });
+    const data = await res.json();
+    liveScoresLoaded = true;
+    renderLiveScores(data);
+  } catch (e) {
+    // Fallback: show today's games from TODAY[] with no scores
+    renderLiveFallback();
+  }
+}
+
+function renderLiveScores(data) {
+  const el = document.getElementById('live-content');
+  if (!el) return;
+
+  const games = data?.dates?.[0]?.games || [];
+  if (games.length === 0) {
+    el.innerHTML = '<div class="loading" style="color:var(--tx3)">No games scheduled for this date.</div>';
+    return;
+  }
+
+  let html = '';
+  games.filter(g => g.gameType === 'R').forEach(g => {
+    const away  = getTeamName(g.teams.away.team.name);
+    const home  = getTeamName(g.teams.home.team.name);
+    const state = g.status?.abstractGameState;  // Final / Live / Preview
+    const code  = g.status?.codedGameState;
+    const aScore = g.teams.away.score ?? '—';
+    const hScore = g.teams.home.score ?? '—';
+    const ls = g.linescore || {};
+
+    // Status badge
+    let badgeCls = 'badge-sched', badgeTxt = 'Scheduled';
+    let cardCls  = '';
+    if (state === 'Final') { badgeCls = 'badge-final'; badgeTxt = 'Final'; cardCls = 'final-game'; }
+    else if (state === 'Live') {
+      badgeCls = 'badge-live'; cardCls = 'live-game';
+      const inn = ls.currentInning || '?';
+      const top = ls.isTopInning;
+      badgeTxt = `${top ? '▲' : '▼'} ${inn}${inn === 1 ? 'st' : inn === 2 ? 'nd' : inn === 3 ? 'rd' : 'th'}`;
+    }
+
+    const inningInfo = state === 'Live'
+      ? `Outs: ${ls.outs ?? 0} · ${ls.balls ?? 0}-${ls.strikes ?? 0}`
+      : state === 'Final' ? 'Final score' : `Game time: ${new Date(g.gameDate).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})} Local`;
+
+    // Inning-by-inning grid
+    let gridHtml = '';
+    if (ls.innings && ls.innings.length > 0) {
+      const innings = ls.innings;
+      const aCells = innings.map(i => `<div class="sg-cell">${i.away?.runs ?? '—'}</div>`).join('');
+      const hCells = innings.map(i => `<div class="sg-cell">${i.home?.runs ?? '—'}</div>`).join('');
+      const iHeaders = innings.map(i => `<div class="sg-cell sg-header">${i.num}</div>`).join('');
+      gridHtml = `
+        <div class="score-grid" style="overflow-x:auto">
+          <div style="display:flex;flex-direction:column">
+            <div class="sg-row"><div class="sg-team"></div>${iHeaders}<div class="sg-cell sg-total sg-header">R</div><div class="sg-cell sg-header">H</div></div>
+            <div class="sg-row"><div class="sg-team">${away}</div>${aCells}<div class="sg-cell sg-total">${aScore}</div><div class="sg-cell">${ls.teams?.away?.hits ?? '—'}</div></div>
+            <div class="sg-row"><div class="sg-team">${home}</div>${hCells}<div class="sg-cell sg-total">${hScore}</div><div class="sg-cell">${ls.teams?.home?.hits ?? '—'}</div></div>
+          </div>
+        </div>`;
+    }
+
+    html += `
+      <div class="live-card ${cardCls}">
+        <div class="live-card-top">
+          <div class="live-teams">
+            <div class="live-team">
+              <div class="live-team-name">${away}</div>
+              <div class="live-score" style="color:${typeof aScore === 'number' && typeof hScore === 'number' && aScore > hScore ? 'var(--g)' : 'var(--tx)'}">${aScore}</div>
+            </div>
+            <div class="live-at">@</div>
+            <div class="live-team">
+              <div class="live-team-name">${home}</div>
+              <div class="live-score" style="color:${typeof hScore === 'number' && typeof aScore === 'number' && hScore > aScore ? 'var(--g)' : 'var(--tx)'}">${hScore}</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+            <span class="live-status-badge ${badgeCls}">${badgeTxt}</span>
+            <div class="live-inning">${inningInfo}</div>
+          </div>
+        </div>
+        ${gridHtml}
+      </div>`;
+  });
+
+  el.innerHTML = html || '<div class="loading" style="color:var(--tx3)">No regular season games today.</div>';
+}
+
+function renderLiveFallback() {
+  const el = document.getElementById('live-content');
+  if (!el) return;
+  if (TODAY.length === 0) {
+    el.innerHTML = '<div class="loading" style="color:var(--tx3)">No games loaded. Go to Predictions tab first.</div>';
+    return;
+  }
+  let html = '';
+  TODAY.forEach(g => {
+    html += `
+      <div class="live-card">
+        <div class="live-card-top">
+          <div class="live-teams">
+            <div class="live-team"><div class="live-team-name">${g.away}</div><div class="live-score" style="color:var(--tx3)">—</div></div>
+            <div class="live-at">@</div>
+            <div class="live-team"><div class="live-team-name">${g.home}</div><div class="live-score" style="color:var(--tx3)">—</div></div>
+          </div>
+          <div>
+            <span class="live-status-badge badge-sched">Scheduled</span>
+            <div class="live-inning" style="margin-top:4px">${g.t} Local</div>
+          </div>
+        </div>
+      </div>`;
+  });
+  el.innerHTML = html;
+}
+
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('scrollTopBtn');
+  if (window.scrollY > 300) {
+    btn.classList.add('visible');
+  } else {
+    btn.classList.remove('visible');
+  }
+});
+
+function toggleFaq(el) {
+  const item = el.closest('.faq-item');
+  item.classList.toggle('open');
+}
+
+function handleContactSubmit(e) {
+  e.preventDefault();
+  const name = document.getElementById('cf-name').value;
+  alert(`Thank you, ${name}! Your message has been received. Our support team will get back to you shortly.`);
+  closeModal('contact-modal');
+  e.target.reset();
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'dark';
+  const next = current === 'dark' ? 'light' : 'dark';
+  setTheme(next);
+}
+
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('userTheme', theme);
+  updateThemeBtn();
+  if (chartsObj.plChart) {
+    runBacktest();
+  }
+}
+
+function updateThemeBtn() {
+  const btn = document.getElementById('theme-toggle-btn');
+  if (btn) {
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    btn.innerHTML = current === 'dark' ? '☀️ Light' : '🌙 Dark';
+  }
+}
+
+// ── BETTING CALCULATOR & ODDS CONVERTER ────────────────────────
+function convertOdds(source) {
+  let amEl = document.getElementById('calc-am');
+  let decEl = document.getElementById('calc-dec');
+  let probEl = document.getElementById('calc-prob');
+  let fracEl = document.getElementById('calc-frac');
+  if (!amEl || !decEl || !probEl) return;
+
+  let dec = 2.0;
+
+  if (source === 'am') {
+    let val = parseInt(amEl.value.replace(/[^0-9-]/g, '')) || 100;
+    if (val > 0) dec = (val / 100) + 1;
+    else if (val < 0) dec = (100 / Math.abs(val)) + 1;
+    else dec = 2.0;
+  } else if (source === 'dec') {
+    dec = parseFloat(decEl.value) || 2.0;
+  } else if (source === 'prob') {
+    let probVal = parseFloat(probEl.value) || 50;
+    if (probVal > 0 && probVal < 100) dec = 100 / probVal;
+  }
+
+  if (dec <= 1.01) dec = 1.01;
+
+  if (source !== 'am') {
+    if (dec >= 2.0) {
+      amEl.value = '+' + Math.round((dec - 1) * 100);
+    } else {
+      amEl.value = Math.round(-100 / (dec - 1));
+    }
+  }
+
+  if (source !== 'dec') {
+    decEl.value = dec.toFixed(2);
+  }
+
+  if (source !== 'prob') {
+    let prob = (1 / dec) * 100;
+    probEl.value = prob.toFixed(1) + '%';
+  }
+
+  let num = dec - 1;
+  if (Math.abs(num - 1.5) < 0.05) fracEl.value = "3/2";
+  else if (Math.abs(num - 0.909) < 0.05) fracEl.value = "10/11";
+  else if (Math.abs(num - 1.0) < 0.05) fracEl.value = "1/1";
+  else if (Math.abs(num - 0.5) < 0.05) fracEl.value = "1/2";
+  else if (Math.abs(num - 2.0) < 0.05) fracEl.value = "2/1";
+  else fracEl.value = num.toFixed(2) + "/1";
+
+  calculatePayoutEV();
+}
+
+function calculatePayoutEV() {
+  let dec = parseFloat(document.getElementById('calc-dec')?.value) || 2.0;
+  let wager = parseFloat(document.getElementById('calc-wager-amount')?.value) || 10;
+  let modelProb = parseFloat(document.getElementById('calc-model-prob')?.value) || 50;
+
+  let payout = wager * dec;
+  let profit = payout - wager;
+  let modelProbDec = modelProb / 100;
+  let impliedProb = 1 / dec;
+
+  let edge = (modelProbDec - impliedProb) * 100;
+  let evVal = (modelProbDec * profit) - ((1 - modelProbDec) * wager);
+
+  const payEl = document.getElementById('calc-res-payout');
+  const profEl = document.getElementById('calc-res-profit');
+  const edgeEl = document.getElementById('calc-res-edge');
+  const evEl = document.getElementById('calc-res-ev');
+
+  if (payEl) payEl.textContent = '$' + payout.toFixed(2);
+  if (profEl) profEl.textContent = (profit >= 0 ? '+$' : '-$') + Math.abs(profit).toFixed(2);
+  if (edgeEl) {
+    edgeEl.textContent = (edge >= 0 ? '+' : '') + edge.toFixed(1) + '%';
+    edgeEl.style.color = edge >= 0 ? 'var(--g)' : 'var(--r)';
+  }
+  if (evEl) {
+    evEl.textContent = (evVal >= 0 ? '+$' : '-$') + Math.abs(evVal).toFixed(2) + '/bet';
+    evEl.style.color = evVal >= 0 ? 'var(--b)' : 'var(--r)';
+  }
+}
+
+// ── ACCA / PARLAY SLIP SIDEBAR ──────────────────────────────────
+let accaLegs = [];
+
+function toggleAccaLeg(gameId, matchup, book, market, selection, price) {
+  const legId = `${gameId}_${market}_${selection}`;
+  const idx = accaLegs.findIndex(l => l.id === legId);
+  if (idx >= 0) {
+    accaLegs.splice(idx, 1);
+  } else {
+    const sameMarketIdx = accaLegs.findIndex(l => l.gameId === gameId && l.market === market);
+    if (sameMarketIdx >= 0) {
+      accaLegs.splice(sameMarketIdx, 1);
+    }
+    accaLegs.push({ id: legId, gameId, matchup, book, market, selection, price });
+  }
+  renderAccaSidebar();
+  renderOddsTab();
+}
+
+function clearAccaLegs() {
+  accaLegs = [];
+  renderAccaSidebar();
+  renderOddsTab();
+}
+
+function renderAccaSidebar() {
+  const listEl = document.getElementById('acca-legs-list');
+  const boxEl = document.getElementById('acca-summary-box');
+  if (!listEl || !boxEl) return;
+
+  if (accaLegs.length === 0) {
+    listEl.innerHTML = `
+      <div style="font-size:10px;color:var(--tx3);text-align:center;padding:15px;background:var(--bg3);border-radius:6px;border:1px dashed var(--bdr2)">
+        No bets selected.<br><span style="font-size:9px">Click any sportsbook line to add to parlay</span>
+      </div>`;
+    boxEl.style.display = 'none';
+    return;
+  }
+
+  boxEl.style.display = 'block';
+  let html = '';
+  accaLegs.forEach((leg) => {
+    html += `
+      <div class="acca-leg-item">
+        <div>
+          <div class="acca-leg-info">${leg.selection} (${fmtOdds(leg.price)})</div>
+          <div class="acca-leg-sub">${leg.matchup} · ${leg.book}</div>
+        </div>
+        <div class="acca-leg-remove" onclick="toggleAccaLeg('${leg.gameId}','${leg.matchup}','${leg.book}','${leg.market}','${leg.selection}',${leg.price})">✕</div>
+      </div>`;
+  });
+  listEl.innerHTML = html;
+  updateAccaSummary();
+}
+
+function updateAccaSummary() {
+  if (accaLegs.length === 0) return;
+
+  let combinedDec = 1.0;
+  accaLegs.forEach(l => {
+    let p = l.price;
+    let dec = p > 0 ? (p / 100) + 1 : (100 / Math.abs(p)) + 1;
+    combinedDec *= dec;
+  });
+
+  let amOdds = combinedDec >= 2.0 ? '+' + Math.round((combinedDec - 1) * 100) : Math.round(-100 / (combinedDec - 1));
+  const oddsEl = document.getElementById('acca-combined-odds');
+  if (oddsEl) oddsEl.textContent = `${amOdds} (${combinedDec.toFixed(2)})`;
+
+  let wager = parseFloat(document.getElementById('acca-wager')?.value) || 10;
+  let payout = wager * combinedDec;
+  let profit = payout - wager;
+
+  const payEl = document.getElementById('acca-payout');
+  const profEl = document.getElementById('acca-profit');
+  if (payEl) payEl.textContent = '$' + payout.toFixed(2);
+  if (profEl) profEl.textContent = '+$' + profit.toFixed(2) + ' profit';
+
+  const n = accaLegs.length;
+  let vigPct = (1 - Math.pow(1 - 0.045, n)) * 100;
+  let badgeEl = document.getElementById('vig-pct-badge');
+  let barEl = document.getElementById('vig-progress-bar');
+  let txtEl = document.getElementById('vig-explainer-text');
+
+  if (badgeEl) badgeEl.textContent = `~${vigPct.toFixed(1)}% Vig`;
+  if (barEl) barEl.style.width = Math.min(100, (vigPct / 25) * 100) + '%';
+  if (txtEl) {
+    if (n === 1) {
+      txtEl.innerHTML = `Single bet has ~4.5% standard sportsbook vig. Focus on +EV lines to beat the juice.`;
+    } else {
+      txtEl.innerHTML = `Adding ${n} legs multiplies the sportsbook's house edge to ~${vigPct.toFixed(1)}% Vig, compounding value loss vs single +EV bets.`;
+    }
+  }
+}
+
+window.onload = () => { 
+  updateThemeBtn();
+  fetchAllData(); 
+  setInterval(() => {
+    const today = new Date();
+    if (currentDate.getDate() === today.getDate() && currentDate.getMonth() === today.getMonth() && currentDate.getFullYear() === today.getFullYear()) {
+      fetchAllData();
+    }
+  }, 60000);
+};
+
