@@ -3507,6 +3507,8 @@ function renderOddsTab() {
     const { away, home, time, books: gameBooks } = game;
     const snapKey = `${away}@${home}`;
     const snap = oddsSnapshot[snapKey] || {};
+    const gId = `${away}_${home}`;
+    const mUp = `${away} @ ${home}`;
 
     // Calculate best lines across books
     const bestMLAway = Math.max(...books.map(b => parseInt(gameBooks[b]?.ml?.a ?? -999)));
@@ -3546,9 +3548,6 @@ function renderOddsTab() {
       const mlHBest = mlHv >= bestMLHome;
       const rlABest = rlAv >= bestRLAway;
       const ouBest  = ouV  <= lowestOU && ouOv >= bestOUOver;
-
-      const gId = `${away}_${home}`;
-      const mUp = `${away} @ ${home}`;
 
       const isMlASel = accaLegs.some(l => l.id === `${gId}_ML_${away} ML`);
       const isMlHSel = accaLegs.some(l => l.id === `${gId}_ML_${home} ML`);
