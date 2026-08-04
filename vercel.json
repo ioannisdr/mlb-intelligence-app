@@ -1,75 +1,25 @@
 {
-    "version":  2,
-    "functions":  {
-                      "api/*.js":  {
-                                       "maxDuration":  10
-                                   }
-                  },
-    "rewrites":  [
-                     {
-                         "source":  "/api/schedule",
-                         "destination":  "/api/schedule.js"
-                     },
-                     {
-                         "source":  "/api/teams",
-                         "destination":  "/api/teams.js"
-                     },
-                     {
-                         "source":  "/api/pitchers",
-                         "destination":  "/api/pitchers.js"
-                     },
-                     {
-                         "source":  "/api/weather",
-                         "destination":  "/api/weather.js"
-                     },
-                     {
-                         "source":  "/api/odds",
-                         "destination":  "/api/odds.js"
-                     },
-                     {
-                         "source":  "/api/team-form",
-                         "destination":  "/api/team-form.js"
-                     },
-                     {
-                         "source":  "/api/picks",
-                         "destination":  "/api/picks.js"
-                     },
-                     {
-                         "source":  "/api/backtest",
-                         "destination":  "/api/backtest.js"
-                     },
-                     {
-                         "source":  "/api/cron",
-                         "destination":  "/api/cron.js"
-                     },
-                     {
-                         "source":  "/api/freeze",
-                         "destination":  "/api/freeze.js"
-                     },
-                     {
-                         "source":  "/api/history",
-                         "destination":  "/api/history.js"
-                     },
-                     {
-                         "source":  "/api/cron-odds",
-                         "destination":  "/api/cron-odds.js"
-                     }
-                 ],
-    "crons":  [
-                  {
-                      "path":  "/api/cron",
-                      "schedule":  "0 11 * * *"
-                  }
-              ],
-    "headers":  [
-                    {
-                        "headers":  [
-                                        {
-                                            "key":  "Cache-Control",
-                                            "value":  "no-cache, no-store, must-revalidate"
-                                        }
-                                    ],
-                        "source":  "/(.*)"
-                    }
-                ]
+    "version": 2,
+    "functions": {
+        "api/*.js": {
+            "maxDuration": 10
+        }
+    },
+    "crons": [
+        {
+            "path": "/api/cron",
+            "schedule": "0 11 * * *"
+        }
+    ],
+    "headers": [
+        {
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "no-cache, no-store, must-revalidate"
+                }
+            ],
+            "source": "/(.*)"
+        }
+    ]
 }
