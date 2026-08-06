@@ -2078,7 +2078,7 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   // Priority: real API odds > backtest override > simulated from model prob
   let liveMkt = null;
   if (typeof oddsData !== 'undefined' && Array.isArray(oddsData)) {
-    const liveGame = oddsData.find(o => o.home === g.home);
+    const liveGame = oddsData.find(o => `${o.away}@${o.home}` === `${g.away}@${g.home}`);
     if (liveGame && liveGame.books && liveGame.books[currentBook]) {
       liveMkt = liveGame.books[currentBook];
     }
@@ -3422,8 +3422,8 @@ async function loadOddsTab(forceRefresh = false) {
     if (oddsData.length < TODAY.length) {
       const simOdds = buildSimulatedOdds();
       TODAY.forEach(g => {
-        if (!oddsData.find(o => o.home === g.home)) {
-          const simGame = simOdds.find(o => o.home === g.home);
+        if (!oddsData.find(o => `${o.away}@${o.home}` === `${g.away}@${g.home}`)) {
+          const simGame = simOdds.find(o => `${o.away}@${o.home}` === `${g.away}@${g.home}`);
           if (simGame) oddsData.push(simGame);
         }
       });
