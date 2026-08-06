@@ -2074,11 +2074,42 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   let homeProb = 1 / (1 + Math.exp(-logit));
   let awayProb = 1 - homeProb;
 
+  // -- SMART ODDS MATCHER ---------------------------------------------------
+  // Matches by teams first; if multiple games exist (series), uses fuzzy
+  // pitcher last-name substring matching to pick the right game.
+  function findOddsGame(oddsArr, away, home, awayPitcher, homePitcher) {
+    if (!oddsArr || !Array.isArray(oddsArr)) return null;
+    const teamMatches = oddsArr.filter(o => o.away === away && o.home === home);
+    if (teamMatches.length === 0) return null;
+    if (teamMatches.length === 1) return teamMatches[0];
+    // Multiple games (series) — fuzzy match pitchers
+    const lastWord = (s) => (s || '').trim().split(/\s+/).pop().toLowerCase();
+    const fuzzyP = (dbP, espnP) => {
+      if (!dbP || !espnP || dbP === 'TBD' || espnP === 'TBD') return false;
+      const a = dbP.toLowerCase(), b = espnP.toLowerCase();
+      if (a === b) return true;
+      if (a.includes(b) || b.includes(a)) return true;
+      return lastWord(dbP) === lastWord(espnP);
+    };
+    // Try to find exact fuzzy pitcher match
+    const pitcherMatch = teamMatches.find(o =>
+      fuzzyP(awayPitcher, o.awayP) && fuzzyP(homePitcher, o.homeP)
+    );
+    if (pitcherMatch) return pitcherMatch;
+    // Partial: at least one pitcher matches
+    const partialMatch = teamMatches.find(o =>
+      fuzzyP(awayPitcher, o.awayP) || fuzzyP(homePitcher, o.homeP)
+    );
+    if (partialMatch) return partialMatch;
+    // Last resort: return first team match
+    return teamMatches[0];
+  }
+
   // -- MARKET ODDS ----------------------------------------------------------
   // Priority: real API odds > backtest override > simulated from model prob
   let liveMkt = null;
   if (typeof oddsData !== 'undefined' && Array.isArray(oddsData)) {
-    const liveGame = oddsData.find(o => `${o.away}@${o.home}-${o.awayP}-${o.homeP}` === `${g.away}@${g.home}-${g.awayP}-${g.homeP}`);
+    const liveGame = findOddsGame(oddsData, g.away, g.home, g.awayP, g.homeP);
     if (liveGame && liveGame.books && liveGame.books[currentBook]) {
       liveMkt = liveGame.books[currentBook];
     }
@@ -2673,7 +2704,7 @@ async function runBacktest() {
             // so the backtest exactly matches the Live Predictions tab.
 
             let realMkt = null;
-            const isTodaySlate = TODAY.some(tg => tg.home === home && tg.away === away && tg.homeP === homePName && tg.awayP === awayPName);
+            const isTodaySlate = TODAY.some(tg => tg.home === home && tg.away === away);
             if (isTodaySlate && ODDS[home] && ODDS[home][currentBook]) {
                realMkt = ODDS[home][currentBook];  // live odds for today
             } else if (btCachedOdds[home] && btCachedOdds[home][currentBook]) {
@@ -3402,13 +3433,13 @@ async function loadOddsTab(forceRefresh = false) {
     // Populate or update oddsSnapshot for movement detection
     if (games && games.length > 0) {
       games.forEach(g => {
-        const key = `${g.away}@${g.home}-${g.awayP}-${g.homeP}`;
+        const key = `${g.away}@${g.home}`;
         if (!oddsSnapshot[key]) {
           // Initialize with opening lines so movement arrows (^ / ·) show immediately vs opening line!
           oddsSnapshot[key] = JSON.parse(JSON.stringify(g.openBooks || g.books || {}));
         } else if (oddsData.length > 0) {
           // On subsequent refreshes, store previous fetch as baseline
-          const prevGame = oddsData.find(oldG => `${oldG.away}@${oldG.home}-${oldG.awayP}-${oldG.homeP}` === key);
+          const prevGame = oddsData.find(oldG => `${oldG.away}@${oldG.home}` === key);
           if (prevGame && prevGame.books) {
             oddsSnapshot[key] = JSON.parse(JSON.stringify(prevGame.books));
           }
@@ -3422,8 +3453,8 @@ async function loadOddsTab(forceRefresh = false) {
     if (oddsData.length < TODAY.length) {
       const simOdds = buildSimulatedOdds();
       TODAY.forEach(g => {
-        if (!oddsData.find(o => `${o.away}@${o.home}-${o.awayP}-${o.homeP}` === `${g.away}@${g.home}-${g.awayP}-${g.homeP}`)) {
-          const simGame = simOdds.find(o => `${o.away}@${o.home}-${o.awayP}-${o.homeP}` === `${g.away}@${g.home}-${g.awayP}-${g.homeP}`);
+        if (!oddsData.find(o => o.away === g.away && o.home === g.home)) {
+          const simGame = simOdds.find(o => o.away === g.away && o.home === g.home);
           if (simGame) oddsData.push(simGame);
         }
       });
@@ -3519,7 +3550,7 @@ function renderOddsTab() {
 
   oddsData.forEach(game => {
     const { away, home, time, books: gameBooks } = game;
-    const snapKey = `${away}@${home}-${game.awayP}-${game.homeP}`;
+    const snapKey = `${away}@${home}`;
     const snap = oddsSnapshot[snapKey] || {};
     const gId = `${away}_${home}`;
     const mUp = `${away} @ ${home}`;
