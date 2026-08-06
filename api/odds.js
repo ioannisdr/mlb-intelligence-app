@@ -36,8 +36,12 @@ export default async function handler(req, res) {
         const comp = ev.competitions[0];
         if (!comp) return;
         
-        const homeTeam = comp.competitors.find(c => c.homeAway === 'home')?.team?.name || '';
-        const awayTeam = comp.competitors.find(c => c.homeAway === 'away')?.team?.name || '';
+        const homeComp = comp.competitors.find(c => c.homeAway === 'home');
+        const awayComp = comp.competitors.find(c => c.homeAway === 'away');
+        const homeTeam = homeComp?.team?.name || '';
+        const awayTeam = awayComp?.team?.name || '';
+        const homeP = homeComp?.probables?.[0]?.athlete?.fullName || 'TBD';
+        const awayP = awayComp?.probables?.[0]?.athlete?.fullName || 'TBD';
         const odds = comp.odds ? comp.odds[0] : null;
         
         if (!homeTeam || !awayTeam || !odds) return;
@@ -80,6 +84,8 @@ export default async function handler(req, res) {
         const match = {
           away: getTeamName(awayTeam),
           home: getTeamName(homeTeam),
+          awayP: awayP,
+          homeP: homeP,
           books: {
             DraftKings: {
               ml: { h: hML, a: aML },

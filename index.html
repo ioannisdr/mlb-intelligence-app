@@ -2078,7 +2078,7 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   // Priority: real API odds > backtest override > simulated from model prob
   let liveMkt = null;
   if (typeof oddsData !== 'undefined' && Array.isArray(oddsData)) {
-    const liveGame = oddsData.find(o => `${o.away}@${o.home}` === `${g.away}@${g.home}`);
+    const liveGame = oddsData.find(o => `${o.away}@${o.home}-${o.awayP}-${o.homeP}` === `${g.away}@${g.home}-${g.awayP}-${g.homeP}`);
     if (liveGame && liveGame.books && liveGame.books[currentBook]) {
       liveMkt = liveGame.books[currentBook];
     }
@@ -2673,7 +2673,7 @@ async function runBacktest() {
             // so the backtest exactly matches the Live Predictions tab.
 
             let realMkt = null;
-            const isTodaySlate = TODAY.some(tg => tg.home === home && tg.away === away);
+            const isTodaySlate = TODAY.some(tg => tg.home === home && tg.away === away && tg.homeP === homePName && tg.awayP === awayPName);
             if (isTodaySlate && ODDS[home] && ODDS[home][currentBook]) {
                realMkt = ODDS[home][currentBook];  // live odds for today
             } else if (btCachedOdds[home] && btCachedOdds[home][currentBook]) {
@@ -3402,13 +3402,13 @@ async function loadOddsTab(forceRefresh = false) {
     // Populate or update oddsSnapshot for movement detection
     if (games && games.length > 0) {
       games.forEach(g => {
-        const key = `${g.away}@${g.home}`;
+        const key = `${g.away}@${g.home}-${g.awayP}-${g.homeP}`;
         if (!oddsSnapshot[key]) {
           // Initialize with opening lines so movement arrows (^ / ·) show immediately vs opening line!
           oddsSnapshot[key] = JSON.parse(JSON.stringify(g.openBooks || g.books || {}));
         } else if (oddsData.length > 0) {
           // On subsequent refreshes, store previous fetch as baseline
-          const prevGame = oddsData.find(oldG => `${oldG.away}@${oldG.home}` === key);
+          const prevGame = oddsData.find(oldG => `${oldG.away}@${oldG.home}-${oldG.awayP}-${oldG.homeP}` === key);
           if (prevGame && prevGame.books) {
             oddsSnapshot[key] = JSON.parse(JSON.stringify(prevGame.books));
           }
@@ -3422,8 +3422,8 @@ async function loadOddsTab(forceRefresh = false) {
     if (oddsData.length < TODAY.length) {
       const simOdds = buildSimulatedOdds();
       TODAY.forEach(g => {
-        if (!oddsData.find(o => `${o.away}@${o.home}` === `${g.away}@${g.home}`)) {
-          const simGame = simOdds.find(o => `${o.away}@${o.home}` === `${g.away}@${g.home}`);
+        if (!oddsData.find(o => `${o.away}@${o.home}-${o.awayP}-${o.homeP}` === `${g.away}@${g.home}-${g.awayP}-${g.homeP}`)) {
+          const simGame = simOdds.find(o => `${o.away}@${o.home}-${o.awayP}-${o.homeP}` === `${g.away}@${g.home}-${g.awayP}-${g.homeP}`);
           if (simGame) oddsData.push(simGame);
         }
       });
@@ -3519,7 +3519,7 @@ function renderOddsTab() {
 
   oddsData.forEach(game => {
     const { away, home, time, books: gameBooks } = game;
-    const snapKey = `${away}@${home}`;
+    const snapKey = `${away}@${home}-${game.awayP}-${game.homeP}`;
     const snap = oddsSnapshot[snapKey] || {};
     const gId = `${away}_${home}`;
     const mUp = `${away} @ ${home}`;
@@ -4335,7 +4335,7 @@ function renderTrendsChart(gId, away, home) {
   
   let game = null;
   if (typeof oddsData !== 'undefined' && oddsData) {
-    game = oddsData.find(g => g.away === away && g.home === home);
+    game = oddsData.find(o => o.away === away && o.home === home);
   }
   const realMkt = game?.books[selectedBook] || null;
   const mod = calculateModel(mockG, realMkt);
