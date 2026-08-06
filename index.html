@@ -1462,6 +1462,49 @@ for (const home in Aug3Games) {
   }
 }
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// HARDCODED HISTORICAL BET365 ODDS — Aug 1-6, 2026
+// Format mirrors oddsData: { away, home, books: { bet365: { ml: {h, a}, ou: N, ouPrice: {o, u} } } }
+// ═══════════════════════════════════════════════════════════════════════════════
+const HISTORICAL_BET365 = {
+  // ────────── AUGUST 1 ──────────
+  // PASTE REAL BET365 ODDS BELOW. Example format for each game:
+  // { away: "TeamAbbr", home: "TeamAbbr", ml: { h: -150, a: +130 }, ou: 8.5 }
+  "2026-08-01": [
+    // e.g. { away: "Nationals", home: "Phillies", ml: { h: -180, a: +155 }, ou: 8.0 },
+  ],
+  // ────────── AUGUST 2 ──────────
+  "2026-08-02": [
+  ],
+  // ────────── AUGUST 3 ──────────
+  "2026-08-03": [
+  ],
+  // ────────── AUGUST 4 ──────────
+  "2026-08-04": [
+  ],
+  // ────────── AUGUST 5 ──────────
+  "2026-08-05": [
+  ],
+  // ────────── AUGUST 6 ──────────
+  "2026-08-06": [
+  ],
+};
+
+// Helper: lookup hardcoded bet365 odds for a game on a historical date
+function getHistoricalBet365(dateStr, away, home) {
+  const dayGames = HISTORICAL_BET365[dateStr];
+  if (!dayGames || dayGames.length === 0) return null;
+  const match = dayGames.find(g => g.away === away && g.home === home);
+  if (!match) return null;
+  // Return in the same shape as a books[bookName] entry
+  return {
+    ml: match.ml,
+    ou: match.ou,
+    ouPrice: match.ouPrice || { o: -110, u: -110 },
+    rl: match.rl || { aLine: '+1.5', aPrice: -110, hLine: '-1.5', hPrice: -110 }
+  };
+}
+
 const HISTORICAL_FROZEN = {
   "2026-07-29": {
     "Royals@Twins": {
@@ -2120,10 +2163,15 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   const histOverrideEarly = (cDateStr && typeof HISTORICAL_FROZEN !== 'undefined') ? (HISTORICAL_FROZEN[cDateStr] && HISTORICAL_FROZEN[cDateStr][cFreezeKey]) : null;
 
   let mkt;
+  // Also check hardcoded historical bet365 odds for Aug 1-6
+  const histBet365 = (cDateStr && typeof getHistoricalBet365 === 'function') ? getHistoricalBet365(cDateStr, g.away, g.home) : null;
+
   if (overrideMkt) {
     mkt = JSON.parse(JSON.stringify(overrideMkt));
   } else if (liveMkt) {
     mkt = JSON.parse(JSON.stringify(liveMkt));
+  } else if (histBet365) {
+    mkt = JSON.parse(JSON.stringify(histBet365));
   } else if (histOverrideEarly && histOverrideEarly.mkt) {
     mkt = JSON.parse(JSON.stringify(histOverrideEarly.mkt));
   } else if (cDateStr && typeof window !== 'undefined' && window.HISTORICAL_ODDS && window.HISTORICAL_ODDS[cDateStr] && window.HISTORICAL_ODDS[cDateStr][g.home] && window.HISTORICAL_ODDS[cDateStr][g.home][currentBook]) {
