@@ -2181,7 +2181,8 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
     mkt = {
       ml: { h: probToAmLine(mktHomeProbVig), a: probToAmLine(mktAwayProbVig) },
       rl: { a: '+1.5', h: '-1.5' }, 
-      ou: Math.round((8.25 + (r2 * 1.1)) * 2) / 2
+      ou: Math.round((8.25 + (r2 * 1.1)) * 2) / 2,
+      ouPrice: { o: -110, u: -110 }
     };
   }
 
