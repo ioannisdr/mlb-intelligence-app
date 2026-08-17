@@ -1,24 +1,9 @@
-// api/odds.js — Real MLB odds from ESPN Scoreboard API (DraftKings baseline + Opening Line Tracking)
+// api/odds.js — Real MLB odds from ESPN Scoreboard API
 // Cache: 90s (lines can move any minute during game day)
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 's-maxage=90, stale-while-revalidate=180');
   res.setHeader('Access-Control-Allow-Origin', '*');
-
-  // Fixed, deterministic book offsets vs ESPN BET baseline
-  // DraftKings is 0 offset (exact baseline match)
-  const BOOK_OFFSETS = {
-    DraftKings: [0, 0, 0, 0, 0],
-    ESPNBet:    [0, 0, 0, 0, 0],
-    FanDuel:    [ 1, -1,  1, 0,  2],
-    BetMGM:     [-1,  1, -1, 0, -1],
-    Caesars:    [ 2, -2,  2, 0,  1],
-    BetRivers:  [-2,  2, -2, 0, -2],
-    Fanatics:   [ 1, -1,  1, 0,  1],
-    bet365:     [-1,  1, -1, 0, -1],
-    HardRock:   [ 2, -2,  1, 0,  2],
-    PointsBet:  [-2,  2, -1, 0, -2],
-  };
 
   try {
     const todayStr = new Date().toISOString().split('T')[0].replace(/-/g, '');
@@ -87,7 +72,7 @@ export default async function handler(req, res) {
           awayP: awayP,
           homeP: homeP,
           books: {
-            DraftKings: {
+            ESPNBet: {
               ml: { h: hML, a: aML },
               rl: { hLine: hRL, hPrice: hRLP, aLine: aRL, aPrice: aRLP },
               ou: ouLine,
@@ -95,7 +80,7 @@ export default async function handler(req, res) {
             }
           },
           openBooks: {
-            DraftKings: {
+            ESPNBet: {
               ml: { h: hMLOpen, a: aMLOpen },
               rl: { hLine: hRL, hPrice: hRLPOpen, aLine: aRL, aPrice: aRLPOpen },
               ou: ouLine,
@@ -110,8 +95,7 @@ export default async function handler(req, res) {
       });
 
       if (oddsData.length > 0) {
-        const enriched = applyBookOffsets(oddsData, BOOK_OFFSETS);
-        return res.status(200).json({ source: 'live-espn', games: enriched });
+        return res.status(200).json({ source: 'live-espn', games: oddsData });
       }
     }
   } catch (e) {
@@ -119,31 +103,4 @@ export default async function handler(req, res) {
   }
 
   return res.status(200).json({ source: 'fallback', games: [] });
-}
-
-function applyBookOffsets(games, offsets) {
-  return games.map(match => {
-    const base = match.books.DraftKings;
-    const baseOpen = match.openBooks ? match.openBooks.DraftKings : base;
-
-    Object.entries(offsets).forEach(([book, [mlA, mlH, rlPd, ouShift, ouPd]]) => {
-      if (book === 'DraftKings') return;
-
-      match.books[book] = {
-        ml:      { a: base.ml.a + mlA, h: base.ml.h + mlH },
-        ou:      +(base.ou + ouShift).toFixed(1),
-        ouPrice: { o: base.ouPrice.o + ouPd, u: base.ouPrice.u - ouPd },
-        rl:      { ...base.rl, aPrice: base.rl.aPrice + rlPd, hPrice: base.rl.hPrice - rlPd },
-      };
-
-      if (!match.openBooks) match.openBooks = {};
-      match.openBooks[book] = {
-        ml:      { a: baseOpen.ml.a + mlA, h: baseOpen.ml.h + mlH },
-        ou:      +(baseOpen.ou + ouShift).toFixed(1),
-        ouPrice: { o: baseOpen.ouPrice.o + ouPd, u: baseOpen.ouPrice.u - ouPd },
-        rl:      { ...baseOpen.rl, aPrice: baseOpen.rl.aPrice + rlPd, hPrice: baseOpen.rl.hPrice - rlPd },
-      };
-    });
-    return match;
-  });
 }
