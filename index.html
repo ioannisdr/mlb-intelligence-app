@@ -581,7 +581,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
     <button onclick="openModal('profit-modal')" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx);cursor:pointer;font-weight:600">📈 Profitability Guide</button>
     <button onclick="openModal('contact-modal')" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx);cursor:pointer;font-weight:600">✉️ Contact</button>
     <select id="book-select" onchange="changeBook(this.value)" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bdr2);border-radius:4px;padding:3px 6px;font-size:10px;outline:none;cursor:pointer;">
-      <option value="ESPNBet">ESPNBet (Real Live Odds)</option>
+      <option value="DraftKings">DraftKings (Real Live Odds)</option>
     </select>
     <span id="live-status" style="font-size:10px;color:var(--tx2)">Connecting...</span>
     <span style="font-size:9px;color:var(--tx3);margin-left:4px;">Auto-updates every 60s</span>
@@ -1420,7 +1420,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 </div>
 
 <script>
-let currentBook = 'ESPNBet';
+let currentBook = 'DraftKings';
 let P = {};
 let S = {};   // team batting stats · keyed by team nickname
 let WX = {};  // weather per team · keyed by home team nickname

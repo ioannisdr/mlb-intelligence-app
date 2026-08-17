@@ -72,7 +72,7 @@ export default async function handler(req, res) {
           awayP: awayP,
           homeP: homeP,
           books: {
-            ESPNBet: {
+            DraftKings: {
               ml: { h: hML, a: aML },
               rl: { hLine: hRL, hPrice: hRLP, aLine: aRL, aPrice: aRLP },
               ou: ouLine,
@@ -80,7 +80,7 @@ export default async function handler(req, res) {
             }
           },
           openBooks: {
-            ESPNBet: {
+            DraftKings: {
               ml: { h: hMLOpen, a: aMLOpen },
               rl: { hLine: hRL, hPrice: hRLPOpen, aLine: aRL, aPrice: aRLPOpen },
               ou: ouLine,
