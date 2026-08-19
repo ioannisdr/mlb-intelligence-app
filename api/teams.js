@@ -7,54 +7,94 @@ function getTeamNick(fullName) {
   return fullName.split(' ').pop();
 }
 
+// Approximates wOBA based on OBP, SLG, and AVG (Standard FanGraphs formula weights)
+function calcWOBA(obp, slg, avg) {
+  return Math.round((0.72 * obp + 0.31 * (slg - avg) + 0.050) * 1000) / 1000;
+}
+
+// Parses a split object and returns key metrics
+function parseSplit(split) {
+  const s = split.stat ?? {};
+  const obp  = parseFloat(s.obp)  || 0.318;
+  const slg  = parseFloat(s.slg)  || 0.405;
+  const avg  = parseFloat(s.avg)  || 0.250;
+  
+  const pa   = parseInt(s.plateAppearances) || 1;
+  const so   = parseInt(s.strikeOuts) || 0;
+  const bb   = parseInt(s.baseOnBalls) || 0;
+
+  return {
+    woba: parseFloat(s.woba) || parseFloat(s.wOBA) || calcWOBA(obp, slg, avg),
+    obp, slg, avg,
+    ops: parseFloat(s.ops) || (obp + slg),
+    kpct: (so / pa) * 100 || 22.0,
+    bbpct: (bb / pa) * 100 || 8.0,
+    runs: parseInt(s.runs) || 0,
+    hr: parseInt(s.homeRuns) || 0
+  };
+}
+
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 's-maxage=1800, stale-while-revalidate=3600');
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   try {
-    // Fetch batting (season stats includes OBP, SLG, AVG to calculate accurate wOBA) and pitching stats in parallel
-    const [batRes, pitRes] = await Promise.all([
-      fetch('https://statsapi.mlb.com/api/v1/teams/stats?stats=season&group=hitting&sportId=1&season=2026', {
-        headers: { 'Accept': 'application/json' }
-      }),
-      fetch('https://statsapi.mlb.com/api/v1/teams/stats?stats=season&group=pitching&sportId=1&season=2026', {
-        headers: { 'Accept': 'application/json' }
-      })
+    const today = new Date();
+    const l14 = new Date(today.getTime() - 14 * 24 * 60 * 60 * 1000);
+    const todayStr = today.toISOString().split('T')[0];
+    const l14Str = l14.toISOString().split('T')[0];
+
+    // Fetch 5 parallel requests
+    const [batOverallRes, batLhpRes, batRhpRes, batL14Res, pitRes] = await Promise.all([
+      fetch('https://statsapi.mlb.com/api/v1/teams/stats?stats=season&group=hitting&sportId=1&season=2026', { headers: { 'Accept': 'application/json' } }),
+      fetch('https://statsapi.mlb.com/api/v1/teams/stats?stats=statSplits&group=hitting&sportId=1&season=2026&sitCodes=vl', { headers: { 'Accept': 'application/json' } }),
+      fetch('https://statsapi.mlb.com/api/v1/teams/stats?stats=statSplits&group=hitting&sportId=1&season=2026&sitCodes=vr', { headers: { 'Accept': 'application/json' } }),
+      fetch(`https://statsapi.mlb.com/api/v1/teams/stats?stats=byDateRange&group=hitting&sportId=1&season=2026&startDate=${l14Str}&endDate=${todayStr}`, { headers: { 'Accept': 'application/json' } }),
+      fetch('https://statsapi.mlb.com/api/v1/teams/stats?stats=season&group=pitching&sportId=1&season=2026', { headers: { 'Accept': 'application/json' } })
     ]);
 
-    if (!batRes.ok) throw new Error(`MLB batting API error ${batRes.status}`);
-    const batData = await batRes.json();
+    if (!batOverallRes.ok) throw new Error(`MLB batting API error ${batOverallRes.status}`);
+
+    const batOverall = await batOverallRes.json();
+    const batLhp = batLhpRes.ok ? await batLhpRes.json() : { stats: [] };
+    const batRhp = batRhpRes.ok ? await batRhpRes.json() : { stats: [] };
+    const batL14 = batL14Res.ok ? await batL14Res.json() : { stats: [] };
 
     const teams = {};
 
-    // Process batting stats
-    const batSplits = batData?.stats?.[0]?.splits ?? [];
-    batSplits.forEach(split => {
+    // 1. Overall Batting
+    const overallSplits = batOverall?.stats?.[0]?.splits ?? [];
+    overallSplits.forEach(split => {
       const nick = getTeamNick(split.team?.name);
-      const s = split.stat ?? {};
-
-      const obp  = parseFloat(s.obp)  || 0.318;
-      const slg  = parseFloat(s.slg)  || 0.405;
-      const avg  = parseFloat(s.avg)  || 0.250;
-      // wOBA from advanced stats; fall back to regression-based approximation
-      const woba = parseFloat(s.woba) || parseFloat(s.wOBA) ||
-                   Math.round((0.72 * obp + 0.31 * (slg - avg) + 0.050) * 1000) / 1000;
-
-      teams[nick] = {
-        woba,
-        obp,
-        slg,
-        avg,
-        ops:  parseFloat(s.ops) || (obp + slg),
-        runs: parseInt(s.runs)  || 0,
-        hr:   parseInt(s.homeRuns) || 0,
-        so:   parseInt(s.strikeOuts) || 0,
-        bb:   parseInt(s.baseOnBalls) || 0,
-        gp:   parseInt(s.gamesPlayed) || 1
-      };
+      teams[nick] = parseSplit(split);
+      // Initialize sub-objects
+      teams[nick].vsLHP = { woba: teams[nick].woba };
+      teams[nick].vsRHP = { woba: teams[nick].woba };
+      teams[nick].l14   = { woba: teams[nick].woba };
     });
 
-    // Augment with team pitching ERA
+    // 2. vs LHP
+    const lhpSplits = batLhp?.stats?.[0]?.splits ?? [];
+    lhpSplits.forEach(split => {
+      const nick = getTeamNick(split.team?.name);
+      if (teams[nick]) teams[nick].vsLHP = parseSplit(split);
+    });
+
+    // 3. vs RHP
+    const rhpSplits = batRhp?.stats?.[0]?.splits ?? [];
+    rhpSplits.forEach(split => {
+      const nick = getTeamNick(split.team?.name);
+      if (teams[nick]) teams[nick].vsRHP = parseSplit(split);
+    });
+
+    // 4. Last 14 Days
+    const l14Splits = batL14?.stats?.[0]?.splits ?? [];
+    l14Splits.forEach(split => {
+      const nick = getTeamNick(split.team?.name);
+      if (teams[nick]) teams[nick].l14 = parseSplit(split);
+    });
+
+    // 5. Team Pitching ERA
     if (pitRes.ok) {
       const pitData = await pitRes.json();
       const pitSplits = pitData?.stats?.[0]?.splits ?? [];
@@ -70,7 +110,6 @@ export default async function handler(req, res) {
     res.status(200).json(teams);
   } catch (error) {
     console.error('teams.js error:', error.message);
-    // Return empty object so frontend falls back to defaults gracefully
-    res.status(200).json({});
+    res.status(200).json({}); // Fallback
   }
 }

@@ -581,7 +581,16 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
     <button onclick="openModal('profit-modal')" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx);cursor:pointer;font-weight:600">📈 Profitability Guide</button>
     <button onclick="openModal('contact-modal')" style="font-size:10px;padding:3px 8px;border-radius:4px;border:1px solid var(--bdr2);background:var(--bg3);color:var(--tx);cursor:pointer;font-weight:600">✉️ Contact</button>
     <select id="book-select" onchange="changeBook(this.value)" style="background:var(--bg3);color:var(--tx);border:1px solid var(--bdr2);border-radius:4px;padding:3px 6px;font-size:10px;outline:none;cursor:pointer;">
-      <option value="DraftKings">DraftKings (Real Live Odds)</option>
+      <option value="DraftKings">DraftKings</option>
+      <option value="FanDuel">FanDuel</option>
+      <option value="BetMGM">BetMGM</option>
+      <option value="Caesars">Caesars</option>
+      <option value="BetRivers">BetRivers</option>
+      <option value="ESPNBet">ESPNBet</option>
+      <option value="Fanatics">Fanatics</option>
+      <option value="bet365">bet365</option>
+      <option value="HardRock">HardRock</option>
+      <option value="PointsBet">PointsBet</option>
     </select>
     <span id="live-status" style="font-size:10px;color:var(--tx2)">Connecting...</span>
     <span style="font-size:9px;color:var(--tx3);margin-left:4px;">Auto-updates every 60s</span>
@@ -1420,7 +1429,7 @@ body{background:var(--bg);color:var(--tx);font-family:'Inter',-apple-system,sans
 </div>
 
 <script>
-let currentBook = 'DraftKings';
+let currentBook = 'ESPNBet';
 let P = {};
 let S = {};   // team batting stats · keyed by team nickname
 let WX = {};  // weather per team · keyed by home team nickname
@@ -1451,49 +1460,6 @@ for (const home in Aug3Games) {
   for (const book of books) {
     window.HISTORICAL_ODDS['2026-08-03'][home][book] = Aug3Games[home];
   }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// HARDCODED HISTORICAL BET365 ODDS — Aug 1-6, 2026
-// Format mirrors oddsData: { away, home, books: { bet365: { ml: {h, a}, ou: N, ouPrice: {o, u} } } }
-// ═══════════════════════════════════════════════════════════════════════════════
-const HISTORICAL_BET365 = {
-  // ────────── AUGUST 1 ──────────
-  // PASTE REAL BET365 ODDS BELOW. Example format for each game:
-  // { away: "TeamAbbr", home: "TeamAbbr", ml: { h: -150, a: +130 }, ou: 8.5 }
-  "2026-08-01": [
-    // e.g. { away: "Nationals", home: "Phillies", ml: { h: -180, a: +155 }, ou: 8.0 },
-  ],
-  // ────────── AUGUST 2 ──────────
-  "2026-08-02": [
-  ],
-  // ────────── AUGUST 3 ──────────
-  "2026-08-03": [
-  ],
-  // ────────── AUGUST 4 ──────────
-  "2026-08-04": [
-  ],
-  // ────────── AUGUST 5 ──────────
-  "2026-08-05": [
-  ],
-  // ────────── AUGUST 6 ──────────
-  "2026-08-06": [
-  ],
-};
-
-// Helper: lookup hardcoded bet365 odds for a game on a historical date
-function getHistoricalBet365(dateStr, away, home) {
-  const dayGames = HISTORICAL_BET365[dateStr];
-  if (!dayGames || dayGames.length === 0) return null;
-  const match = dayGames.find(g => g.away === away && g.home === home);
-  if (!match) return null;
-  // Return in the same shape as a books[bookName] entry
-  return {
-    ml: match.ml,
-    ou: match.ou,
-    ouPrice: match.ouPrice || { o: -110, u: -110 },
-    rl: match.rl || { aLine: '+1.5', aPrice: -110, hLine: '-1.5', hPrice: -110 }
-  };
 }
 
 const HISTORICAL_FROZEN = {
@@ -1578,7 +1544,7 @@ function pfLabel(pf) {
   if (pf >= 110) return `🏟️ PF ${pf} 🔥 Extreme Hitters Park`;
   if (pf >= 105) return `🏟️ PF ${pf} 🔴 Hitters Park`;
   if (pf >= 102) return `🏟️ PF ${pf} 🟠 Slight Hitters`;
-  if (pf >= 99)  return `🏟️ PF ${pf} ⬜ Neutral`;
+  if (pf >= 99)  return `🏟️ PF ${pf} ⚪ Neutral`;
   if (pf >= 96)  return `🏟️ PF ${pf} 🔵 Slight Pitchers`;
   return `🏟️ PF ${pf} 🟣 Pitchers Park`;
 }
@@ -1719,7 +1685,7 @@ async function fetchAllData() {
     const parseDB_Sig = (sigStr) => {
       if(sigStr === 'PRIME') return { l: 'PRIME', c: 'sig-prime', v: 3, icon: "🔥" };
       if(sigStr === 'EDGE')  return { l: 'EDGE',  c: 'sig-edge',  v: 2, icon: "✅" };
-      return { l: 'SKIP', c: 'sig-skip', v: 1, icon: "⬜" };
+      return { l: 'SKIP', c: 'sig-skip', v: 1, icon: "✅" };
     };
 
     if (picksRes && picksRes.picks && picksRes.picks.length > 0) {
@@ -1811,12 +1777,6 @@ async function fetchAllData() {
       localStorage.setItem('cachedOdds', JSON.stringify(cachedOdds));
       ODDS = { ...cachedOdds, ...ODDS };
     } catch(e) {}
-
-    // -- Eagerly populate oddsData (Single Source of Truth for Predictions + Odds Movement) --
-    const oddsGames = oddsRes?.games || (Array.isArray(oddsRes) ? oddsRes : []);
-    if (oddsGames.length > 0) {
-      oddsData = oddsGames;
-    }
 
     // -- Pitcher stats -----------------------------------------------------
     P = pitcherRes || {};
@@ -2064,32 +2024,17 @@ function getPitcherComposite(p) {
 }
 
 function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTotal = null) {
-  // Surgically extracted from 51f6acc
-  let ap = P[g.awayP] || { xera: 4.2, kpct: 22, fip: 4.3, hand: 'RHP' };
-  let hp = P[g.homeP] || { xera: 4.2, kpct: 22, fip: 4.3, hand: 'RHP' };
+  let ap = P[g.awayP] || { xera: 4.2, kpct: 22, fip: 4.3 };
+  let hp = P[g.homeP] || { xera: 4.2, kpct: 22, fip: 4.3 };
   let as = S[g.away] || { woba: 0.315 };
   let hs = S[g.home] || { woba: 0.315 };
-
-  // Calculate Blended Offense Based on Platoon Splits and Recent Form
-  const a_hand = ap.hand || 'RHP';
-  const h_hand = hp.hand || 'RHP';
-  
-  // Away Offense faces Home Pitcher (h_hand)
-  const a_split = h_hand === 'LHP' ? (as.vsLHP?.woba || as.woba) : (as.vsRHP?.woba || as.woba);
-  const a_l14   = as.l14?.woba || a_split;
-  const a_blended_woba = (a_split * 0.75) + (a_l14 * 0.25);
-  
-  // Home Offense faces Away Pitcher (a_hand)
-  const h_split = a_hand === 'LHP' ? (hs.vsLHP?.woba || hs.woba) : (hs.vsRHP?.woba || hs.woba);
-  const h_l14   = hs.l14?.woba || h_split;
-  const h_blended_woba = (h_split * 0.75) + (h_l14 * 0.25);
 
   let a_comp = getPitcherComposite(ap);
   let h_comp = getPitcherComposite(hp);
   let a_pitch = a_comp * -0.20;
   let h_pitch = h_comp * -0.20;
-  let a_off = a_blended_woba * 5.0;
-  let h_off = h_blended_woba * 5.0;
+  let a_off = as.woba * 5.0;
+  let h_off = hs.woba * 5.0;
 
   const hasPitcherData = g.awayP !== 'TBD' && g.homeP !== 'TBD' &&
                          P[g.awayP]?.era !== undefined && P[g.homeP]?.era !== undefined;
@@ -2122,42 +2067,11 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   let homeProb = 1 / (1 + Math.exp(-logit));
   let awayProb = 1 - homeProb;
 
-  // -- SMART ODDS MATCHER ---------------------------------------------------
-  // Matches by teams first; if multiple games exist (series), uses fuzzy
-  // pitcher last-name substring matching to pick the right game.
-  function findOddsGame(oddsArr, away, home, awayPitcher, homePitcher) {
-    if (!oddsArr || !Array.isArray(oddsArr)) return null;
-    const teamMatches = oddsArr.filter(o => o.away === away && o.home === home);
-    if (teamMatches.length === 0) return null;
-    if (teamMatches.length === 1) return teamMatches[0];
-    // Multiple games (series) — fuzzy match pitchers
-    const lastWord = (s) => (s || '').trim().split(/\s+/).pop().toLowerCase();
-    const fuzzyP = (dbP, espnP) => {
-      if (!dbP || !espnP || dbP === 'TBD' || espnP === 'TBD') return false;
-      const a = dbP.toLowerCase(), b = espnP.toLowerCase();
-      if (a === b) return true;
-      if (a.includes(b) || b.includes(a)) return true;
-      return lastWord(dbP) === lastWord(espnP);
-    };
-    // Try to find exact fuzzy pitcher match
-    const pitcherMatch = teamMatches.find(o =>
-      fuzzyP(awayPitcher, o.awayP) && fuzzyP(homePitcher, o.homeP)
-    );
-    if (pitcherMatch) return pitcherMatch;
-    // Partial: at least one pitcher matches
-    const partialMatch = teamMatches.find(o =>
-      fuzzyP(awayPitcher, o.awayP) || fuzzyP(homePitcher, o.homeP)
-    );
-    if (partialMatch) return partialMatch;
-    // Last resort: return first team match
-    return teamMatches[0];
-  }
-
   // -- MARKET ODDS ----------------------------------------------------------
   // Priority: real API odds > backtest override > simulated from model prob
   let liveMkt = null;
   if (typeof oddsData !== 'undefined' && Array.isArray(oddsData)) {
-    const liveGame = findOddsGame(oddsData, g.away, g.home, g.awayP, g.homeP);
+    const liveGame = oddsData.find(o => o.home === g.home);
     if (liveGame && liveGame.books && liveGame.books[currentBook]) {
       liveMkt = liveGame.books[currentBook];
     }
@@ -2168,19 +2082,14 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   const histOverrideEarly = (cDateStr && typeof HISTORICAL_FROZEN !== 'undefined') ? (HISTORICAL_FROZEN[cDateStr] && HISTORICAL_FROZEN[cDateStr][cFreezeKey]) : null;
 
   let mkt;
-  // Also check hardcoded historical bet365 odds for Aug 1-6
-  const histBet365 = (cDateStr && typeof getHistoricalBet365 === 'function') ? getHistoricalBet365(cDateStr, g.away, g.home) : null;
-
   if (overrideMkt) {
     mkt = JSON.parse(JSON.stringify(overrideMkt));
-  } else if (liveMkt) {
-    mkt = JSON.parse(JSON.stringify(liveMkt));
-  } else if (histBet365) {
-    mkt = JSON.parse(JSON.stringify(histBet365));
   } else if (histOverrideEarly && histOverrideEarly.mkt) {
     mkt = JSON.parse(JSON.stringify(histOverrideEarly.mkt));
   } else if (cDateStr && typeof window !== 'undefined' && window.HISTORICAL_ODDS && window.HISTORICAL_ODDS[cDateStr] && window.HISTORICAL_ODDS[cDateStr][g.home] && window.HISTORICAL_ODDS[cDateStr][g.home][currentBook]) {
     mkt = JSON.parse(JSON.stringify(window.HISTORICAL_ODDS[cDateStr][g.home][currentBook]));
+  } else if (liveMkt) {
+    mkt = JSON.parse(JSON.stringify(liveMkt));
   } else if (ODDS[g.home] && ODDS[g.home][currentBook]) {
     mkt = JSON.parse(JSON.stringify(ODDS[g.home][currentBook]));
   } else {
@@ -2195,8 +2104,7 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
     mkt = {
       ml: { h: probToAmLine(mktHomeProbVig), a: probToAmLine(mktAwayProbVig) },
       rl: { a: '+1.5', h: '-1.5' }, 
-      ou: Math.round((8.25 + (r2 * 1.1)) * 2) / 2,
-      ouPrice: { o: -110, u: -110 }
+      ou: Math.round((8.25 + (r2 * 1.1)) * 2) / 2
     };
   }
 
@@ -2232,8 +2140,8 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
   }
 
   // Offense quality adjustment: high-wOBA lineup > more runs projected
-  const awOBA = (a_blended_woba || 0.315) - 0.315;
-  const hwOBA = (h_blended_woba || 0.315) - 0.315;
+  const awOBA = (as.woba || 0.315) - 0.315;
+  const hwOBA = (hs.woba || 0.315) - 0.315;
   projOU += (awOBA + hwOBA) * 8; // each 0.01 wOBA above avg ? +0.08 projected runs
 
   projOU = Math.round(projOU * 10) / 10;
@@ -2256,7 +2164,7 @@ function calculateModel(g, overrideMkt = null, backtestWinner = null, backtestTo
 
   return { homeProb, awayProb, evH, evA, edgeH, edgeA, projOU, wStr, hp, ap, mkt,
            homeDog, awayDog, mktHomeImplied, mktAwayImplied, pf, wxH,
-           regA, regH, eraGapLogit, a_woba: a_blended_woba, h_woba: h_blended_woba };
+           regA, regH, eraGapLogit };
 }
 
 function getGrade(ev) {
@@ -2284,7 +2192,7 @@ function getSignal(market, { ev = 0, mlPickProb = 0.5, isMinus15 = true, ouAbsDi
   if (ev === -99) return { l: "SKIP", c: "sig-skip", v: 1, icon: "⬜" };
   const PRIME = { l: 'PRIME', c: 'sig-prime', v: 3, icon: "🔥" };
   const EDGE  = { l: 'EDGE',  c: 'sig-edge',  v: 2, icon: "✅" };
-  const SKIP  = { l: 'SKIP',  c: 'sig-skip',  v: 1, icon: "⬜" };
+  const SKIP  = { l: 'SKIP',  c: 'sig-skip',  v: 1, icon: "✅" };
   if (market === 'ML') {
     if ((mlPickProb >= 0.525 && ev >= 0.020) || (mlPickProb >= 0.515 && ev >= 0.100) || ev >= 0.150) return PRIME; // Dual-Path PRIME or Massive EV Dog
     if ((mlPickProb >= 0.505 && ev >= 0.010) || ev >= 0.050) return EDGE;
@@ -2500,7 +2408,7 @@ function renderApp() {
                   <span style="color:var(--tx3)"> K%</span> <span style="color:var(--b)">${P[g.awayP]?P[g.awayP].kpct.toFixed(1):'·'}%</span>
                 </div>
                 <div style="font-size:10px;color:var(--tx3);margin-top:3px;">
-                  Off wOBA: <span style="color:var(--b);font-weight:600">${mod.a_woba?.toFixed(3) || '·'}</span> (vs ${P[g.homeP]?.hand || 'RHP'})
+                  Off wOBA: <span style="color:var(--b);font-weight:600">${S[g.away]?.woba?.toFixed(3) || '·'}</span>
                 </div>
                 ${mod.regA ? `<div style="margin-top:2px"><span class="reg-badge reg-${mod.regA.type}">${mod.regA.text}</span></div>` : ''}
               </div>
@@ -2539,7 +2447,7 @@ function renderApp() {
                   <span class="tier ${P[g.homeP]?P[g.homeP].tier==='Elite'?'t-elite':P[g.homeP].tier==='Strong'?'t-strong':'t-mid':'t-mid'}">${P[g.homeP]?P[g.homeP].tier:'Mid'}</span>
                 </div>
                 <div style="font-size:10px;color:var(--tx3);margin-top:3px;">
-                  Off wOBA: <span style="color:var(--b);font-weight:600">${mod.h_woba?.toFixed(3) || '·'}</span> (vs ${P[g.awayP]?.hand || 'RHP'})
+                  Off wOBA: <span style="color:var(--b);font-weight:600">${S[g.home]?.woba?.toFixed(3) || '·'}</span>
                 </div>
                 ${mod.regH ? `<div style="margin-top:2px"><span class="reg-badge reg-${mod.regH.type}" style="float:right">${mod.regH.text}</span></div>` : ''}
               </div>
@@ -2833,7 +2741,7 @@ async function runBacktest() {
             let isMinus15 = favProb >= 0.55;
             let rlHit = false;
             let rlProfit = 0;
-            let rlSig = { l: 'SKIP', c: 'sig-skip', v: 1, icon: "⬜" };
+            let rlSig = { l: 'SKIP', c: 'sig-skip', v: 1, icon: "✅" };
 
             if (rlSig.l !== 'SKIP') {
                pl.ALL[rlPick] += rlProfit;
@@ -3024,7 +2932,42 @@ function renderCharts(pl, grHits, monthlyPL, totalProfits = { ML: 0, RL: 0, OU: 
     }
   });
 
+  fetch(`/api/history?gId=${gId}`)
+    .then(res => res.json())
+    .then(historyData => {
+      if (!historyData || historyData.length === 0) return;
+      const activeBooks = ['DraftKings', 'FanDuel', 'BetMGM', 'Caesars', 'BetRivers', 'ESPNBet', 'Fanatics', 'bet365', 'HardRock', 'PointsBet'];
+      const recentHistory = historyData.slice(-60);
+      const timeLabels = [];
+      const consensusData = [];
+      const selData = [];
 
+      recentHistory.forEach(snapshot => {
+        const dateObj = new Date(snapshot.timestamp);
+        timeLabels.push(dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+
+        let sum = 0, count = 0;
+        activeBooks.forEach(b => {
+          if (snapshot.books && snapshot.books[b] && snapshot.books[b].ml && snapshot.books[b].ml.h) {
+            sum += parseInt(snapshot.books[b].ml.h);
+            count++;
+          }
+        });
+        consensusData.push(count > 0 ? Math.round(sum / count) : null);
+
+        const selML = snapshot.books && snapshot.books[selectedBook] && snapshot.books[selectedBook].ml;
+        selData.push(selML ? parseInt(selML.h) : null);
+      });
+
+      if (trendsCharts[gId]) {
+        trendsCharts[gId].data.labels = timeLabels;
+        trendsCharts[gId].data.datasets[0].data = Array(timeLabels.length).fill(homeFV);
+        trendsCharts[gId].data.datasets[1].data = consensusData;
+        trendsCharts[gId].data.datasets[2].data = selData;
+        trendsCharts[gId].update();
+      }
+    })
+    .catch(err => console.error("Failed to fetch historical odds:", err));
 
   // 2. Grade Hit-Rate Chart (PRIME vs EDGE)
   const SIG_LABELS = ['PRIME', 'EDGE'];
@@ -3507,8 +3450,8 @@ async function loadOddsTab(forceRefresh = false) {
     if (oddsData.length < TODAY.length) {
       const simOdds = buildSimulatedOdds();
       TODAY.forEach(g => {
-        if (!oddsData.find(o => o.away === g.away && o.home === g.home)) {
-          const simGame = simOdds.find(o => o.away === g.away && o.home === g.home);
+        if (!oddsData.find(o => o.home === g.home)) {
+          const simGame = simOdds.find(o => o.home === g.home);
           if (simGame) oddsData.push(simGame);
         }
       });
@@ -3517,7 +3460,7 @@ async function loadOddsTab(forceRefresh = false) {
     oddsLoaded = true;
     
     if (document.querySelector(".tab-active")?.textContent?.includes("Predictions")) {
-      renderApp();
+      renderPredictions();
     }
 
     const now = new Date().toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit' });
@@ -4420,7 +4363,7 @@ function renderTrendsChart(gId, away, home) {
   
   let game = null;
   if (typeof oddsData !== 'undefined' && oddsData) {
-    game = oddsData.find(o => o.away === away && o.home === home);
+    game = oddsData.find(g => g.away === away && g.home === home);
   }
   const realMkt = game?.books[selectedBook] || null;
   const mod = calculateModel(mockG, realMkt);
@@ -4497,47 +4440,6 @@ function renderTrendsChart(gId, away, home) {
       }
     }
   });
-
-  fetch(`/api/history?gId=${gId}`)
-    .then(res => res.json())
-    .then(historyData => {
-      if (!historyData || historyData.length === 0) return;
-      const activeBooks = ['DraftKings', 'FanDuel', 'BetMGM', 'Caesars', 'BetRivers', 'ESPNBet', 'Fanatics', 'bet365', 'HardRock', 'PointsBet'];
-      const recentHistory = historyData.slice(-60);
-      const timeLabels = [];
-      const consensusData = [];
-      const selData = [];
-
-      recentHistory.forEach(snapshot => {
-        console.log('Raw API snapshot:', snapshot);
-        
-        const dateObj = new Date(snapshot.timestamp);
-        timeLabels.push(dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
-
-        let sum = 0, count = 0;
-        activeBooks.forEach(b => {
-          if (snapshot.books && snapshot.books[b] && snapshot.books[b].ml && snapshot.books[b].ml.h) {
-            sum += parseInt(snapshot.books[b].ml.h);
-            count++;
-          }
-        });
-        consensusData.push(count > 0 ? Math.round(sum / count) : null);
-
-        const selML = snapshot.books && snapshot.books[selectedBook] && snapshot.books[selectedBook].ml;
-        selData.push(selML ? parseInt(selML.h) : null);
-      });
-
-      console.log('Consensus Array:', consensusData);
-
-      if (trendsCharts[gId]) {
-        trendsCharts[gId].data.labels = timeLabels;
-        trendsCharts[gId].data.datasets[0].data = Array(timeLabels.length).fill(homeFV);
-        trendsCharts[gId].data.datasets[1].data = consensusData;
-        trendsCharts[gId].data.datasets[2].data = selData;
-        trendsCharts[gId].update();
-      }
-    })
-    .catch(err => console.error("Failed to fetch historical odds:", err));
 }
 </script>
 
