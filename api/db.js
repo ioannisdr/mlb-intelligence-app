@@ -48,6 +48,30 @@ CREATE TABLE IF NOT EXISTS odds_snapshots (
   ou_away_odds  INT DEFAULT -110
 );
 
+CREATE TABLE IF NOT EXISTS odds_cache (
+  game_id         TEXT PRIMARY KEY,
+  game_date       TEXT,
+  away            TEXT,
+  home            TEXT,
+  away_pitcher    TEXT,
+  home_pitcher    TEXT,
+  ml_home         INT,
+  ml_away         INT,
+  rl_home_line    TEXT,
+  rl_home_price   INT,
+  rl_away_line    TEXT,
+  rl_away_price   INT,
+  ou_line         NUMERIC(4,1),
+  ou_over_price   INT,
+  ou_under_price  INT,
+  ml_home_open    INT,
+  ml_away_open    INT,
+  ou_line_open    NUMERIC(4,1),
+  ou_over_open    INT,
+  ou_under_open   INT,
+  updated_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS predictions (
   id           BIGSERIAL PRIMARY KEY,
   game_id      TEXT REFERENCES games(id) ON DELETE CASCADE,
